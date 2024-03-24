@@ -37,3 +37,7 @@
         Date            Who                     What
 
 */
+CREATE TRIGGER instead_of_insert
+INSTEAD OF INSERT ON funds
+FOR EACH ROW
+EXECUTE FUNCTION insert_Fund();

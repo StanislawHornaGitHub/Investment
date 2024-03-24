@@ -32,10 +32,21 @@
 
 CREATE VIEW Funds AS
 SELECT
-    f.ID,
-    f.F_name,
-    fc.C_name,
-    f.Currency,
-    f.F_url
+    f.ID AS "fund_id",
+    f.F_name AS "fund_name",
+    fc.C_name AS "category_name",
+    f.Currency AS "currency",
+    f.F_url AS "fund_url"
 FROM Fund f
 LEFT JOIN Fund_Category fc ON fc.ID = f.Category_ID;
+
+CREATE VIEW Quotations AS
+SELECT
+    fq.Quotation_date AS "date",
+    fq.fund_id AS "fund_id",
+    fq.Quotation_value AS "value",
+    fq.Day_value_change AS "daily_change",
+    fq.Week_value_change AS "weekly_change",
+    fq.Month_value_change AS "monthly_change",
+    fq.Year_value_change AS "yearly_change"
+FROM Fund_Quotation fq;

@@ -32,3 +32,42 @@
         Date            Who                     What
 
 */
+
+CREATE FUNCTION get_fund_name(url_path varchar)
+RETURNS varchar
+AS $$
+    return (
+        url_path.split('/')[5].replace('-', ' ').title()
+    )
+
+$$ LANGUAGE plpython3u;
+
+CREATE FUNCTION get_fund_id(url_path varchar)
+RETURNS varchar
+AS $$
+    return (
+        url_path.split('/')[4]
+    )
+
+$$ LANGUAGE plpython3u;
+
+CREATE FUNCTION get_fund_category(url_path varchar)
+RETURNS varchar
+AS $$
+    return (
+        url_path.split('/')[3].replace('-', ' ').title()
+    )
+
+$$ LANGUAGE plpython3u;
+
+CREATE FUNCTION get_fund_category_short(url_path varchar)
+RETURNS varchar
+AS $$
+    categoryName = url_path.split('/')[3]
+    return (
+        ''.join(
+            [word[0] for word in categoryName.split("-")]
+        )
+    )
+
+$$ LANGUAGE plpython3u;

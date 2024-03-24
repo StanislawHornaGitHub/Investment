@@ -39,3 +39,37 @@
         Date            Who                     What
             
 */
+
+CREATE FUNCTION insert_Fund ()
+RETURNS TRIGGER AS $$
+DECLARE
+    var_fund_url varchar;
+    var_fund_name varchar;
+    var_fund_id varchar;
+    var_category_name varchar;
+    var_category_short varchar;
+    var_category_id int;
+BEGIN
+
+    var_fund_url := NEW.fund_url;
+
+    IF var_fund_url IS NOT NULL THEN
+        var_fund_name := get_fund_name(var_fund_url);
+        var_fund_id := get_fund_id(var_fund_url);
+        var_category_name := get_fund_category(var_fund_url);
+        var_category_short := get_fund_category_short(var_fund_url);
+
+        INSERT INTO Fund_Category(c_name, C_shortname)
+        VALUES(var_category_name,var_category_short)
+        RETURNING ID INTO var_category_id;
+
+        INSERT INTO Fund (ID, F_name, Category_ID, F_url)
+        VALUES(var_fund_id,var_fund_name,var_category_id,var_fund_url);
+
+        RETURN NEW;
+    END IF;
+
+    RAISE EXCEPTION 'Can not add new fund without URL';
+
+END;
+$$ LANGUAGE plpgsql;
