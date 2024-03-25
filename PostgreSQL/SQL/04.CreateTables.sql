@@ -73,7 +73,7 @@ CREATE TABLE Fund_Category (
 CREATE TABLE Fund_Quotation (
     Quotation_date timestamp NOT NULL,
     Fund_ID varchar NOT NULL,
-    Quotation_value money NOT NULL,
+    Quotation_value float NOT NULL,
     Day_value_change float NULL,
     Week_value_change float NULL,
     Month_value_change float NULL,
@@ -87,7 +87,7 @@ CREATE TABLE Fund_Operations (
     Fund_ID varchar NOT NULL,
     Quotation_date timestamp NOT NULL,
     Operation_date timestamp NOT NULL,
-    Operation_value money NOT NULL,
+    Operation_value float NOT NULL,
     Operation_currency varchar NOT NULL
 );
 
@@ -107,8 +107,8 @@ CREATE TABLE Investment_Fund_Results (
     Result_date timestamp NOT NULL,
     Fund_ID varchar NOT NULL,
     Participation_units float NOT NULL,
-    Invested_money money NOT NULL,
-    Fund_value money NOT NULL,
+    Invested_money float NOT NULL,
+    Fund_value float NOT NULL,
     Day_result_percentage float NOT NULL,
     Week_result_percentage float NOT NULL,
     Month_result_percentage float NOT NULL,
