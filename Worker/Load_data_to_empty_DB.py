@@ -26,13 +26,13 @@ FundsToAdd = [
     "https://www.analizy.pl/fundusze-inwestycyjne-otwarte/PZU79/pzu-obligacji-krotkoterminowych"
 ]
 
-# for f in FundsToAdd:
-#     try:
-#         f = Fund(f)
-#         session.add(f)
-#         session.commit()
-#     except:
-#         print('error')
+for f in FundsToAdd:
+    try:
+        f = Fund(f)
+        session.add(f)
+        session.commit()
+    except:
+        print('error')
 
 
 Price.Price.updateQuotation()

@@ -85,6 +85,7 @@ CREATE TABLE Fund_Quotation (
 CREATE TABLE Fund_Operations (
     ID serial PRIMARY KEY NOT NULL,
     Fund_ID varchar NOT NULL,
+    Investment_id int NOT NULL,
     Quotation_date timestamp NOT NULL,
     Operation_date timestamp NOT NULL,
     Operation_value float NOT NULL,
@@ -93,7 +94,8 @@ CREATE TABLE Fund_Operations (
 
 CREATE TABLE Investment (
     ID serial PRIMARY KEY NOT NULL,
-    I_name varchar NOT NULL
+    I_name varchar NOT NULL,
+    Owner_ID int NOT NULL
 );
 
 CREATE TABLE Investment_Fund (
@@ -106,6 +108,7 @@ CREATE TABLE Investment_Fund (
 CREATE TABLE Investment_Fund_Results (
     Result_date timestamp NOT NULL,
     Fund_ID varchar NOT NULL,
+    Investment_ID int NOT NULL,
     Participation_units float NOT NULL,
     Invested_money float NOT NULL,
     Fund_value float NOT NULL,
@@ -115,7 +118,12 @@ CREATE TABLE Investment_Fund_Results (
     Year_result_percentage float NOT NULL,
     Overall_result_percentage float NOT NULL,
 
-    CONSTRAINT Investment_Fund_Results_pkey PRIMARY KEY (Result_date,Fund_ID)
+    CONSTRAINT Investment_Fund_Results_pkey PRIMARY KEY (Result_date,Fund_ID,Investment_ID)
+);
+
+CREATE TABLE Investment_Owner (
+    ID serial PRIMARY KEY NOT NULL,
+    O_Name varchar NULL
 );
 
 ALTER TABLE Fund 
@@ -141,3 +149,15 @@ REFERENCES Fund (ID) MATCH SIMPLE;
 ALTER TABLE Investment_Fund_Results 
 ADD CONSTRAINT Fund_fkey FOREIGN KEY (Fund_ID) 
 REFERENCES Fund (ID) MATCH SIMPLE;
+
+ALTER TABLE Investment_Fund_Results 
+ADD CONSTRAINT Investment_fkey FOREIGN KEY (Investment_ID) 
+REFERENCES Investment (ID) MATCH SIMPLE;
+
+ALTER TABLE Investment
+ADD CONSTRAINT Owner_fkey FOREIGN KEY (Owner_ID) 
+REFERENCES Investment_Owner (ID) MATCH SIMPLE;
+
+ALTER TABLE Fund_Operations
+ADD CONSTRAINT Investment_fkey FOREIGN KEY (Investment_ID) 
+REFERENCES Investment (ID) MATCH SIMPLE;
