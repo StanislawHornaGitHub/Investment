@@ -71,3 +71,15 @@ AS $$
     )
 
 $$ LANGUAGE plpython3u;
+
+CREATE FUNCTION subtract_date_days (date_to_process timestamp, num_of_days int)
+RETURNS timestamp
+AS $$
+import datetime
+import re
+    
+converted_date = datetime.datetime(*[int(x) for x in re.findall(r'\d+', date_to_process)])
+return (converted_date - datetime.timedelta(days= num_of_days))
+
+$$ LANGUAGE plpython3u;
+
