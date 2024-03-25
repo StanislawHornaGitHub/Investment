@@ -35,6 +35,7 @@ SELECT
     f.ID AS "fund_id",
     f.F_name AS "fund_name",
     fc.C_name AS "category_name",
+    fc.C_shortname AS "category_short",
     f.Currency AS "currency",
     f.F_url AS "fund_url"
 FROM Fund f
