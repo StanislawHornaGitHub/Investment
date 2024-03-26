@@ -10,6 +10,8 @@ from sqlalchemy import select, insert
 from sqlalchemy import exc, func
 import json
 
+from sqlalchemy.exc import DatabaseError
+
 
 from Processing import Price
 
@@ -26,13 +28,17 @@ FundsToAdd = [
     "https://www.analizy.pl/fundusze-inwestycyjne-otwarte/PZU79/pzu-obligacji-krotkoterminowych"
 ]
 
-# for f in FundsToAdd:
-#     try:
-#         f = Fund(f)
-#         session.add(f)
-#         session.commit()
-#     except:
-#         print('error')
+for f in FundsToAdd:
+    try:
+        f = Fund(f)
+        session.add(f)
+        session.commit()
+    except DatabaseError as err:
+        session.rollback()
+        print(" - ".join([phrase for phrase in str(err).split('\n') if ("DETAIL: " in phrase) or ("(psycopg2.errors." in phrase)]))
+        continue
+    except Exception as e:
+        print("OTHER: ", type(e))
 
 
 Price.Price.updateQuotation()

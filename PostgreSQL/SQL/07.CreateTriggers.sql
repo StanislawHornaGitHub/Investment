@@ -41,3 +41,8 @@ CREATE TRIGGER instead_of_insert
 INSTEAD OF INSERT ON funds
 FOR EACH ROW
 EXECUTE FUNCTION insert_Fund();
+
+CREATE TRIGGER instead_of_insert
+INSTEAD OF INSERT ON investments
+FOR EACH ROW
+EXECUTE FUNCTION insert_investment();

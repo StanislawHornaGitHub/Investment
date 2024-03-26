@@ -84,60 +84,75 @@ CREATE TABLE Fund_Quotation (
 
 CREATE TABLE Fund_Operations (
     ID serial PRIMARY KEY NOT NULL,
-    Fund_ID varchar NOT NULL,
     Quotation_date timestamp NOT NULL,
-    Operation_date timestamp NOT NULL,
+    Operation_date timestamp NULL,
     Operation_value float NOT NULL,
-    Operation_currency varchar NOT NULL
+    Operation_currency varchar NULL
 );
 
 CREATE TABLE Investment (
-    ID serial PRIMARY KEY NOT NULL,
-    I_name varchar NOT NULL
+    ID serial UNIQUE NOT NULL,
+    I_name varchar NOT NULL,
+    Owner_ID int NOT NULL,
+    Start_date timestamp NULL,
+    End_date timestamp NULL,
+
+    CONSTRAINT Investment_pkey PRIMARY KEY (ID,Owner_ID)
 );
 
 CREATE TABLE Investment_Fund (
     Investment_ID int NOT NULL,
-    Fund_ID varchar UNIQUE NOT NULL,
+    Fund_ID varchar NOT NULL,
+    Operation_ID int NOT NULL,
 
-    CONSTRAINT Investment_Fund_pkey PRIMARY KEY (Investment_ID,Fund_ID)
+    CONSTRAINT Investment_Fund_pkey PRIMARY KEY (Investment_ID,Fund_ID,Operation_ID)
 );
 
 CREATE TABLE Investment_Fund_Results (
     Result_date timestamp NOT NULL,
     Fund_ID varchar NOT NULL,
+    Investment_ID int NOT NULL,
     Participation_units float NOT NULL,
     Invested_money float NOT NULL,
     Fund_value float NOT NULL,
-    Day_result_percentage float NOT NULL,
-    Week_result_percentage float NOT NULL,
-    Month_result_percentage float NOT NULL,
-    Year_result_percentage float NOT NULL,
-    Overall_result_percentage float NOT NULL,
+    Day_result_percentage float NULL,
+    Week_result_percentage float NULL,
+    Month_result_percentage float NULL,
+    Year_result_percentage float NULL,
+    Overall_result_percentage float NULL,
 
-    CONSTRAINT Investment_Fund_Results_pkey PRIMARY KEY (Result_date,Fund_ID)
+    CONSTRAINT Investment_Fund_Results_pkey PRIMARY KEY (Result_date,Fund_ID,Investment_ID)
+);
+
+CREATE TABLE Investment_Owner (
+    ID serial PRIMARY KEY NOT NULL,
+    O_Name varchar NULL
 );
 
 ALTER TABLE Fund 
 ADD CONSTRAINT Category_fkey FOREIGN KEY (Category_ID) 
 REFERENCES Fund_Category (ID) MATCH SIMPLE;
 
-ALTER TABLE Fund_Quotation 
-ADD CONSTRAINT Fund_fkey FOREIGN KEY (Fund_ID) 
-REFERENCES Fund (ID) MATCH SIMPLE;
-
-ALTER TABLE Fund_Operations 
-ADD CONSTRAINT Fund_fkey FOREIGN KEY (Fund_ID) 
-REFERENCES Fund (ID) MATCH SIMPLE;
-
 ALTER TABLE Investment_Fund 
 ADD CONSTRAINT Investment_fkey FOREIGN KEY (Investment_ID) 
 REFERENCES Investment (ID) MATCH SIMPLE;
+
+ALTER TABLE Investment_Fund 
+ADD CONSTRAINT Operation_fkey FOREIGN KEY (Operation_ID) 
+REFERENCES Fund_Operations (ID) MATCH SIMPLE;
 
 ALTER TABLE Investment_Fund 
 ADD CONSTRAINT Fund_fkey FOREIGN KEY (Fund_ID) 
 REFERENCES Fund (ID) MATCH SIMPLE;
 
 ALTER TABLE Investment_Fund_Results 
+ADD CONSTRAINT Fund_fkey FOREIGN KEY (Fund_ID) 
+REFERENCES Fund (ID) MATCH SIMPLE;
+
+ALTER TABLE Investment
+ADD CONSTRAINT Owner_fkey FOREIGN KEY (Owner_ID) 
+REFERENCES Investment_Owner (ID) MATCH SIMPLE;
+
+ALTER TABLE Fund_Quotation
 ADD CONSTRAINT Fund_fkey FOREIGN KEY (Fund_ID) 
 REFERENCES Fund (ID) MATCH SIMPLE;

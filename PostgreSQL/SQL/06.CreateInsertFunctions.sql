@@ -73,3 +73,125 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE FUNCTION insert_investment ()
+RETURNS TRIGGER AS $$
+DECLARE
+    Inv_ID int;
+    Own_ID int;
+    Ops_ID int;
+    Duplicate_Ops_count int;
+BEGIN   
+
+    SELECT
+        Count(*)
+    INTO Duplicate_Ops_count
+    FROM Investments
+    WHERE 
+        investment_name = NEW.investment_name AND
+        investment_owner = NEW.investment_owner AND
+        investment_fund_id = NEW.investment_fund_id AND
+        operation_quotation_date = NEW.operation_quotation_date AND
+        operation_value = NEW.operation_value;
+
+    IF Duplicate_Ops_count > 0 THEN
+
+    RAISE EXCEPTION 
+        'This operation already exists' 
+        USING ERRCODE = 'integrity_constraint_violation';
+    
+    RETURN NULL;
+
+    END IF;
+
+    -- Investment Owner
+    IF NEW.investment_owner_id IS NULL THEN
+        
+        -- Check if it is not the next row of bulk insert
+        SELECT
+            ID
+        INTO Own_ID
+        FROM investment_owner
+        WHERE o_name = NEW.investment_owner;
+
+        -- If Owner ID is not found based on the name insert new one
+        IF Own_ID IS NULL THEN
+
+            INSERT INTO investment_owner(o_name)
+            VALUES(NEW.investment_owner)
+            RETURNING ID INTO Own_ID;
+
+        END IF;
+    
+    -- If owner id was provided simply use it
+    ELSE
+        Own_ID:= NEW.investment_owner_id;
+    END IF;
+
+    -- Investment 
+    IF NEW.investment_id IS NULL THEN
+
+        -- Check if it is not the next row of bulk insert
+        SELECT
+            ID
+        INTO Inv_ID
+        FROM investment
+        WHERE 
+            i_name = NEW.investment_name AND
+            Owner_ID = Own_ID;
+
+        -- If Investment ID is not found based on the name insert new one
+        IF Inv_ID IS NULL THEN
+
+            INSERT INTO investment(
+                i_name, 
+                Owner_ID,
+                Start_date,
+                End_date
+                )
+            VALUES(
+                NEW.investment_name,
+                Own_ID,
+                NEW.investment_start_date,
+                NEW.investment_end_date
+                )
+            RETURNING ID INTO Inv_ID;
+
+        END IF;
+
+    -- If investment id was provided simply use it
+    ELSE
+        Inv_ID := NEW.investment_id;
+    END IF;
+
+    -- Insert operation of purchase or sale
+    INSERT INTO Fund_Operations (
+        Quotation_date, 
+        Operation_date,
+        Operation_value,
+        Operation_currency
+        )
+    VALUES(
+        NEW.operation_quotation_date,
+        NEW.operation_date,
+        NEW.operation_value,
+        NEW.operation_currency
+    )
+    RETURNING ID INTO Ops_ID;
+
+    -- Insert link between particular fund, operation and investment
+    INSERT INTO investment_fund(
+        investment_id,
+        fund_id,
+        operation_id
+    )
+    VALUES(
+        Inv_ID,
+        NEW.investment_fund_id,
+        Ops_ID
+    );
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
