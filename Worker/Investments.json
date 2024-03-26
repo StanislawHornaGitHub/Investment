@@ -1,0 +1,88 @@
+{
+    "Oszczędnościowe": {
+        "StartDate": "2024-01-25",
+        "EndDate":  "",
+        "Funds": {
+            "DWS05": [
+                {
+                    "BuyDate": "2024-01-19",
+                    "Money": 300
+                },
+                {
+                    "BuyDate": "2024-01-24",
+                    "Money": 50700
+                }
+            ],
+            "UNI32": [
+                {
+                    "BuyDate": "2024-01-22",
+                    "Money": 300
+                },
+                {
+                    "BuyDate": "2024-01-25",
+                    "Money": 50700
+                }
+            ]
+        }
+    },
+    "Akcyjne": {
+        "StartDate": "2024-02-22",
+        "Funds": {
+            "ING43": [
+                {
+                    "BuyDate": "2024-02-22",
+                    "Money": 1000
+                },
+                {
+                    "BuyDate": "2024-03-01",
+                    "Money": 1000
+                }
+            ],
+            "DWS20": [
+                {
+                    "BuyDate": "2024-03-15",
+                    "Money": 2000
+                }
+            ]
+        }
+    },
+    "Fundusze_PZU":{
+        "StartDate": "2024-02-28",
+        "Funds": {
+            "PZU40": [
+                {
+                    "BuyDate": "2024-02-28",
+                    "Money": 1500
+                },
+                {
+                    "BuyDate": "2024-03-04",
+                    "Money": 2000
+                },
+                {
+                    "BuyDate": "2024-03-15",
+                    "Money": 900
+                }
+            ],
+            "PZU45": [
+                {
+                    "BuyDate": "2024-02-28",
+                    "Money": 1500
+                },
+                {
+                    "BuyDate": "2024-03-04",
+                    "Money": 2000
+                }
+            ],
+            "PZU79": [
+                {
+                    "BuyDate": "2024-02-28",
+                    "Money": 1500
+                },
+                {
+                    "BuyDate": "2024-03-04",
+                    "Money": 2000
+                }
+            ]
+        }
+    }
+}

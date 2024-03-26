@@ -1,9 +1,12 @@
 {
     "cSpell.words": [
         "Analizy",
+        "dateutil",
+        "ERRCODE",
         "findall",
         "fkey",
         "fkeys",
+        "ifun",
         "plpgsql",
         "plpython",
         "sessionmaker",
