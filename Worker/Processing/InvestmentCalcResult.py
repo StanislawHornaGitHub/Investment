@@ -8,9 +8,9 @@ from sqlalchemy import func
 from sqlalchemy.exc import DatabaseError
 import datetime
 
-from Worker.Utility import DebugOutput
+from Utility import DebugOutput
 
-from Worker.Utility.Dates import Dates
+from Utility.Dates import Dates
 
 
 class InvestmentCalcResult:
@@ -93,7 +93,6 @@ class InvestmentCalcResult:
                         "last_year_result": None
                     }
                 except:
-                    # print("Missing date: ", currentProcessingDate)
                     continue
 
                 for date in desiredDates:
@@ -108,11 +107,13 @@ class InvestmentCalcResult:
                             if entry["fund_id"] == fund 
                         ]
                     
-                    if (entryToCompare := Dates.getEntryWithDesiredDate(
-                        listToLookUp,
-                        "result_date",
-                        desiredDates[date]
-                    )) != None:
+                    if ((
+                            entryToCompare := Dates.getEntryWithDesiredDate(
+                                listToLookUp,
+                                "result_date",
+                                desiredDates[date]
+                            )
+                        ) != None) and record["fund_invested_money"] > 0:
                         colName = InvestmentCalcResult.ConvertPeriodNamesDatesToInvestmentResult[date]
                         
                         try:
@@ -129,7 +130,7 @@ class InvestmentCalcResult:
 
             currentProcessingDate = Dates.addDays(currentProcessingDate, 1)
 
-        DebugOutput.CSV_writer.saveFile(result, f"invest_{investment_id}.csv")
+        #DebugOutput.CSV_writer.saveFile(result, f"invest_{investment_id}.csv")
 
         for output in result:
             record = InvestmentResult(

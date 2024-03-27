@@ -43,3 +43,15 @@ class InvestmentConfig:
             investments = json.loads(str("\n".join(Invest.readlines())))
         
         return investments
+    
+    @staticmethod
+    def getInvestmentIDs(session):
+        result = []
+        output = (
+            session
+            .query(func.distinct(Investment.investment_id))
+            .all()
+        )
+        for id in output:
+            result.append(id[0])
+        return result
