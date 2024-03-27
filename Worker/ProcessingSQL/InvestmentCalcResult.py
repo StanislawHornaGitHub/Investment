@@ -10,17 +10,7 @@ import datetime
 
 from Worker.Utility import DebugOutput
 
-from Worker.Utility.Dates import Dates
-
-
 class InvestmentCalcResult:
-
-    ConvertPeriodNamesDatesToInvestmentResult = {
-        "daily": "last_day_result",
-        "weekly": "last_week_result",
-        "monthly": "last_month_result",
-        "yearly": "last_year_result"
-    }
 
     @staticmethod
     def calculateResult(investment_id: int):
@@ -37,7 +27,7 @@ class InvestmentCalcResult:
         tempOwnedFunds = {}
         if lastUpdateDate == None:
             currentProcessingDate = start_date
-
+            
             for fund in funds:
                 tempOwnedFunds[fund] = {
                     "ParticipationUnits": 0,
@@ -45,15 +35,13 @@ class InvestmentCalcResult:
                 }
         else:
             for fund in funds:
-                LastFundResult = InvestmentCalcResult.getLastFundResult(
-                    fund, lastUpdateDate, session)
+                LastFundResult = InvestmentCalcResult.getLastFundResult(fund,lastUpdateDate,session)
                 tempOwnedFunds[fund] = {
                     "ParticipationUnits": LastFundResult[0],
-                    "InvestedMoney": LastFundResult[1]
+                    "InvestedMoney": LastFundResult[0]
                 }
-            currentProcessingDate = Dates.addDays(lastUpdateDate, 1)
-            SQLdata = InvestmentResult.getInvestmentResult(investment_id, session)
-
+            currentProcessingDate = (lastUpdateDate + datetime.timedelta(days=1))
+        
         result = []
 
         while ((currentProcessingDate <= datetime.datetime.now())):
@@ -68,69 +56,34 @@ class InvestmentCalcResult:
                     tempOwnedFunds[fund]["InvestedMoney"] += (
                         ordersMap[currentProcessingDate][fund]["Money"]
                     )
-            desiredDates = Dates.getDesiredDates(currentProcessingDate)
 
             for fund in funds:
-
                 try:
-                    record = {
-                        "result_date": currentProcessingDate,
-                        "investment_id": investment_id,
-                        "fund_id": fund,
-                        "fund_participation_units": (
-                            tempOwnedFunds[fund]["ParticipationUnits"]
-                        ),
-                        "fund_invested_money": (
-                            tempOwnedFunds[fund]["InvestedMoney"]
-                        ),
-                        "fund_value": (
-                            tempOwnedFunds[fund]["ParticipationUnits"] *
-                            quot[fund][currentProcessingDate]
-                        ),
-                        "last_day_result": None,
-                        "last_week_result": None,
-                        "last_month_result": None,
-                        "last_year_result": None
-                    }
-                except:
-                    # print("Missing date: ", currentProcessingDate)
-                    continue
-
-                for date in desiredDates:
-                    if lastUpdateDate == None:
-                        listToLookUp = [
-                                entry for entry in result 
-                                if entry["fund_id"] == fund 
-                            ]
-                    else:
-                        listToLookUp = [
-                            entry for entry in (SQLdata + result)
-                            if entry["fund_id"] == fund 
-                        ]
-                    
-                    if (entryToCompare := Dates.getEntryWithDesiredDate(
-                        listToLookUp,
-                        "result_date",
-                        desiredDates[date]
-                    )) != None:
-                        colName = InvestmentCalcResult.ConvertPeriodNamesDatesToInvestmentResult[date]
-                        
-                        try:
-                            record[colName] = (
-                                (
-                                    (record["fund_value"] - record["fund_invested_money"]) - 
-                                    (entryToCompare["fund_value"] - entryToCompare["fund_invested_money"])
-                                ) 
+                    result.append(
+                        {
+                            "result_date": currentProcessingDate,
+                            "investment_id": investment_id,
+                            "fund_id": fund,
+                            "fund_participation_units": (
+                                tempOwnedFunds[fund]["ParticipationUnits"]
+                            ),
+                            "fund_invested_money":(
+                                tempOwnedFunds[fund]["InvestedMoney"]
+                            ),
+                            "fund_value":(
+                                tempOwnedFunds[fund]["ParticipationUnits"] *
+                                quot[fund][currentProcessingDate]
                             )
-                        except:
-                            pass
+                        }
+                    )
+                except:
+                    #print("Missing date: ", currentProcessingDate)
+                    pass
 
-                result.append(record)
+            currentProcessingDate += datetime.timedelta(days=1)
 
-            currentProcessingDate = Dates.addDays(currentProcessingDate, 1)
-
-        DebugOutput.CSV_writer.saveFile(result, f"invest_{investment_id}.csv")
-
+        DebugOutput.CSV_writer.saveFile(result,f"invest_{investment_id}.csv")
+        
         for output in result:
             record = InvestmentResult(
                 **output
@@ -142,6 +95,7 @@ class InvestmentCalcResult:
                 session.rollback()
                 print(err)
                 print(output)
+        
 
     @staticmethod
     def getInvestmentOrderMap(investment_id: int, session):
@@ -171,7 +125,7 @@ class InvestmentCalcResult:
                 }
 
             resultMap[date][fund_id]["Money"] += money
-
+        
         return orders[0][0], list(fundList), resultMap
 
     @staticmethod
@@ -210,7 +164,7 @@ class InvestmentCalcResult:
     def getLastFundResult(fund_id: str, last_date, session):
         return (
             session
-            .query(InvestmentResult.fund_participation_units, InvestmentResult.fund_invested_money)
+            .query(InvestmentResult.fund_participation_units,InvestmentResult.fund_invested_money)
             .filter(InvestmentResult.fund_id == fund_id, InvestmentResult.result_date == last_date)
             .first()
         )
