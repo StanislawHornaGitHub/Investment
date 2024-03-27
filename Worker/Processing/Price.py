@@ -2,7 +2,7 @@ import SQL
 from SQL.Quotation import Quotation
 from SQL.Fund import Fund
 from AnalizyPL.API import AnalizyFund
-from Processing.ConvertToDict import ConvertToDict
+from Utility.ConvertToDict import ConvertToDict
 from sqlalchemy import func
 
 from dateutil.parser import parse

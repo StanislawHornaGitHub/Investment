@@ -115,11 +115,11 @@ CREATE TABLE Investment_Fund_Results (
     Participation_units float NOT NULL,
     Invested_money float NOT NULL,
     Fund_value float NOT NULL,
-    Day_result_percentage float NULL,
-    Week_result_percentage float NULL,
-    Month_result_percentage float NULL,
-    Year_result_percentage float NULL,
-    Overall_result_percentage float NULL,
+    Day_profit float NULL,
+    Week_profit float NULL,
+    Month_profit float NULL,
+    Year_profit float NULL,
+    
 
     CONSTRAINT Investment_Fund_Results_pkey PRIMARY KEY (Result_date,Fund_ID,Investment_ID)
 );

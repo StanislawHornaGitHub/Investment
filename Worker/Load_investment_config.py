@@ -1,5 +1,3 @@
-
-import SQL
 from Processing.InvestmentConfig import InvestmentConfig
 
 

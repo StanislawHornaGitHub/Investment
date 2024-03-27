@@ -81,11 +81,10 @@ SELECT
     ifr.Participation_units AS "fund_participation_units",
     ifr.Invested_money AS "fund_invested_money",
     ifr.Fund_value AS "fund_value",
-    ifr.Day_result_percentage AS "last_day_result",
-    ifr.Week_result_percentage AS "last_week_result",
-    ifr.Month_result_percentage AS "last_month_result",
-    ifr.Year_result_percentage AS "last_year_result",
-    ifr.Overall_result_percentage AS "overall_result"
+    ifr.Day_profit AS "last_day_result",
+    ifr.Week_profit AS "last_week_result",
+    ifr.Month_profit AS "last_month_result",
+    ifr.Year_profit AS "last_year_result"
 FROM Investment_Fund_Results ifr;
 
 

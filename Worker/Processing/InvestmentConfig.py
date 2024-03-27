@@ -19,13 +19,13 @@ class InvestmentConfig:
                 for i in range(len(Investments[invest]["Funds"][fund])):
                     session.add(
                         Investment(
-                        investment_id=None,
-                        investment_name=invest,
-                        investment_owner_id=None,
-                        investment_owner=InvestOwner,
-                        investment_fund_id=fund,
-                        operation_quotation_date=parse(Investments[invest]["Funds"][fund][i]["BuyDate"]),
-                        operation_value=Investments[invest]["Funds"][fund][i]["Money"]
+                            investment_id=None,
+                            investment_name=invest,
+                            investment_owner_id=None,
+                            investment_owner=InvestOwner,
+                            investment_fund_id=fund,
+                            operation_quotation_date=parse(Investments[invest]["Funds"][fund][i]["BuyDate"]),
+                            operation_value=Investments[invest]["Funds"][fund][i]["Money"]
                         )
                     )
                     try:
@@ -43,3 +43,15 @@ class InvestmentConfig:
             investments = json.loads(str("\n".join(Invest.readlines())))
         
         return investments
+    
+    @staticmethod
+    def getInvestmentIDs(session):
+        result = []
+        output = (
+            session
+            .query(func.distinct(Investment.investment_id))
+            .all()
+        )
+        for id in output:
+            result.append(id[0])
+        return result
