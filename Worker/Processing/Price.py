@@ -5,8 +5,8 @@ from AnalizyPL.API import AnalizyFund
 from Utility.ConvertToDict import ConvertToDict
 from sqlalchemy import func
 
-from dateutil.parser import parse
-import datetime
+from Utility.Dates import Dates
+
 
 class Price:
 
@@ -21,19 +21,19 @@ class Price:
                             )
         for date, fundID in lastRefreshDates:
             downloadedQuot = AnalizyFund.downloadQuotation(fund[fundID])
+            allQuotations = downloadedQuot["FundQuotation"]
             downloadedQuot["FundQuotation"] = [
                 q for q in downloadedQuot["FundQuotation"] 
-                if parse(q[AnalizyFund.RESPONSE_DATE_NAME])>date
+                if q[AnalizyFund.RESPONSE_DATE_NAME]>date
                 ]
             
-            Price.insertRecord_Q(downloadedQuot, session)
+            Price.insertRecord_Q(downloadedQuot, session, allQuotations)
         
         fundsWithPrice = list([fr[1] for fr in lastRefreshDates])
         fundsWithoutPrice = [
             f for f in list(fund.keys()) 
             if f not in fundsWithPrice
             ]
-        print(fundsWithoutPrice)
         Price.insertQuotation(fundsWithoutPrice, fund, session)
 
         session.commit()
@@ -50,14 +50,12 @@ class Price:
     
 
     @staticmethod
-    def insertRecord_Q(dataToInsert: list[dict[str, str]], session):
-        
-        fundID = dataToInsert["Fund_ID"]
+    def insertRecord_Q(dataToInsert: list[dict[str, str]], session, allQuotation = []):
         
         for entry in dataToInsert["FundQuotation"]:
             
-            currentDate = parse(entry[AnalizyFund.RESPONSE_DATE_NAME])
-            currentValue = float(entry[AnalizyFund.RESPONSE_PRICE_NAME])
+            currentDate = entry[AnalizyFund.RESPONSE_DATE_NAME]
+            currentValue = entry[AnalizyFund.RESPONSE_PRICE_NAME]
             
             result = {
                 'daily': None,
@@ -66,16 +64,16 @@ class Price:
                 'yearly': None
             }
             
-            dates = Price.getDesiredDates(currentDate)
+            dates = Dates.getDesiredDates(currentDate)
             
             for period in dates:
-                if (prev_value := Price.getHistoricalQuotation(
-                        dates[period],
-                        fundID, 
-                        session
-                        )
+                if (prev_value := Dates.getEntryWithDesiredDate(
+                    allQuotation + dataToInsert["FundQuotation"],
+                    AnalizyFund.RESPONSE_DATE_NAME,
+                    dates[period]
+                )
                     ) != None:
-                    result[period] = (currentValue / prev_value[0]) - 1.0
+                    result[period] = (currentValue / prev_value[AnalizyFund.RESPONSE_PRICE_NAME]) - 1.0
             
             
             session.add(
@@ -105,19 +103,3 @@ class Price:
             .first()
         )
         
-    @staticmethod
-    def getDesiredDates(currentDate: datetime) -> dict[str, datetime.datetime]:
-        return {
-            'daily': (currentDate - datetime.timedelta(
-                days=1
-            )),
-            'weekly': (currentDate - datetime.timedelta(
-                days=7
-            )),
-            'monthly': (currentDate - datetime.timedelta(
-                days=30
-            )),
-            'yearly': (currentDate - datetime.timedelta(
-                days=365
-            )),
-        }

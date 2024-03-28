@@ -33,5 +33,11 @@ class AnalizyFund:
             "Fund_Currency": None,
             "FundQuotation": fundQuotationResponse[AnalizyFund.RESPONSE_DETAILS][0][AnalizyFund.RESPONSE_LIST]
         }
-
+        for i in range(len(result["FundQuotation"])):
+            result["FundQuotation"][i][AnalizyFund.RESPONSE_DATE_NAME] = parse(
+                result["FundQuotation"][i][AnalizyFund.RESPONSE_DATE_NAME]
+            )
+            result["FundQuotation"][i][AnalizyFund.RESPONSE_PRICE_NAME] = float(
+                result["FundQuotation"][i][AnalizyFund.RESPONSE_PRICE_NAME]
+            )
         return result
