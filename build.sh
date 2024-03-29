@@ -24,17 +24,17 @@ StartPostgresContainer(){
 LoadFunds(){
 
     # Start python script to load fund URLs
-    python3 ./Worker/Load_Funds.py
+    python3 ./Flask/Worker/Load_Funds.py
 }
 
 LoadInvestments(){
 
     
-    python3 ./Worker/Load_investment_config.py
+    python3 ./Flask/Worker/Load_investment_config.py
 }
 
 CalcInvestments(){
-    python3 ./Worker/Calculate_investment_results.py
+    python3 ./Flask/Worker/Calculate_investment_results.py
 }
 
 
