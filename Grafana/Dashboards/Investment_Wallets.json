@@ -411,7 +411,7 @@
                     "reducer": [
                         "sum"
                     ],
-                    "show": false
+                    "show": true
                 },
                 "showHeader": true,
                 "sortBy": [
@@ -1097,8 +1097,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -1222,8 +1221,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -1347,8 +1345,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -1486,8 +1483,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -1611,8 +1607,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -1736,8 +1731,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -1875,8 +1869,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -2000,8 +1993,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -2125,8 +2117,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -2264,8 +2255,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -2389,8 +2379,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -2514,8 +2503,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "super-light-red",
-                                        "value": null
+                                        "color": "super-light-red"
                                     },
                                     {
                                         "color": "super-light-green",
@@ -2604,7 +2592,7 @@
         "list": [
             {
                 "current": {
-                    "selected": true,
+                    "selected": false,
                     "text": "Stan",
                     "value": "Stan"
                 },
@@ -2638,6 +2626,6 @@
     "timezone": "browser",
     "title": "Investment Wallet",
     "uid": "ddh0du4z59atcfa",
-    "version": 7,
+    "version": 8,
     "weekStart": "monday"
 }
