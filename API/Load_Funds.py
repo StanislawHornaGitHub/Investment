@@ -3,7 +3,7 @@ from Processing.Price import Price
 from Processing.FundConfig import FundConfig
 
 
-funds = FundConfig.importJSONconfig("/home/stanislawhorna/VScode/Investment/Flask/Worker/Funds.json")
+funds = FundConfig.importJSONconfig("/home/stanislawhorna/VScode/Investment/API/json/Funds.json")
 
 FundConfig.insertFundConfig(funds)
 
