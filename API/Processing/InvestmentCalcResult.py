@@ -9,6 +9,7 @@ from sqlalchemy.exc import DatabaseError
 import datetime
 
 from Utility import DebugOutput
+from Processing.InvestmentConfig import InvestmentConfig
 
 from Utility.Dates import Dates
 
@@ -21,6 +22,17 @@ class InvestmentCalcResult:
         "monthly": "last_month_result",
         "yearly": "last_year_result"
     }
+    
+    @staticmethod
+    def calculateAllResults():
+        session = SQL.base.Session()
+
+        investmentsToRefresh = InvestmentConfig.getInvestmentIDs(session)
+
+        for id in investmentsToRefresh:
+            InvestmentCalcResult.calculateResult(id)
+            
+        session.close()
 
     @staticmethod
     def calculateResult(investment_id: int):
