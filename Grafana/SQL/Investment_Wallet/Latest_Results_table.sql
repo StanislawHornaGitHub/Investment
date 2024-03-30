@@ -23,7 +23,6 @@ WITH results_with_rank AS (
         *,
         ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) AS "rank"
     FROM investment_results
-
 ),
 
 filtered_investment_results AS (

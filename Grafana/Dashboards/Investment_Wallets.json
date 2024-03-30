@@ -463,7 +463,8 @@
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "thresholds"
+                        "fixedColor": "orange",
+                        "mode": "fixed"
                     },
                     "decimals": 2,
                     "mappings": [],
@@ -513,7 +514,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "WITH results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) as \"rank\"\n    FROM investment_results\n\n),\n\nfiltered_investment_results AS (\n\tSELECT \n\t\t*\n\tfrom results_with_rank\n\tWHERE  rank = 1\n),\n\nrefund_per_investment AS (\n    SELECT\n        SUM(FUND_VALUE - FUND_INVESTED_MONEY) AS \"Profit\"\n    FROM filtered_investment_results ir\n    INNER JOIN (\n        SELECT DISTINCT \n            investment_id, \n            investment_name  \n        FROM investments i\n        WHERE investment_owner = ${Investment_Owner:singlequote}\n    ) i ON i.investment_id  = ir.investment_id\n)\nSELECT \n    * \nFROM refund_per_investment",
+                    "rawSql": "WITH results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) as \"rank\"\n    FROM investment_results\n\n),\n\nfiltered_investment_results AS (\n\tSELECT \n\t\t*\n\tfrom results_with_rank\n\tWHERE  rank = 1\n),\n\nrefund_per_investment AS (\n    SELECT\n        SUM(FUND_VALUE - FUND_INVESTED_MONEY) AS \"Profit\"\n    FROM filtered_investment_results ir\n    INNER JOIN (\n        SELECT DISTINCT \n            investment_id, \n            investment_name  \n        FROM investments i\n        WHERE investment_owner = 'Stan'\n    ) i ON i.investment_id  = ir.investment_id\n)\nSELECT \n    * \nFROM refund_per_investment",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -834,8 +835,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "super-light-red",
-                                "value": null
+                                "color": "super-light-red"
                             },
                             {
                                 "color": "super-light-green",
@@ -931,8 +931,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2626,6 +2625,6 @@
     "timezone": "browser",
     "title": "Investment Wallet",
     "uid": "ddh0du4z59atcfa",
-    "version": 8,
+    "version": 10,
     "weekStart": "monday"
 }

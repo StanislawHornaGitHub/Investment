@@ -1,6 +1,6 @@
 /*
     .DESCRIPTION
-        SQL script for PostgreSQL to define UPDATE functions in TravelNest DB.
+        SQL script for PostgreSQL to define UPDATE functions in Investments DB.
 
         This file is supposed to define all update functions,
         which will be used in INSTEAD OF UPDATE view triggers.

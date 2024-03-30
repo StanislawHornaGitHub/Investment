@@ -12,4 +12,7 @@
    - username: ``
    - password: ``
    - TLS/SSL Mode: `disable` 
-2. Import dashboards form `/Grafana/Dashboards` directory
+2. Install plugins:
+   - Button Panel
+   - Data Manipulation
+3. Import dashboards form `/Grafana/Dashboards` directory
