@@ -1,0 +1,369 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 15,
+    "links": [],
+    "liveNow": true,
+    "panels": [
+        {
+            "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "ddgyoxk2li6tcf"
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 0,
+                "y": 0
+            },
+            "id": 2,
+            "options": {
+                "buttons": [
+                    {
+                        "datasource": "Investment-DB",
+                        "query": "{\n  \"rawSql\": \"SELECT get_funds_quotation(${Backend_IP:singlequote}, ${Backend_Port:singlequote});\",\n  \"format\": \"table\"\n}",
+                        "text": "Download funds quotation",
+                        "variant": "primary"
+                    },
+                    {
+                        "datasource": "Investment-DB",
+                        "query": "{\n  \"rawSql\": \"SELECT get_investments_result(${Backend_IP:singlequote}, ${Backend_Port:singlequote});\",\n  \"format\": \"table\"\n}",
+                        "text": "Calculate investment results",
+                        "variant": "primary"
+                    },
+                    {
+                        "datasource": "Investment-DB",
+                        "query": "{\n  \"rawSql\": \"SELECT remove_investments_result();\",\n  \"format\": \"table\"\n}",
+                        "text": "Delete investment results",
+                        "variant": "destructive"
+                    }
+                ],
+                "orientation": "vertical"
+            },
+            "pluginVersion": "10.4.1",
+            "title": "Control buttons",
+            "type": "speakyourcode-button-panel"
+        },
+        {
+            "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "ddgyoxk2li6tcf"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Date"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "time: YYYY-MM-DD"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 96
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "fund_id"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 103
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Fund ID"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 135
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 11,
+                "x": 6,
+                "y": 0
+            },
+            "id": 3,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": false,
+                        "displayName": "Date"
+                    }
+                ]
+            },
+            "pluginVersion": "10.4.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "ddgyoxk2li6tcf"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH funds_quotation_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id ORDER BY date DESC) AS \"rank\"\n    FROM quotations q\n)\n\nSELECT \n    date AS \"Date\",\n    f.fund_id AS \"Fund ID\",\n    fund_name AS \"Fund name\"\nFROM funds_quotation_with_rank fq\nLEFT JOIN funds f ON f.FUND_ID = fq.fund_id\nWHERE rank = 1",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Fund Quotation Dates",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "ddgyoxk2li6tcf"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Date"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "time: YYYY-MM-DD"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 96
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "fund_id"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 103
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 7,
+                "x": 17,
+                "y": 0
+            },
+            "id": 4,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": false,
+                        "displayName": "date"
+                    }
+                ]
+            },
+            "pluginVersion": "10.4.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "ddgyoxk2li6tcf"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH investment_results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) AS \"rank\"\n    FROM investment_results ir\n)\n\nSELECT \n    result_date AS \"Date\",\n    investment_name AS \"Investment name\",\n    investment_owner AS \"Owner\"\nFROM (\n        SELECT \n            investment_id,\n            MIN(result_date) as \"result_date\"\n        FROM investment_results_with_rank\n        WHERE rank = 1\n        GROUP BY investment_id\n) AS r\nLEFT JOIN (\n        SELECT DISTINCT \n            investment_id, \n            investment_name,\n            investment_owner\n        FROM investments i\n) AS i ON i.investment_id = r.investment_id",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Investment Result Dates",
+            "type": "table"
+        }
+    ],
+    "schemaVersion": 39,
+    "tags": [],
+    "templating": {
+        "list": [
+            {
+                "current": {
+                    "selected": false,
+                    "text": "192.168.0.212",
+                    "value": "192.168.0.212"
+                },
+                "hide": 0,
+                "label": "Backend IP",
+                "name": "Backend_IP",
+                "options": [
+                    {
+                        "selected": true,
+                        "text": "192.168.0.212",
+                        "value": "192.168.0.212"
+                    }
+                ],
+                "query": "192.168.0.212",
+                "skipUrlSync": false,
+                "type": "textbox"
+            },
+            {
+                "current": {
+                    "selected": false,
+                    "text": "5000",
+                    "value": "5000"
+                },
+                "hide": 0,
+                "label": "Backend Port",
+                "name": "Backend_Port",
+                "options": [
+                    {
+                        "selected": true,
+                        "text": "5000",
+                        "value": "5000"
+                    }
+                ],
+                "query": "5000",
+                "skipUrlSync": false,
+                "type": "textbox"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-1h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Investment Management",
+    "uid": "edh4bvsv3kmwwe",
+    "version": 13,
+    "weekStart": ""
+}

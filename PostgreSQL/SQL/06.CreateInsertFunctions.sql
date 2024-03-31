@@ -1,6 +1,6 @@
 /*
     .DESCRIPTION
-        SQL script for PostgreSQL to define INSERT functions in TravelNest DB.
+        SQL script for PostgreSQL to define INSERT functions in Investments DB.
 
         This file is supposed to define all insert functions,
         which will be used in INSTEAD OF INSERT view triggers.

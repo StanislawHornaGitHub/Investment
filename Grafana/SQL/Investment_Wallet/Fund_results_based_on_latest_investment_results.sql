@@ -6,7 +6,7 @@
 
     .NOTES
 
-        Version:            1.0
+        Version:            1.1
         Author:             Stanisław Horna
         Mail:               stanislawhorna@outlook.com
         GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -14,19 +14,34 @@
         ChangeLog:
 
         Date            Who                     What
-
+        2024-03-31      Stanisław Horna         Moved from max date to row_number function
 */
+
 WITH selected_owner_investments AS (
-    SELECT
+    SELECT DISTINCT
         investment_id
     FROM investments
     WHERE investment_owner = ${Investment_Owner:singlequote}
+),
+investment_results_with_rank AS (
+    SELECT
+        *,
+        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) as "rank"
+    FROM investment_results
+),
+
+latest_investment_results AS (
+    SELECT
+        *
+    FROM investment_results_with_rank
+    WHERE "rank" = 1
 )
 
 
 SELECT 
     f.fund_id AS "Fund ID",
     fund_name AS "Fund Name",
+    "Overall refund",
     "Daily refund",
     "Weekly refund",
     "Monthly refund",
@@ -38,16 +53,12 @@ SELECT
 FROM (
     SELECT 
         FUND_ID,
+        ((fund_value / fund_invested_money) -1) * 100 as "Overall refund",
         (last_day_result / fund_invested_money) * 100 AS "Daily refund",
         (last_week_result / fund_invested_money) * 100 AS "Weekly refund",
         (last_month_result / fund_invested_money) * 100 AS "Monthly refund"
-    FROM investment_results ir 
-    WHERE result_date = (
-        SELECT 
-            MAX(result_date) 
-        FROM investment_results ir2 
-        WHERE ir2.investment_id = ir.investment_id
-        ) AND investment_id IN (
+    FROM latest_investment_results
+    WHERE investment_id IN (
                 SELECT
                     investment_id
                 FROM selected_owner_investments

@@ -1,6 +1,6 @@
 /*
     .DESCRIPTION
-        SQL script for PostgreSQL to define VIEW TRIGGERS in TravelNest DB.
+        SQL script for PostgreSQL to define VIEW TRIGGERS in Investments DB.
         EXISTING TRIGGERS WILL BE REMOVED AND RE-CREATED WITH THIS FILES' DEFINITION.
 
         This file is supposed to define all triggers to call functions:

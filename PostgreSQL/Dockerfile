@@ -20,6 +20,7 @@ FROM postgres:16.2
 RUN apt-get update
 RUN apt-get install -y postgresql-plpython3-16
 RUN apt-get install -y locales locales-all
+RUN apt-get install -y python3-requests
 
 # Set timezone
 ENV TZ="Europe/Warsaw"

@@ -62,6 +62,10 @@
                             {
                                 "id": "unit",
                                 "value": "PLN"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 100
                             }
                         ]
                     },
@@ -463,7 +467,8 @@
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "thresholds"
+                        "fixedColor": "orange",
+                        "mode": "fixed"
                     },
                     "decimals": 2,
                     "mappings": [],
@@ -646,7 +651,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "/*\n    .DESCRIPTION\n        Query for Grafana Dashboard.\n        Display investment results like in table similar to the first console one\n\n\n    .NOTES\n\n        Version:            1.0\n        Author:             Stanisław Horna\n        Mail:               stanislawhorna@outlook.com\n        GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment\n        Creation Date:      28-Mar-2024\n        ChangeLog:\n\n        Date            Who                     What\n        2024-03-29      Stanisław Horna         Changed to CTE to have the proper result,\n                                                if not all funds have new quotations\n*/\n\nWITH results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) AS \"rank\"\n    FROM investment_results\n\n),\n\nfiltered_investment_results AS (\n\tSELECT \n\t\t*\n\tFROM results_with_rank\n\tWHERE  rank = 1\n),\n\nrefund_per_investment AS (\n    SELECT\n        ir.investment_id,\n        ir.fund_id,\n        FUND_VALUE - FUND_INVESTED_MONEY AS \"Profit\"\n    FROM filtered_investment_results ir\n    GROUP BY ir.investment_id, ir.fund_id, FUND_VALUE, FUND_INVESTED_MONEY\n)\n\n\nSELECT \n\ti.investment_name AS \"Investment name\",\n\tf.fund_id AS \"Fund ID\",\n\tresult_date AS \"Quotation date\",\n\t\"Profit\" AS \"Overall profit\",\n    last_day_result AS \"Last day profit\",\n    last_week_result AS \"Last week profit\",\n    last_month_result AS \"Last month profit\",\n\tlast_day_result / fund_invested_money * 100 AS \"Last day refund\",\n\tlast_week_result / fund_invested_money * 100 AS \"Last week refund\",\n\tlast_month_result / fund_invested_money * 100 AS \"Last month refund\"\nFROM (\nSELECT \n\tinvestment_id,\n\tfund_id,\n\tSUM(\"Profit\") as \"Profit\"\nFROM refund_per_investment\nGROUP BY ROLLUP(investment_id, fund_id)   \n) AS ir\nINNER JOIN (\n    SELECT DISTINCT\n        investment_id,\n        investment_name\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n) AS i ON i.investment_id = ir.investment_id \nLEFT JOIN  filtered_investment_results f ON f.fund_id = ir.fund_id AND f.investment_id = ir.investment_id\nWHERE ir.investment_id IS NOT NULL ",
+                    "rawSql": "WITH results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) AS \"rank\"\n    FROM investment_results\n    WHERE investment_id IN (\n        SELECT DISTINCT\n            investment_id\n        FROM investments\n        WHERE investment_owner = ${Investment_Owner:singlequote}\n    )\n\n),\n\nfiltered_investment_results AS (\n\tSELECT \n\t\t*\n\tFROM results_with_rank\n\tWHERE  rank = 1\n),\n\nrefund_per_investment AS (\n    SELECT\n        ir.investment_id,\n        ir.fund_id,\n        FUND_VALUE - FUND_INVESTED_MONEY AS \"Profit\"\n    FROM filtered_investment_results ir\n    GROUP BY ir.investment_id, ir.fund_id, FUND_VALUE, FUND_INVESTED_MONEY\n)\n\n\nSELECT \n\ti.investment_name AS \"Investment name\",\n\tf.fund_id AS \"Fund ID\",\n\tresult_date AS \"Quotation date\",\n\t\"Profit\" AS \"Overall profit\",\n    last_day_result AS \"Last day profit\",\n    last_week_result AS \"Last week profit\",\n    last_month_result AS \"Last month profit\",\n\tlast_day_result / fund_invested_money * 100 AS \"Last day refund\",\n\tlast_week_result / fund_invested_money * 100 AS \"Last week refund\",\n\tlast_month_result / fund_invested_money * 100 AS \"Last month refund\"\nFROM (\nSELECT \n\tinvestment_id,\n\tfund_id,\n\tSUM(\"Profit\") as \"Profit\"\nFROM refund_per_investment\nGROUP BY ROLLUP(investment_id, fund_id)   \n) AS ir\nINNER JOIN (\n    SELECT DISTINCT\n        investment_id,\n        investment_name\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n) AS i ON i.investment_id = ir.investment_id \nLEFT JOIN  filtered_investment_results f ON f.fund_id = ir.fund_id AND f.investment_id = ir.investment_id\nWHERE ir.investment_id IS NOT NULL ",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -834,8 +839,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "super-light-red",
-                                "value": null
+                                "color": "super-light-red"
                             },
                             {
                                 "color": "super-light-green",
@@ -931,8 +935,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -1016,7 +1019,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "WITH selected_owner_investments AS (\n    SELECT\n        investment_id\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n)\n\n\nSELECT \n    f.fund_id AS \"Fund ID\",\n    fund_name AS \"Fund Name\",\n    \"Daily refund\",\n    \"Weekly refund\",\n    \"Monthly refund\",\n    CASE \n        WHEN \"Monthly refund\" is not NULL  THEN (\"Monthly refund\"/30) * 365\n        WHEN \"Weekly refund\" is not NULL THEN (\"Weekly refund\"/7) * 365\n        WHEN \"Daily refund\" is not NULL THEN (\"Daily refund\") * 365\n    END AS \"Estimated yearly refund\"\nFROM (\n    SELECT \n        FUND_ID,\n        (last_day_result / fund_invested_money) * 100 AS \"Daily refund\",\n        (last_week_result / fund_invested_money) * 100 AS \"Weekly refund\",\n        (last_month_result / fund_invested_money) * 100 AS \"Monthly refund\"\n    FROM investment_results ir \n    WHERE result_date = (\n        SELECT \n            MAX(result_date) \n        FROM investment_results ir2 \n        WHERE ir2.investment_id = ir.investment_id\n        ) AND investment_id IN (\n                SELECT\n                    investment_id\n                FROM selected_owner_investments\n            )\n) AS s\nLEFT JOIN funds f on f.fund_id = s.fund_id;",
+                    "rawSql": "\nWITH selected_owner_investments AS (\n    SELECT DISTINCT\n        investment_id\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n),\ninvestment_results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) as \"rank\"\n    FROM investment_results\n),\n\nlatest_investment_results AS (\n    SELECT\n        *\n    FROM investment_results_with_rank\n    WHERE \"rank\" = 1\n)\n\n\nSELECT \n    f.fund_id AS \"Fund ID\",\n    fund_name AS \"Fund Name\",\n    \"Overall refund\",\n    \"Daily refund\",\n    \"Weekly refund\",\n    \"Monthly refund\",\n    CASE \n        WHEN \"Monthly refund\" is not NULL  THEN (\"Monthly refund\"/30) * 365\n        WHEN \"Weekly refund\" is not NULL THEN (\"Weekly refund\"/7) * 365\n        WHEN \"Daily refund\" is not NULL THEN (\"Daily refund\") * 365\n    END AS \"Estimated yearly refund\"\nFROM (\n    SELECT \n        FUND_ID,\n        ((fund_value / fund_invested_money) -1) * 100 as \"Overall refund\",\n        (last_day_result / fund_invested_money) * 100 AS \"Daily refund\",\n        (last_week_result / fund_invested_money) * 100 AS \"Weekly refund\",\n        (last_month_result / fund_invested_money) * 100 AS \"Monthly refund\"\n    FROM latest_investment_results\n    WHERE investment_id IN (\n                SELECT\n                    investment_id\n                FROM selected_owner_investments\n            )\n) AS s\nLEFT JOIN funds f on f.fund_id = s.fund_id;",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -2626,6 +2629,6 @@
     "timezone": "browser",
     "title": "Investment Wallet",
     "uid": "ddh0du4z59atcfa",
-    "version": 8,
+    "version": 16,
     "weekStart": "monday"
 }

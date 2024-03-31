@@ -1,6 +1,6 @@
 /*
     .DESCRIPTION
-        SQL script for PostgreSQL to define DELETE functions in TravelNest DB.
+        SQL script for PostgreSQL to define DELETE functions in Investments DB.
 
         This file is supposed to define all delete functions,
         which will be used in INSTEAD OF DELETE view triggers.
