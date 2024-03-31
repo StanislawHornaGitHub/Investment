@@ -47,6 +47,12 @@
                         "query": "{\n  \"rawSql\": \"SELECT get_investments_result(${Backend_IP:singlequote}, ${Backend_Port:singlequote});\",\n  \"format\": \"table\"\n}",
                         "text": "Calculate investment results",
                         "variant": "primary"
+                    },
+                    {
+                        "datasource": "Investment-DB",
+                        "query": "{\n  \"rawSql\": \"SELECT remove_investments_result();\",\n  \"format\": \"table\"\n}",
+                        "text": "Delete investment results",
+                        "variant": "destructive"
                     }
                 ],
                 "orientation": "vertical"
@@ -358,6 +364,6 @@
     "timezone": "browser",
     "title": "Investment Management",
     "uid": "edh4bvsv3kmwwe",
-    "version": 12,
+    "version": 13,
     "weekStart": ""
 }

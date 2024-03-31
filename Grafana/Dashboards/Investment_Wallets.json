@@ -839,8 +839,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "super-light-red",
-                                "value": null
+                                "color": "super-light-red"
                             },
                             {
                                 "color": "super-light-green",
@@ -936,8 +935,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2597,7 +2595,7 @@
         "list": [
             {
                 "current": {
-                    "selected": true,
+                    "selected": false,
                     "text": "Stan",
                     "value": "Stan"
                 },
@@ -2631,6 +2629,6 @@
     "timezone": "browser",
     "title": "Investment Wallet",
     "uid": "ddh0du4z59atcfa",
-    "version": 15,
+    "version": 16,
     "weekStart": "monday"
 }
