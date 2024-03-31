@@ -62,6 +62,10 @@
                             {
                                 "id": "unit",
                                 "value": "PLN"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 100
                             }
                         ]
                     },
@@ -2627,6 +2631,6 @@
     "timezone": "browser",
     "title": "Investment Wallet",
     "uid": "ddh0du4z59atcfa",
-    "version": 14,
+    "version": 15,
     "weekStart": "monday"
 }
