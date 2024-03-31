@@ -10,6 +10,7 @@
         "jsonify",
         "plpgsql",
         "plpython",
+        "POSTGRE",
         "sessionmaker",
         "sqlalchemy",
         "subf",

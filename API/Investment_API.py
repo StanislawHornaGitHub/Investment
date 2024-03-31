@@ -1,5 +1,6 @@
+
+import os
 from flask import Flask, jsonify, request
-import SQL
 from Processing.Price import Price
 from Processing.InvestmentCalcResult import InvestmentCalcResult
 from Processing.FundConfig import FundConfig
@@ -7,6 +8,7 @@ from Processing.InvestmentConfig import InvestmentConfig
 
 app = Flask(__name__)
 
+DEBUG_MODE = os.getenv('FLASK_DEBUG', True)
 
 @app.route('/FundQuotation', methods=['PUT'])
 def refreshFundQuotation():
@@ -43,5 +45,9 @@ def insertInvestmentConfig():
 
         return jsonInvestments
 
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(
+        debug=DEBUG_MODE,
+        host='0.0.0.0'
+    )

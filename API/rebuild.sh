@@ -39,10 +39,6 @@ DockerImageName="flask_investment"
 DockerContainerName="FLASK_Investment"
 HostPortToOpen="5000"
 
-# define tests vars
-TestRunFilePath="./Test/run_tests.py"
-
-
 Main() {
 
     # check if docker is running
@@ -89,7 +85,7 @@ waitForContainerInit() {
     # each startup is announced by log message "database system is ready to accept connections"
     # after first one Database is initialized from scripts located in "SQL" directory, 
     # once DB init is completed, another restart is performed and container is ready to work.
-    while [ "$numOfDBstartups" -lt 0 ]; do
+    while [ "$numOfDBstartups" -le 0 ]; do
         
         sleep 0.1
         # check if container is still running, 
