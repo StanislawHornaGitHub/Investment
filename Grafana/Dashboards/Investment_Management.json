@@ -29,7 +29,7 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 4,
+                "w": 6,
                 "x": 0,
                 "y": 0
             },
@@ -38,13 +38,13 @@
                 "buttons": [
                     {
                         "datasource": "Investment-DB",
-                        "query": "{\n  \"rawSql\": \"SELECT get_funds_quotation('192.168.0.212', '5000');\",\n  \"format\": \"table\"\n}",
+                        "query": "{\n  \"rawSql\": \"SELECT get_funds_quotation(${Backend_IP:singlequote}, ${Backend_Port:singlequote});\",\n  \"format\": \"table\"\n}",
                         "text": "Download funds quotation",
                         "variant": "primary"
                     },
                     {
                         "datasource": "Investment-DB",
-                        "query": "{\n  \"rawSql\": \"SELECT get_investments_result('192.168.0.212', '5000');\",\n  \"format\": \"table\"\n}",
+                        "query": "{\n  \"rawSql\": \"SELECT get_investments_result(${Backend_IP:singlequote}, ${Backend_Port:singlequote});\",\n  \"format\": \"table\"\n}",
                         "text": "Calculate investment results",
                         "variant": "primary"
                     }
@@ -128,8 +128,8 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 7,
-                "x": 4,
+                "w": 11,
+                "x": 6,
                 "y": 0
             },
             "id": 3,
@@ -144,7 +144,12 @@
                     "show": false
                 },
                 "showHeader": true,
-                "sortBy": []
+                "sortBy": [
+                    {
+                        "desc": false,
+                        "displayName": "Date"
+                    }
+                ]
             },
             "pluginVersion": "10.4.1",
             "targets": [
@@ -242,7 +247,7 @@
             "gridPos": {
                 "h": 8,
                 "w": 7,
-                "x": 11,
+                "x": 17,
                 "y": 0
             },
             "id": 4,
@@ -302,7 +307,48 @@
     "schemaVersion": 39,
     "tags": [],
     "templating": {
-        "list": []
+        "list": [
+            {
+                "current": {
+                    "selected": false,
+                    "text": "192.168.0.212",
+                    "value": "192.168.0.212"
+                },
+                "hide": 0,
+                "label": "Backend IP",
+                "name": "Backend_IP",
+                "options": [
+                    {
+                        "selected": true,
+                        "text": "192.168.0.212",
+                        "value": "192.168.0.212"
+                    }
+                ],
+                "query": "192.168.0.212",
+                "skipUrlSync": false,
+                "type": "textbox"
+            },
+            {
+                "current": {
+                    "selected": false,
+                    "text": "5000",
+                    "value": "5000"
+                },
+                "hide": 0,
+                "label": "Backend Port",
+                "name": "Backend_Port",
+                "options": [
+                    {
+                        "selected": true,
+                        "text": "5000",
+                        "value": "5000"
+                    }
+                ],
+                "query": "5000",
+                "skipUrlSync": false,
+                "type": "textbox"
+            }
+        ]
     },
     "time": {
         "from": "now-1h",
@@ -312,6 +358,6 @@
     "timezone": "browser",
     "title": "Investment Management",
     "uid": "edh4bvsv3kmwwe",
-    "version": 6,
+    "version": 12,
     "weekStart": ""
 }

@@ -1,6 +1,0 @@
-
-from Processing.InvestmentCalcResult import InvestmentCalcResult
-from Processing.InvestmentConfig import InvestmentConfig
-import SQL
-
-InvestmentCalcResult.calculateAllResults()

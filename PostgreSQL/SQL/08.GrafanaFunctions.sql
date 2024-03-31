@@ -43,3 +43,11 @@ return (
 )
 
 $$ LANGUAGE plpython3u;
+
+CREATE FUNCTION remove_investments_result ()
+RETURNS void AS $$
+BEGIN
+	DELETE FROM investment_results;
+	RETURN;
+END;
+$$ LANGUAGE plpgsql;
