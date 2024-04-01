@@ -1,3 +1,22 @@
+"""
+.DESCRIPTION
+    Utility class definition for exporting data to files, which can help in debugging,
+    especially calculation related subjects.
+    
+
+.NOTES
+
+    Version:            1.0
+    Author:             Stanisław Horna
+    Mail:               stanislawhorna@outlook.com
+    GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
+    Creation Date:      27-Mar-2024
+    ChangeLog:
+
+    Date            Who                     What
+
+"""
+
 import csv
 import json
 

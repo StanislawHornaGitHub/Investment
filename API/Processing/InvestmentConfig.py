@@ -1,4 +1,21 @@
+"""
+.DESCRIPTION
+    Class definition for static methods related to configuring Investment moves
+    selling or buying particular funds within Investment Wallet
+    
 
+.NOTES
+
+    Version:            1.0
+    Author:             Stanisław Horna
+    Mail:               stanislawhorna@outlook.com
+    GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
+    Creation Date:      25-Mar-2024
+    ChangeLog:
+
+    Date            Who                     What
+
+"""
 import json
 import SQL
 from SQL.Investment import Investment

@@ -1,4 +1,24 @@
+"""
+.DESCRIPTION
+    Class definition for static methods related to Investment refund calculation.
+    
 
+.NOTES
+
+    Version:            1.2
+    Author:             Stanisław Horna
+    Mail:               stanislawhorna@outlook.com
+    GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
+    Creation Date:      27-Mar-2024
+    ChangeLog:
+
+    Date            Who                     What
+    2024-03-31      Stanisław Horna         .calculateAllResults() implemented.
+    
+    2024-04-01      Stanisław Horna         Handling for refreshing investment results, if previous calculation
+                                            ended with incomplete results due to missing fund quotations.
+
+"""
 import SQL
 from SQL.Quotation import Quotation
 from SQL.InvestmentResult import InvestmentResult
