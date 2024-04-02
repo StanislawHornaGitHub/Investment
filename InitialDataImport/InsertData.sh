@@ -43,7 +43,7 @@ importFundsConfig() {
     # Invoke PUT /FundConfig method
     curl --location --request PUT "$API_IP_ADDRESS:$API_PORT/FundConfig" \
         --header 'Content-Type: application/json' \
-        --data "$jsonFunds" >/dev/null
+        --data "$jsonFunds"
 }
 
 importInvestmentConfig() {

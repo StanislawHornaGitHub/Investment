@@ -13,41 +13,92 @@
     ChangeLog:
 
     Date            Who                     What
+    2024-04-02      Stanisław Horna         Response body and code implemented.
 
 """
 import json
 
 import SQL
 from SQL.Fund import Fund
-from sqlalchemy.exc import DatabaseError
+from sqlalchemy.exc import IntegrityError
 
 
 class FundConfig:
-    
+
     @staticmethod
     def insertFundConfig(Funds: list[str]):
+
+        # Create session and init processing variables
         session = SQL.base.Session()
+        responseCode = 200
+        result = []
+
+        # Loop through provided URLs
         for url in Funds:
+
+            # Try to create entry for current URL
             try:
                 entry = Fund(url)
                 session.add(entry)
                 session.commit()
-            except DatabaseError as err:
+
+            # Catch Integrity errors i.e. fund id already exists
+            except IntegrityError as err:
+
+                # Rollback transaction to be able to successfully proceed with the next url
                 session.rollback()
-                print(" - ".join([phrase for phrase in str(err).split('\n') if ("DETAIL: " in phrase) or ("(psycopg2.errors." in phrase)]))
+
+                # Extract error
+                errorMessage = " - ".join([phrase for phrase in str(err).split(
+                    '\n') if ("DETAIL: " in phrase) or ("(psycopg2.errors." in phrase)])
+
+                result.append(
+                    {
+                        "Fund_ID": entry.fund_id,
+                        "Fund_URL": entry.fund_url,
+                        "Status": "Already exists",
+                        "Status_Details": errorMessage
+                    }
+                )
+                print(errorMessage)
+
+                # Change responseCode to 206 (Partial Content), when only fund can not be processed
+                # If there is set other code like 400 for some other url, avoid changing it
+                if responseCode == 200:
+                    responseCode = 206
+
+                # Go to next iteration
                 continue
-            except: 
-                pass
-                
-                
-        session.close()
+
+            except Exception as e:
+                # Rollback transaction to be able to successfully proceed with the next url
+                session.rollback()
+
+                # Add error message without further analysis
+                result.append(
+                    {
+                        "Fund_ID": entry.fund_id,
+                        "Fund_URL": entry.fund_url,
+                        "Status": "Failed to add",
+                        "Status_Details": str(e)
+                    }
+                )
+                responseCode = 400
         
-        return None
+        # Set message if all funds were inserted successfully 
+        if responseCode == 200:
+            result = {
+                "Status": f"All {len(Funds)} fund URLs inserted successfully"
+            }
+
+        # Close SQL session
+        session.close()
+
+        return responseCode, result
 
     @staticmethod
     def importJSONconfig(filePath: str) -> list[str]:
         with open(filePath, "r") as Invest:
             investments = json.loads(str("\n".join(Invest.readlines())))
-        
+
         return investments["FundsToCheckURLs"]
-    
