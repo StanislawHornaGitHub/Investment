@@ -51,3 +51,11 @@ BEGIN
 	RETURN;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE FUNCTION remove_fund_quotation ()
+RETURNS void AS $$
+BEGIN
+	DELETE FROM Quotations;
+	RETURN;
+END;
+$$ LANGUAGE plpgsql;

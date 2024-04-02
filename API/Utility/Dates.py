@@ -57,3 +57,7 @@ class Dates:
         return (
             date + datetime.timedelta(days=days)
             )
+        
+    @staticmethod
+    def convertDateToString(date: datetime.datetime, outFormat: str =  "%Y-%m-%d") -> str:
+        return date.strftime(outFormat)
