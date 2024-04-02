@@ -1,3 +1,19 @@
+"""
+.DESCRIPTION
+    Class definition for static methods related downloading fund quotation from the Internet.
+
+.NOTES
+
+    Version:            1.0
+    Author:             Stanisław Horna
+    Mail:               stanislawhorna@outlook.com
+    GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
+    Creation Date:      24-Mar-2024
+    ChangeLog:
+
+    Date            Who                     What
+
+"""
 import SQL
 from SQL.Quotation import Quotation
 from SQL.Fund import Fund

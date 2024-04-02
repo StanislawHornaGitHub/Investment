@@ -1,3 +1,20 @@
+"""
+.DESCRIPTION
+    Main FLASK API file.
+    
+
+.NOTES
+
+    Version:            1.0
+    Author:             Stanisław Horna
+    Mail:               stanislawhorna@outlook.com
+    GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
+    Creation Date:      30-Mar-2024
+    ChangeLog:
+
+    Date            Who                     What
+
+"""
 
 import os
 from flask import Flask, jsonify, request

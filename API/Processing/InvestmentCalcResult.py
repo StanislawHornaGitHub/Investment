@@ -1,4 +1,24 @@
+"""
+.DESCRIPTION
+    Class definition for static methods related to Investment refund calculation.
+    
 
+.NOTES
+
+    Version:            1.2
+    Author:             Stanisław Horna
+    Mail:               stanislawhorna@outlook.com
+    GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
+    Creation Date:      27-Mar-2024
+    ChangeLog:
+
+    Date            Who                     What
+    2024-03-31      Stanisław Horna         .calculateAllResults() implemented.
+    
+    2024-04-01      Stanisław Horna         Handling for refreshing investment results, if previous calculation
+                                            ended with incomplete results due to missing fund quotations.
+
+"""
 import SQL
 from SQL.Quotation import Quotation
 from SQL.InvestmentResult import InvestmentResult
@@ -283,12 +303,7 @@ class InvestmentCalcResult:
 
     @staticmethod
     def getLastResultDate(investment_id, session):
-        return (
-            session
-            .query(func.max(InvestmentResult.result_date))
-            .filter(InvestmentResult.investment_id == investment_id)
-            .first()
-        )[0]
+        return InvestmentCalcResult.unifyInvestmentResults(investment_id, session)
 
     @staticmethod
     def getLastFundResult(fund_id: str, last_date, session):
@@ -298,3 +313,54 @@ class InvestmentCalcResult:
             .filter(InvestmentResult.fund_id == fund_id, InvestmentResult.result_date == last_date)
             .first()
         )
+
+    @staticmethod
+    def unifyInvestmentResults(investment_id: int, session) -> datetime.datetime:
+        
+        # Create subquery to calculate row number for each fund in investment
+        # rank 1 will be assigned to the latest fund's result within investment
+        # despite actual result date.
+        # It will allow to handle the case when different funds have different latest quotation dates
+        subquery = (
+            session
+            .query(
+                InvestmentResult.result_date,
+                InvestmentResult.fund_id,
+                func.row_number().over(partition_by=(
+                    InvestmentResult.investment_id,
+                    InvestmentResult.fund_id
+                ), order_by=InvestmentResult.result_date.desc()).label('rank')
+            )
+            .filter(InvestmentResult.investment_id == investment_id)
+            .subquery()
+        )
+        
+        # Find the oldest date with rank 1, so it will contain latest date when each fund of the investment
+        # had the same result date.
+        dateToFilter = (
+            session
+            .query(func.min(subquery.c.result_date))
+            .filter(
+                subquery.c.rank == 1
+            )
+            .all()
+        )[0][0]
+        
+        # Find rows with incomplete results and delete them
+        # Example:
+        # fund1 has last result from 02.01, but fund2 has result from 05.01,
+        # query will delete all funds newer than 02.01, 
+        # which actually will be result with missing data from some funds
+        deletedRecords = (
+            session
+            .query(InvestmentResult)
+            .filter(
+                InvestmentResult.investment_id == investment_id, 
+                InvestmentResult.result_date > dateToFilter
+            )
+            .delete()
+        )
+        session.commit()
+        
+        # Return the edge date, before which the results are complete
+        return dateToFilter

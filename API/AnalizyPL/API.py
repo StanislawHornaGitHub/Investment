@@ -1,3 +1,22 @@
+"""
+.DESCRIPTION
+    Class definition for static methods related to communication with Analizy.PL API,
+    to download fund quotation.
+    
+
+.NOTES
+
+    Version:            1.0
+    Author:             Stanisław Horna
+    Mail:               stanislawhorna@outlook.com
+    GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
+    Creation Date:      24-Mar-2024
+    ChangeLog:
+
+    Date            Who                     What
+
+"""
+
 from dataclasses import dataclass, field
 from SQL.Fund import Fund
 from SQL.Quotation import Quotation

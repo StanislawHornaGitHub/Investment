@@ -1,3 +1,21 @@
+"""
+.DESCRIPTION
+    SQLAlchemy ORM file to define funds view.
+    
+
+.NOTES
+
+    Version:            1.0
+    Author:             Stanisław Horna
+    Mail:               stanislawhorna@outlook.com
+    GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
+    Creation Date:      24-Mar-2024
+    ChangeLog:
+
+    Date            Who                     What
+
+"""
+
 from sqlalchemy import Column, String, Integer, Float, DateTime
 
 from SQL.base import Base
