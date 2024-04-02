@@ -346,6 +346,9 @@ class InvestmentCalcResult:
             .all()
         )[0][0]
         
+        if dateToFilter == None:
+            return None
+        
         # Find rows with incomplete results and delete them
         # Example:
         # fund1 has last result from 02.01, but fund2 has result from 05.01,
