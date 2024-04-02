@@ -17,7 +17,7 @@
 """
 
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from Processing.Price import Price
 from Processing.InvestmentCalcResult import InvestmentCalcResult
 from Processing.FundConfig import FundConfig
@@ -26,6 +26,7 @@ from Processing.InvestmentConfig import InvestmentConfig
 app = Flask(__name__)
 
 DEBUG_MODE = os.getenv('FLASK_DEBUG', True)
+
 
 @app.route('/FundQuotation', methods=['PUT'])
 def refreshFundQuotation():
@@ -47,8 +48,9 @@ def refreshInvestmentRefund():
 def insertFundURL():
     if (request.method == 'PUT'):
         jsonFunds = request.json
-        FundConfig.insertFundConfig(jsonFunds)
-        return jsonFunds
+        responseCode, responseBody = FundConfig.insertFundConfig(jsonFunds)
+
+        return responseBody, responseCode
 
 
 @app.route('/InvestmentConfig', methods=['PUT'])
