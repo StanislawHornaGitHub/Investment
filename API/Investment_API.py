@@ -31,9 +31,9 @@ DEBUG_MODE = os.getenv('FLASK_DEBUG', True)
 @app.route('/FundQuotation', methods=['PUT'])
 def refreshFundQuotation():
     if (request.method == 'PUT'):
-        Price.updateQuotation()
-        data = {"status": "Refreshed"}
-        return jsonify(data)
+        responseCode, responseBody = Price.updateQuotation()
+        
+        return responseBody, responseCode
 
 
 @app.route('/InvestmentRefund', methods=['PUT'])
