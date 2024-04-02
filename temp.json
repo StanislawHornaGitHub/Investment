@@ -1,0 +1,14 @@
+{
+    "rawSql": "SELECT get_funds_quotation(${Backend_IP:singlequote}, ${Backend_Port:singlequote});",
+    "format": "table"
+  }
+
+  {
+    "rawSql": "SELECT get_investments_result(${Backend_IP:singlequote}, ${Backend_Port:singlequote});",
+    "format": "table"
+  }
+
+  {
+    "rawSql": "SELECT remove_investments_result();",
+    "format": "table"
+  }
