@@ -277,7 +277,7 @@
                 "sortBy": [
                     {
                         "desc": false,
-                        "displayName": "date"
+                        "displayName": "Date"
                     }
                 ]
             },
@@ -370,6 +370,6 @@
     "timezone": "browser",
     "title": "Investment Management",
     "uid": "edh4bvsv3kmwwe",
-    "version": 14,
+    "version": 15,
     "weekStart": ""
 }

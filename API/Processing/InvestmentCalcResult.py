@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.2
+    Version:            1.3
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -17,6 +17,8 @@
     
     2024-04-01      Stanisław Horna         Handling for refreshing investment results, if previous calculation
                                             ended with incomplete results due to missing fund quotations.
+                                            
+    2024-04-03      Stanisław Horna         Bugfix in collecting already calculated results.
 
 """
 import SQL
@@ -108,7 +110,11 @@ class InvestmentCalcResult:
             for fund in funds:
                 
                 LastFundResult = InvestmentCalcResult.getLastFundResult(
-                    fund, lastUpdateDate, session)
+                    investment_id,
+                    fund, 
+                    lastUpdateDate, 
+                    session
+                    )
                 
                 tempOwnedFunds[fund] = {
                     "ParticipationUnits": LastFundResult[0],
@@ -306,11 +312,18 @@ class InvestmentCalcResult:
         return InvestmentCalcResult.unifyInvestmentResults(investment_id, session)
 
     @staticmethod
-    def getLastFundResult(fund_id: str, last_date, session):
+    def getLastFundResult(investment_id: int, fund_id: str, last_date, session):
         return (
             session
-            .query(InvestmentResult.fund_participation_units, InvestmentResult.fund_invested_money)
-            .filter(InvestmentResult.fund_id == fund_id, InvestmentResult.result_date == last_date)
+            .query(
+                InvestmentResult.fund_participation_units, 
+                InvestmentResult.fund_invested_money
+                )
+            .filter(
+                InvestmentResult.investment_id == investment_id,
+                InvestmentResult.fund_id == fund_id, 
+                InvestmentResult.result_date == last_date
+                )
             .first()
         )
 
