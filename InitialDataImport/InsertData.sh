@@ -55,7 +55,7 @@ importInvestmentConfig() {
         # Invoke PUT /InvestmentConfig method
         curl --location --request PUT "$API_IP_ADDRESS:$API_PORT/InvestmentConfig" \
             --header 'Content-Type: application/json' \
-            --data "$jsonInvestment" >/dev/null
+            --data "$jsonInvestment" 
     done
 }
 
