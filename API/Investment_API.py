@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.0
+    Version:            1.1
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -13,7 +13,8 @@
     ChangeLog:
 
     Date            Who                     What
-
+    2024-04-03      Stanisław Horna         Response body and code implemented.
+    
 """
 
 import os
@@ -39,9 +40,9 @@ def refreshFundQuotation():
 @app.route('/InvestmentRefund', methods=['PUT'])
 def refreshInvestmentRefund():
     if (request.method == 'PUT'):
-        InvestmentCalcResult.calculateAllResults()
-        data = {"status": "Refreshed"}
-        return jsonify(data)
+        responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
+        
+        return responseBody, responseCode
 
 
 @app.route('/FundConfig', methods=['PUT'])
