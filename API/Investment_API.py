@@ -57,12 +57,12 @@ def insertFundURL():
 def insertInvestmentConfig():
     if (request.method == 'PUT'):
         jsonInvestments = request.json
-        InvestmentConfig.insertInvestmentConfig(
+        responseCode, responseBody = InvestmentConfig.insertInvestmentConfig(
             jsonInvestments["Investments"],
             jsonInvestments["Owner"]
         )
 
-        return jsonInvestments
+        return responseBody, responseCode
 
 
 if __name__ == '__main__':
