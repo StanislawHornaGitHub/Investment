@@ -6,7 +6,7 @@
 
     .NOTES
 
-        Version:            1.0
+        Version:            1.1
         Author:             Stanisław Horna
         Mail:               stanislawhorna@outlook.com
         GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -14,7 +14,10 @@
         ChangeLog:
 
         Date            Who                     What
-
+        2024-04-04      Stanisław Horna         Additional condition in WHERE clause of outer query added,
+                                                to avoid displaying graph without having investment results,
+                                                for all funds collected under particular investment.
+                                                
 */
 
 SELECT
@@ -29,4 +32,28 @@ INNER JOIN (
     FROM investments i
     WHERE investment_owner = ${Investment_Owner:singlequote}
 ) i ON i.investment_id  = ir.investment_id
+WHERE 
+    FUND_INVESTED_MONEY <> 0 AND
+        ( -- Get number of funds in investment with ID from outer query
+            SELECT 
+                COUNT(*)
+            FROM (
+                SELECT DISTINCT 
+                    investment_fund_id 
+                FROM investments
+                WHERE 
+                    investment_id = i.investment_id 
+            )
+        ) = ( -- Get number of results for current day in investment with ID from outer query
+            SELECT
+                COUNT(*)
+            FROM (
+                SELECT
+                    fund_id
+                FROM investment_results
+                WHERE 
+                    investment_id = i.investment_id AND
+                    result_date = ir.result_date
+            )
+        )
 GROUP BY  RESULT_DATE, i.INVESTMENT_NAME;
