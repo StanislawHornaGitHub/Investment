@@ -672,7 +672,7 @@
                     }
                 }
             ],
-            "title": "Panel Title",
+            "title": "Summary Table",
             "type": "table"
         },
         {
@@ -2631,6 +2631,6 @@
     "timezone": "browser",
     "title": "Investment Wallet",
     "uid": "ddh0du4z59atcfa",
-    "version": 21,
+    "version": 22,
     "weekStart": "monday"
 }
