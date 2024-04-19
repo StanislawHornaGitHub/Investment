@@ -35,12 +35,7 @@ WORKDIR /App
 COPY . /App
 
 # Install Python packages
-RUN pip install --upgrade pip
-RUN pip install python-dateutil
-RUN pip install requests
-RUN pip install flask
-RUN pip install psycopg2-binary
-RUN pip install SQLAlchemy
+RUN pip install -r requirements.txt
 
 # Set environmental variables
 
