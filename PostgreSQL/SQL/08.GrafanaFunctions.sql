@@ -18,7 +18,8 @@
         ChangeLog:
 
         Date            Who                     What
-
+        2024-04-19      Stanisław Horna         add SECURITY DEFINER <- to invoke functions with owner's permissions, 
+                                                    instead of caller ones.
 */
 
 CREATE FUNCTION get_funds_quotation(api_address varchar, api_port varchar)
@@ -50,7 +51,7 @@ BEGIN
 	DELETE FROM investment_results;
 	RETURN;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE FUNCTION remove_fund_quotation ()
 RETURNS void AS $$
@@ -58,4 +59,4 @@ BEGIN
 	DELETE FROM Quotations;
 	RETURN;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
