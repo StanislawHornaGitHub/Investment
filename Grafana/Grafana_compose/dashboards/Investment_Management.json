@@ -1,0 +1,543 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 15,
+    "links": [],
+    "liveNow": true,
+    "panels": [
+        {
+            "datasource": "Investment-DB",
+            "gridPos": {
+                "h": 3,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 2,
+            "options": {
+                "buttons": [
+                    {
+                        "datasource": "Investment-DB",
+                        "query": "{\n  \"rawSql\": \"SELECT get_funds_quotation(${Backend_IP:singlequote}, ${Backend_Port:singlequote});\",\n  \"format\": \"table\"\n}",
+                        "text": "Download funds quotation",
+                        "variant": "primary"
+                    },
+                    {
+                        "datasource": "Investment-DB",
+                        "query": "{\n  \"rawSql\": \"SELECT remove_fund_quotation();\",\n  \"format\": \"table\"\n}",
+                        "text": "Delete fund quotation",
+                        "variant": "destructive"
+                    },
+                    {
+                        "datasource": "Investment-DB",
+                        "query": "{\n    \"rawSql\": \"SELECT get_investments_result(${Backend_IP:singlequote}, ${Backend_Port:singlequote});\",\n    \"format\": \"table\"\n}",
+                        "text": "Calculate investment results",
+                        "variant": "primary"
+                    },
+                    {
+                        "datasource": "Investment-DB",
+                        "query": "{\n    \"rawSql\": \"SELECT remove_investments_result();\",\n    \"format\": \"table\"\n}",
+                        "text": "Delete investment results",
+                        "variant": "destructive"
+                    }
+                ],
+                "orientation": "horizontal"
+            },
+            "pluginVersion": "10.4.1",
+            "title": "Control buttons",
+            "type": "speakyourcode-button-panel"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Date"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "time: YYYY-MM-DD"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 96
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "fund_id"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 103
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Fund ID"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 135
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 13,
+                "w": 7,
+                "x": 0,
+                "y": 3
+            },
+            "id": 3,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": false,
+                        "displayName": "Date"
+                    }
+                ]
+            },
+            "pluginVersion": "10.4.1",
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH funds_quotation_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id ORDER BY date DESC) AS \"rank\"\n    FROM quotations q\n)\n\nSELECT \n    date AS \"Date\",\n    f.fund_id AS \"Fund ID\",\n    fund_name AS \"Fund name\"\nFROM funds_quotation_with_rank fq\nLEFT JOIN funds f ON f.FUND_ID = fq.fund_id\nWHERE rank = 1",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Fund Quotation Dates",
+            "type": "table"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        }
+                    },
+                    "fieldMinMax": false,
+                    "mappings": []
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Not refreshed"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "red",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 13,
+                "w": 5,
+                "x": 7,
+                "y": 3
+            },
+            "id": 5,
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "pieType": "pie",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "10.4.1",
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH refreshed_funds AS (\n    SELECT \n        COUNT(*) AS \"Refreshed\"\n    FROM quotations\n    WHERE date = (\n        SELECT \n            MAX(date)\n        FROM quotations \n    )\n),\n\nall_funds AS (\n    SELECT\n        COUNT(*) AS \"All funds\"\n    FROM funds\n)\n\nSELECT\n    \"Refreshed\",\n    (\"All funds\" - \"Refreshed\") AS \"Not refreshed\"\nFROM refreshed_funds, all_funds\n",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Fund quotation refresh ratio",
+            "type": "piechart"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Date"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "time: YYYY-MM-DD"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 96
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "fund_id"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 103
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 13,
+                "w": 7,
+                "x": 12,
+                "y": 3
+            },
+            "id": 4,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": false,
+                        "displayName": "Date"
+                    }
+                ]
+            },
+            "pluginVersion": "10.4.1",
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH investment_results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) AS \"rank\"\n    FROM investment_results ir\n)\n\nSELECT \n    result_date AS \"Date\",\n    investment_name AS \"Investment name\",\n    investment_owner AS \"Owner\"\nFROM (\n        SELECT \n            investment_id,\n            MIN(result_date) as \"result_date\"\n        FROM investment_results_with_rank\n        WHERE rank = 1\n        GROUP BY investment_id\n) AS r\nLEFT JOIN (\n        SELECT DISTINCT \n            investment_id, \n            investment_name,\n            investment_owner\n        FROM investments i\n) AS i ON i.investment_id = r.investment_id",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Investment Result Dates",
+            "type": "table"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        }
+                    },
+                    "mappings": []
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Not refreshed"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "red",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 13,
+                "w": 5,
+                "x": 19,
+                "y": 3
+            },
+            "id": 6,
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "pieType": "pie",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH last_investment_date AS (\n    SELECT \n        MAX(result_date) as \"last_result_date\"\n    FROM investment_results\n),\n\nrefreshed_investments AS (\n    SELECT\n        COUNT(*) AS \"Refreshed\"\n    FROM (\n        SELECT DISTINCT\n            investment_id\n        FROM investment_results\n        WHERE result_date = (\n            SELECT \n                last_result_date\n            FROM last_investment_date\n        )\n    ) AS i\n    WHERE\n        ( -- Get number of funds in investment with ID from outer query\n            SELECT \n                COUNT(*)\n            FROM (\n                SELECT DISTINCT \n                    investment_fund_id \n                FROM investments\n                WHERE \n                    investment_id = i.investment_id \n            )\n        ) = ( -- Get number of results for current day in investment with ID from outer query\n            SELECT\n                COUNT(*)\n            FROM (\n                SELECT\n                    fund_id\n                FROM investment_results\n                WHERE \n                    investment_id = i.investment_id AND\n                    result_date = (\n                        SELECT \n                            last_result_date\n                        FROM last_investment_date\n                    )\n            )\n        )\n),\n\nall_investments AS (\n    SELECT\n        COUNT(*) AS \"All investments\"\n    FROM (\n        SELECT DISTINCT\n            investment_id\n        FROM investments\n    )\n)\n\nSELECT\n    \"Refreshed\",\n    (\"All investments\" - \"Refreshed\") AS \"Not refreshed\"\nFROM refreshed_investments, all_investments\n\n",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Investment results refresh ratio",
+            "type": "piechart"
+        }
+    ],
+    "refresh": "",
+    "schemaVersion": 39,
+    "tags": [],
+    "templating": {
+        "list": [
+            {
+                "current": {
+                    "selected": false,
+                    "text": "192.168.0.212",
+                    "value": "192.168.0.212"
+                },
+                "hide": 0,
+                "label": "Backend IP",
+                "name": "Backend_IP",
+                "options": [
+                    {
+                        "selected": true,
+                        "text": "192.168.0.212",
+                        "value": "192.168.0.212"
+                    }
+                ],
+                "query": "192.168.0.212",
+                "skipUrlSync": false,
+                "type": "textbox"
+            },
+            {
+                "current": {
+                    "selected": false,
+                    "text": "5000",
+                    "value": "5000"
+                },
+                "hide": 0,
+                "label": "Backend Port",
+                "name": "Backend_Port",
+                "options": [
+                    {
+                        "selected": true,
+                        "text": "5000",
+                        "value": "5000"
+                    }
+                ],
+                "query": "5000",
+                "skipUrlSync": false,
+                "type": "textbox"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-1h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Investment Management",
+    "uid": "edh4bvsv3kmwwe",
+    "version": 19,
+    "weekStart": ""
+}
