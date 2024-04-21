@@ -37,7 +37,9 @@
         ChangeLog:
 
         Date            Who                     What
-            
+        2024-04-19      Stanisław Horna         add SECURITY DEFINER <- to invoke functions with owner's permissions, 
+                                                    instead of caller ones.
+        
 */
 
 CREATE FUNCTION insert_Fund ()
@@ -72,7 +74,7 @@ BEGIN
     RAISE EXCEPTION 'Can not add new fund without URL';
 
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
 CREATE FUNCTION insert_investment ()
@@ -194,4 +196,4 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
