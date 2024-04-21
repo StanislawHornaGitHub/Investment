@@ -271,7 +271,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "WITH refreshed_funds AS (\n    SELECT \n        COUNT(*) AS \"Refreshed\"\n    FROM fund_quotation\n    WHERE quotation_date = (\n        SELECT \n            MAX(quotation_date)\n        FROM fund_quotation \n    )\n),\n\nall_funds AS (\n    SELECT\n        COUNT(*) AS \"All funds\"\n    FROM funds\n)\n\nSELECT\n    \"Refreshed\",\n    (\"All funds\" - \"Refreshed\") AS \"Not refreshed\"\nFROM refreshed_funds, all_funds\n",
+                    "rawSql": "WITH refreshed_funds AS (\n    SELECT \n        COUNT(*) AS \"Refreshed\"\n    FROM quotations\n    WHERE date = (\n        SELECT \n            MAX(date)\n        FROM quotations \n    )\n),\n\nall_funds AS (\n    SELECT\n        COUNT(*) AS \"All funds\"\n    FROM funds\n)\n\nSELECT\n    \"Refreshed\",\n    (\"All funds\" - \"Refreshed\") AS \"Not refreshed\"\nFROM refreshed_funds, all_funds\n",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -565,6 +565,6 @@
     "timezone": "browser",
     "title": "Investment Management",
     "uid": "edh4bvsv3kmwwe",
-    "version": 18,
+    "version": 19,
     "weekStart": ""
 }

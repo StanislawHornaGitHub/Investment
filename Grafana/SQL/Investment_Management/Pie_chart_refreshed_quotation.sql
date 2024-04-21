@@ -6,7 +6,7 @@
 
     .NOTES
 
-        Version:            1.0
+        Version:            1.1
         Author:             Stanisław Horna
         Mail:               stanislawhorna@outlook.com
         GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -14,17 +14,18 @@
         ChangeLog:
 
         Date            Who                     What
+        2024-04-21      Stanisław Horna         Table usage replaced with views.
 
 */
 
 WITH refreshed_funds AS (
     SELECT 
         COUNT(*) AS "Refreshed"
-    FROM fund_quotation
-    WHERE quotation_date = (
+    FROM quotations
+    WHERE date = (
         SELECT 
-            MAX(quotation_date)
-        FROM fund_quotation 
+            MAX(date)
+        FROM quotations 
     )
 ),
 
