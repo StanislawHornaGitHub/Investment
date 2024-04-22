@@ -23,11 +23,91 @@
     "panels": [
         {
             "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "max": 100,
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "%"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 7,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "10.4.2",
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\n\tcpu.\"CPU normal\",\n\tcpu.\"CPU niced\",\n\tcpu.\"CPU kernel\",\n\tram.\"RAM usage\"\nFROM\n\t(\n\t\tSELECT\n\t\t\tROUND(\n\t\t\t\t(USED_MEMORY::NUMERIC / TOTAL_MEMORY::NUMERIC) * 100,\n\t\t\t\t2\n\t\t\t) AS \"RAM usage\"\n\t\tFROM\n\t\t\tPG_SYS_MEMORY_INFO ()\n\t) AS ram,\n\t(\n\t\tSELECT\n\t\t\tROUND(USERMODE_NORMAL_PROCESS_PERCENT::NUMERIC, 2) AS \"CPU normal\",\n\t\t\tROUND(USERMODE_NICED_PROCESS_PERCENT::NUMERIC, 2) AS \"CPU niced\",\n\t\t\tROUND(KERNELMODE_PROCESS_PERCENT::NUMERIC, 2) AS \"CPU kernel\"\n\t\tFROM\n\t\t\tPG_SYS_CPU_USAGE_INFO ()\n\t) AS cpu;\n\n\n\n",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Resource consumption",
+            "type": "gauge"
+        },
+        {
+            "datasource": "Investment-DB",
             "gridPos": {
                 "h": 3,
                 "w": 24,
                 "x": 0,
-                "y": 0
+                "y": 7
             },
             "id": 2,
             "options": {
@@ -135,7 +215,7 @@
                 "h": 13,
                 "w": 7,
                 "x": 0,
-                "y": 3
+                "y": 10
             },
             "id": 3,
             "options": {
@@ -226,7 +306,7 @@
                 "h": 13,
                 "w": 5,
                 "x": 7,
-                "y": 3
+                "y": 10
             },
             "id": 5,
             "options": {
@@ -339,7 +419,7 @@
                 "h": 13,
                 "w": 7,
                 "x": 12,
-                "y": 3
+                "y": 10
             },
             "id": 4,
             "options": {
@@ -429,7 +509,7 @@
                 "h": 13,
                 "w": 5,
                 "x": 19,
-                "y": 3
+                "y": 10
             },
             "id": 6,
             "options": {

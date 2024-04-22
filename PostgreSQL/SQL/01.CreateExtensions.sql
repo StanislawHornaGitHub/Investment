@@ -14,7 +14,13 @@
         ChangeLog:
 
         Date            Who                     What
-
+        2024-04-22      Stanisław Horna         Create extensions for server metrics:
+                                                    - pg_stat_statements
+                                                    - system_stats
 */
 
 CREATE EXTENSION plpython3u;
+
+CREATE EXTENSION pg_stat_statements;
+
+CREATE EXTENSION system_stats;
