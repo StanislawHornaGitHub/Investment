@@ -6,11 +6,8 @@ services:
         dockerfile: Dockerfile
       entrypoint:
         - /run.sh
-        - /usr/share/grafana/bin/grafana-server
-        - --homepath=/usr/share/grafana
-        - --config=/etc/grafana-config/grafana.ini
+      restart: unless-stopped
       volumes:
-        - ./config:/etc/grafana-config
         - ./datasources:/etc/grafana/provisioning/datasources
         - ./dashboards_provisioning:/etc/grafana/provisioning/dashboards
         - ./dashboards:/var/lib/grafana/dashboards

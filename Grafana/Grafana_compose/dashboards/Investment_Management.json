@@ -18,7 +18,6 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 15,
     "links": [],
     "liveNow": true,
     "panels": [
@@ -157,7 +156,7 @@
                     }
                 ]
             },
-            "pluginVersion": "10.4.1",
+            "pluginVersion": "10.4.2",
             "targets": [
                 {
                     "datasource": "Investment-DB",
@@ -361,7 +360,7 @@
                     }
                 ]
             },
-            "pluginVersion": "10.4.1",
+            "pluginVersion": "10.4.2",
             "targets": [
                 {
                     "datasource": "Investment-DB",
@@ -483,7 +482,7 @@
             "type": "piechart"
         }
     ],
-    "refresh": "",
+    "refresh": "5s",
     "schemaVersion": 39,
     "tags": [],
     "templating": {
@@ -538,6 +537,6 @@
     "timezone": "browser",
     "title": "Investment Management",
     "uid": "edh4bvsv3kmwwe",
-    "version": 19,
+    "version": 1,
     "weekStart": ""
 }
