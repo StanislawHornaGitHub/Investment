@@ -12,12 +12,14 @@
         Version:            1.0
         Author:             Stanisław Horna
         Mail:               stanislawhorna@outlook.com
-        GitHub Repository:  https://github.com/PLProjektKompetencyjny/PK_6IO1z_Projekt4_DataBase
+        GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
         Creation Date:      19-Apr-2024
         ChangeLog:
 
         Date            Who                     What
-
+        2024-04-22      Stanisław Horna         Add grafana_read user permissions to run system_stats functions:
+                                                    - pg_sys_cpu_usage_info
+                                                    - pg_sys_memory_info
 */
 
 -- create required roles
@@ -27,31 +29,33 @@ CREATE ROLE "grafana_read" LOGIN PASSWORD 'inv!w_gf_ead3';
 
 
 -- Grant privileges for API READ user
-GRANT CONNECT ON DATABASE "Investments" to "api_read";
+GRANT CONNECT ON DATABASE "Investments" TO "api_read";
 GRANT USAGE ON SCHEMA public TO "api_read";
-GRANT SELECT ON funds to "api_read";
-GRANT SELECT ON investment_results to "api_read";
-GRANT SELECT ON investments to "api_read";
-GRANT SELECT ON quotations to "api_read";
+GRANT SELECT ON funds TO "api_read";
+GRANT SELECT ON investment_results TO "api_read";
+GRANT SELECT ON investments TO "api_read";
+GRANT SELECT ON quotations TO "api_read";
 
 
 -- Grant privileges for API WRITE user
-GRANT CONNECT ON DATABASE "Investments" to "api_write";
+GRANT CONNECT ON DATABASE "Investments" TO "api_write";
 GRANT USAGE ON SCHEMA public TO "api_write";
-GRANT SELECT, INSERT, UPDATE ON funds to "api_write";
-GRANT SELECT, INSERT, UPDATE ON investment_results to "api_write";
-GRANT SELECT, INSERT, UPDATE ON investments to "api_write";
-GRANT SELECT, INSERT, UPDATE ON quotations to "api_write";
+GRANT SELECT, INSERT, UPDATE ON funds TO "api_write";
+GRANT SELECT, INSERT, UPDATE ON investment_results TO "api_write";
+GRANT SELECT, INSERT, UPDATE ON investments TO "api_write";
+GRANT SELECT, INSERT, UPDATE ON quotations TO "api_write";
 
 -- Grant privileges for Grafana user
-GRANT CONNECT ON DATABASE "Investments" to "grafana_read";
+GRANT CONNECT ON DATABASE "Investments" TO "grafana_read";
 GRANT USAGE ON SCHEMA public TO "grafana_read";
-GRANT SELECT ON funds to "grafana_read";
-GRANT SELECT ON investment_results to "grafana_read";
-GRANT SELECT ON investments to "grafana_read";
-GRANT SELECT ON quotations to "grafana_read";
+GRANT SELECT ON funds TO "grafana_read";
+GRANT SELECT ON investment_results TO "grafana_read";
+GRANT SELECT ON investments TO "grafana_read";
+GRANT SELECT ON quotations TO "grafana_read";
 
-GRANT EXECUTE ON FUNCTION get_funds_quotation(varchar, varchar) to "grafana_read";
-GRANT EXECUTE ON FUNCTION get_investments_result(varchar, varchar) to "grafana_read";
-GRANT EXECUTE ON FUNCTION remove_investments_result() to "grafana_read";
-GRANT EXECUTE ON FUNCTION remove_fund_quotation() to "grafana_read";
+GRANT EXECUTE ON FUNCTION get_funds_quotation(varchar, varchar) TO "grafana_read";
+GRANT EXECUTE ON FUNCTION get_investments_result(varchar, varchar) TO "grafana_read";
+GRANT EXECUTE ON FUNCTION remove_investments_result() TO "grafana_read";
+GRANT EXECUTE ON FUNCTION remove_fund_quotation() TO "grafana_read";
+GRANT EXECUTE ON FUNCTION pg_sys_cpu_usage_info() TO "grafana_read";
+GRANT EXECUTE ON FUNCTION pg_sys_memory_info() TO "grafana_read";
