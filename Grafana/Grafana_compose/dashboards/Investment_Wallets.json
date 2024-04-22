@@ -1,0 +1,2505 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 14,
+    "links": [],
+    "panels": [
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "decimals": 2,
+                    "fieldMinMax": false,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "PLN"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Profit"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "PLN"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 100
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Profit percentage"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "%"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 6,
+                "x": 0,
+                "y": 0
+            },
+            "id": 11,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": true,
+                        "displayName": "Profit percentage"
+                    }
+                ]
+            },
+            "pluginVersion": "10.4.1",
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) as \"rank\"\n    FROM investment_results\n\n),\n\nfiltered_investment_results AS (\n\tSELECT \n\t\t*\n\tfrom results_with_rank\n\tWHERE  rank = 1\n),\n\nrefund_per_investment AS (\n    SELECT\n        i.investment_name  AS \"Investment name\",\n        SUM(FUND_VALUE - FUND_INVESTED_MONEY) AS \"Profit\"\n    FROM filtered_investment_results ir\n    INNER JOIN (\n        SELECT DISTINCT \n            investment_id, \n            investment_name  \n        FROM investments i\n        WHERE investment_owner = ${Investment_Owner:singlequote}\n    ) i ON i.investment_id  = ir.investment_id\n    GROUP BY i.INVESTMENT_NAME\n)\n\nSELECT \n*,\n(\"Profit\" / (\n    SELECT \n        SUM(\"Profit\")\n    FROM refund_per_investment\n    )\n) * 100 AS \"Profit percentage\"\nFROM refund_per_investment",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Investment Profit for Today",
+            "type": "table"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        }
+                    },
+                    "mappings": []
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 5,
+                "x": 6,
+                "y": 0
+            },
+            "id": 5,
+            "options": {
+                "displayLabels": [
+                    "percent"
+                ],
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "showLegend": true,
+                    "values": [
+                        "percent"
+                    ]
+                },
+                "pieType": "pie",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    INVESTMENT_NAME,\n    SUM(OPERATION_VALUE)\nFROM INVESTMENTS I\nWHERE investment_owner = ${Investment_Owner:singlequote}\nGROUP BY INVESTMENT_NAME;",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Invested Money (investment wallet)",
+            "type": "piechart"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        }
+                    },
+                    "mappings": []
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 5,
+                "x": 11,
+                "y": 0
+            },
+            "id": 17,
+            "options": {
+                "displayLabels": [
+                    "percent"
+                ],
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "showLegend": true,
+                    "values": [
+                        "percent"
+                    ]
+                },
+                "pieType": "pie",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    fund_name,\n    SUM(operation_value)\nFROM investments i\nLEFT JOIN funds f ON f.fund_id = i.investment_fund_id\nWHERE investment_owner = ${Investment_Owner:singlequote}\nGROUP BY fund_name;",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Invested Money (Fund)",
+            "type": "piechart"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Date"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "time: YYYY-MM-DD"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 100
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Money"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "PLN"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Fund name"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 305
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Fund ID"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 67
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 8,
+                "x": 16,
+                "y": 0
+            },
+            "id": 13,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": true
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": true,
+                        "displayName": "Date"
+                    }
+                ]
+            },
+            "pluginVersion": "10.4.1",
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    OPERATION_QUOTATION_DATE AS \"Date\",\n    FUND_NAME AS \"Fund name\",\n    f.FUND_ID AS \"Fund ID\",\n    operation_value AS \"Money\"\nFROM INVESTMENTS I \nLEFT JOIN FUNDS F ON f.FUND_ID = i.INVESTMENT_FUND_ID\nWHERE investment_owner = ${Investment_Owner:singlequote};",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Fund Operations",
+            "type": "table"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "fixedColor": "orange",
+                        "mode": "fixed"
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "#ffffff",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "PLN"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 0,
+                "y": 10
+            },
+            "id": 27,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "10.4.1",
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) as \"rank\"\n    FROM investment_results\n\n),\n\nfiltered_investment_results AS (\n\tSELECT \n\t\t*\n\tfrom results_with_rank\n\tWHERE  rank = 1\n),\n\nrefund_per_investment AS (\n    SELECT\n        SUM(FUND_VALUE - FUND_INVESTED_MONEY) AS \"Profit\"\n    FROM filtered_investment_results ir\n    INNER JOIN (\n        SELECT DISTINCT \n            investment_id, \n            investment_name  \n        FROM investments i\n        WHERE investment_owner = ${Investment_Owner:singlequote}\n    ) i ON i.investment_id  = ir.investment_id\n)\nSELECT \n    * \nFROM refund_per_investment",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Total",
+            "type": "stat"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Quotation date"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "time: YYYY-MM-DD"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 127
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": "/.refund*/"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "%"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 3
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": "/.profit*/"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "PLN"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 13,
+                "w": 24,
+                "x": 0,
+                "y": 14
+            },
+            "id": 26,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": []
+            },
+            "pluginVersion": "10.4.1",
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "WITH results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) AS \"rank\"\n    FROM investment_results\n    WHERE investment_id IN (\n        SELECT DISTINCT\n            investment_id\n        FROM investments\n        WHERE investment_owner = ${Investment_Owner:singlequote}\n    )\n\n),\n\nfiltered_investment_results AS (\n\tSELECT \n\t\t*\n\tFROM results_with_rank\n\tWHERE  rank = 1\n),\n\nrefund_per_investment AS (\n    SELECT\n        ir.investment_id,\n        ir.fund_id,\n        FUND_VALUE - FUND_INVESTED_MONEY AS \"Profit\"\n    FROM filtered_investment_results ir\n    GROUP BY ir.investment_id, ir.fund_id, FUND_VALUE, FUND_INVESTED_MONEY\n)\n\n\nSELECT \n\ti.investment_name AS \"Investment name\",\n\tf.fund_id AS \"Fund ID\",\n\tresult_date AS \"Quotation date\",\n\t\"Profit\" AS \"Overall profit\",\n    last_day_result AS \"Last day profit\",\n    last_week_result AS \"Last week profit\",\n    last_month_result AS \"Last month profit\",\n\tlast_day_result / fund_invested_money * 100 AS \"Last day refund\",\n\tlast_week_result / fund_invested_money * 100 AS \"Last week refund\",\n\tlast_month_result / fund_invested_money * 100 AS \"Last month refund\"\nFROM (\nSELECT \n\tinvestment_id,\n\tfund_id,\n\tSUM(\"Profit\") as \"Profit\"\nFROM refund_per_investment\nGROUP BY ROLLUP(investment_id, fund_id)   \n) AS ir\nINNER JOIN (\n    SELECT DISTINCT\n        investment_id,\n        investment_name\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n) AS i ON i.investment_id = ir.investment_id \nLEFT JOIN  filtered_investment_results f ON f.fund_id = ir.fund_id AND f.investment_id = ir.investment_id\nWHERE ir.investment_id IS NOT NULL ",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Summary Table",
+            "type": "table"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "area"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "super-light-red",
+                                "value": null
+                            },
+                            {
+                                "color": "super-light-green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "%"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 24,
+                "x": 0,
+                "y": 27
+            },
+            "id": 4,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "min",
+                        "max",
+                        "lastNotNull"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    result_date AS \"time\",\n    i.investment_name AS \"metric\",\n    SUM((fund_value - fund_invested_money)) /SUM(fund_invested_money) * 100 AS \"value\"\nFROM investment_results ir\nINNER JOIN (\n    SELECT DISTINCT \n        investment_id, \n        investment_name  \n    FROM investments i\n    WHERE i.investment_owner = ${Investment_Owner:singlequote}\n) i ON i.investment_id = ir.investment_id\nWHERE \n    FUND_INVESTED_MONEY <> 0 AND\n        ( -- Get number of funds in investment with ID from outer query\n            SELECT \n                COUNT(*)\n            FROM (\n                SELECT DISTINCT \n                    investment_fund_id \n                FROM investments\n                WHERE \n                    investment_id = i.investment_id \n            )\n        ) = ( -- Get number of results for current day in investment with ID from outer query\n            SELECT\n                COUNT(*)\n            FROM (\n                SELECT\n                    fund_id\n                FROM investment_results\n                WHERE \n                    investment_id = i.investment_id AND\n                    result_date = ir.result_date\n            )\n        )\nGROUP BY result_date, i.investment_name;\n",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Refund over time (investment wallet)",
+            "transformations": [
+                {
+                    "id": "prepareTimeSeries",
+                    "options": {
+                        "format": "multi"
+                    }
+                }
+            ],
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "super-light-red"
+                            }
+                        ]
+                    },
+                    "unit": "PLN"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 11,
+                "w": 24,
+                "x": 0,
+                "y": 41
+            },
+            "id": 12,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\n    result_date AS \"time\",\n    i.investment_name  AS \"metric\",\n    SUM(FUND_VALUE - FUND_INVESTED_MONEY) AS \"value\"\nFROM investment_results ir\nINNER JOIN (\n    SELECT DISTINCT \n        investment_id, \n        investment_name  \n    FROM investments i\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n) i ON i.investment_id  = ir.investment_id\nWHERE \n    FUND_INVESTED_MONEY <> 0 AND\n        ( -- Get number of funds in investment with ID from outer query\n            SELECT \n                COUNT(*)\n            FROM (\n                SELECT DISTINCT \n                    investment_fund_id \n                FROM investments\n                WHERE \n                    investment_id = i.investment_id \n            )\n        ) = ( -- Get number of results for current day in investment with ID from outer query\n            SELECT\n                COUNT(*)\n            FROM (\n                SELECT\n                    fund_id\n                FROM investment_results\n                WHERE \n                    investment_id = i.investment_id AND\n                    result_date = ir.result_date\n            )\n        )\nGROUP BY  RESULT_DATE, i.INVESTMENT_NAME;",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Profit over time  (investment wallet)",
+            "transformations": [
+                {
+                    "id": "prepareTimeSeries",
+                    "options": {
+                        "format": "multi"
+                    }
+                }
+            ],
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Investment-DB",
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "decimals": 3,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green"
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "%"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Fund ID"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 78
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Fund Name"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 334
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Daily change %"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 133
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 11,
+                "w": 24,
+                "x": 0,
+                "y": 52
+            },
+            "id": 6,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": true,
+                        "displayName": "Daily refund"
+                    }
+                ]
+            },
+            "pluginVersion": "10.4.1",
+            "targets": [
+                {
+                    "datasource": "Investment-DB",
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\nWITH selected_owner_investments AS (\n    SELECT DISTINCT\n        investment_id\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n),\ninvestment_results_with_rank AS (\n    SELECT\n        *,\n        ROW_NUMBER () OVER (PARTITION BY fund_id, investment_id ORDER BY result_date DESC) as \"rank\"\n    FROM investment_results\n),\n\nlatest_investment_results AS (\n    SELECT\n        *\n    FROM investment_results_with_rank\n    WHERE \"rank\" = 1\n)\n\n\nSELECT \n    f.fund_id AS \"Fund ID\",\n    fund_name AS \"Fund Name\",\n    \"Overall refund\",\n    \"Daily refund\",\n    \"Weekly refund\",\n    \"Monthly refund\",\n    CASE \n        WHEN \"Monthly refund\" is not NULL  THEN (\"Monthly refund\"/30) * 365\n        WHEN \"Weekly refund\" is not NULL THEN (\"Weekly refund\"/7) * 365\n        WHEN \"Daily refund\" is not NULL THEN (\"Daily refund\") * 365\n    END AS \"Estimated yearly refund\"\nFROM (\n    SELECT \n        FUND_ID,\n        ((fund_value / fund_invested_money) -1) * 100 as \"Overall refund\",\n        (last_day_result / fund_invested_money) * 100 AS \"Daily refund\",\n        (last_week_result / fund_invested_money) * 100 AS \"Weekly refund\",\n        (last_month_result / fund_invested_money) * 100 AS \"Monthly refund\"\n    FROM latest_investment_results\n    WHERE investment_id IN (\n                SELECT\n                    investment_id\n                FROM selected_owner_investments\n            )\n) AS s\nLEFT JOIN funds f on f.fund_id = s.fund_id;",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Fund results based on latest investment results",
+            "type": "table"
+        },
+        {
+            "collapsed": true,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 63
+            },
+            "id": 22,
+            "panels": [
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "%"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 11,
+                        "w": 24,
+                        "x": 0,
+                        "y": 64
+                    },
+                    "id": 7,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS \"time\",\n    i.investment_name  AS \"metric\",\n    SUM(last_day_result/ fund_invested_money) * 100 AS \"value\"\nFROM investment_results ir\nINNER JOIN (\n    SELECT DISTINCT \n        investment_id, \n        investment_name  \n    FROM investments i\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n) i ON i.investment_id  = ir.investment_id\nGROUP BY result_date, i.investment_name;",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Refund per day (investment wallet)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                },
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "%"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 11,
+                        "w": 24,
+                        "x": 0,
+                        "y": 75
+                    },
+                    "id": 15,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS \"time\",\n    i.investment_name  AS \"metric\",\n    SUM(last_week_result/ fund_invested_money) * 100 AS \"value\"\nFROM investment_results ir\nINNER JOIN (\n    SELECT DISTINCT \n        investment_id, \n        investment_name  \n    FROM investments i\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n) i ON i.investment_id  = ir.investment_id\nGROUP BY result_date, i.investment_name;",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Refund per week (investment wallet)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                },
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "%"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 11,
+                        "w": 24,
+                        "x": 0,
+                        "y": 86
+                    },
+                    "id": 16,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS \"time\",\n    i.investment_name  AS \"metric\",\n    SUM(last_month_result/ fund_invested_money) * 100 AS \"value\"\nFROM investment_results ir\nINNER JOIN (\n    SELECT DISTINCT \n        investment_id, \n        investment_name  \n    FROM investments i\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n) i ON i.investment_id  = ir.investment_id\nGROUP BY result_date, i.investment_name;",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Refund per month (investment wallet)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                }
+            ],
+            "title": "Investment refund %",
+            "type": "row"
+        },
+        {
+            "collapsed": true,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 64
+            },
+            "id": 23,
+            "panels": [
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "PLN"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 11,
+                        "w": 24,
+                        "x": 0,
+                        "y": 98
+                    },
+                    "id": 3,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\nresult_date AS \"time\",\ni.investment_name  AS \"metric\",\nSUM(last_day_result) AS \"value\"\nFROM investment_results ir\nINNER JOIN  (\n    SELECT DISTINCT \n        investment_id, \n        investment_name  \n    FROM investments i\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n) i ON i.investment_id  = ir.investment_id\nGROUP BY result_date, i.investment_name;",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Profit per day (investment wallet)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                },
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "PLN"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 11,
+                        "w": 24,
+                        "x": 0,
+                        "y": 109
+                    },
+                    "id": 9,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS \"time\",\n    i.investment_name  AS \"metric\",\n    SUM(last_week_result) AS \"value\"\nFROM investment_results ir\nINNER JOIN (\n    SELECT DISTINCT \n        investment_id, \n        investment_name  \n    FROM investments i\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n) i ON i.investment_id  = ir.investment_id\nGROUP BY RESULT_DATE, i.INVESTMENT_NAME;",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Profit per week (investment wallet)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                },
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "PLN"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 11,
+                        "w": 24,
+                        "x": 0,
+                        "y": 120
+                    },
+                    "id": 10,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS \"time\",\n    i.investment_name  AS \"metric\",\n    SUM(last_month_result) AS \"value\"\nFROM investment_results ir\nINNER JOIN (\n    SELECT DISTINCT \n        investment_id, \n        investment_name  \n    FROM investments i\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n) i ON i.investment_id  = ir.investment_id\nGROUP BY result_date, i.investment_name;",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Profit per month (investment wallet)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                }
+            ],
+            "title": "Investment profit",
+            "type": "row"
+        },
+        {
+            "collapsed": true,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 65
+            },
+            "id": 24,
+            "panels": [
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "%"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 19,
+                        "w": 24,
+                        "x": 0,
+                        "y": 132
+                    },
+                    "id": 2,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS time,\n    fund_name AS metric,\n    (last_day_result / fund_invested_money) * 100 AS value\nFROM investment_results ir \nLEFT JOIN funds f ON f.fund_id = ir.fund_id\nWHERE investment_id IN (\n    SELECT DISTINCT\n        investment_id\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n);",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Refund per day (Fund)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                },
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "%"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 19,
+                        "w": 24,
+                        "x": 0,
+                        "y": 151
+                    },
+                    "id": 20,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS time,\n    fund_name AS metric,\n    (last_week_result / fund_invested_money) * 100 AS value\nFROM investment_results ir \nLEFT JOIN funds f ON f.fund_id = ir.fund_id\nWHERE investment_id IN (\n    SELECT DISTINCT\n        investment_id\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n);",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Refund per week (Fund)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                },
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "%"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 19,
+                        "w": 24,
+                        "x": 0,
+                        "y": 170
+                    },
+                    "id": 21,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS time,\n    fund_name AS metric,\n    (last_month_result / fund_invested_money) * 100 AS value\nFROM investment_results ir \nLEFT JOIN funds f ON f.fund_id = ir.fund_id\nWHERE investment_id IN (\n    SELECT DISTINCT\n        investment_id\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n);",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Refund per month (Fund)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                }
+            ],
+            "title": "Funds refund %",
+            "type": "row"
+        },
+        {
+            "collapsed": true,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 66
+            },
+            "id": 25,
+            "panels": [
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "PLN"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 19,
+                        "w": 24,
+                        "x": 0,
+                        "y": 190
+                    },
+                    "id": 19,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS time,\n    fund_name AS metric,\n    last_day_result AS value\nFROM investment_results ir \nLEFT JOIN funds f ON f.fund_id = ir.fund_id\nWHERE investment_id IN (\n    SELECT DISTINCT\n        investment_id\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n)",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Profit per day (Fund)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                },
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "PLN"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 16,
+                        "w": 24,
+                        "x": 0,
+                        "y": 209
+                    },
+                    "id": 14,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS time,\n    fund_name AS metric,\n    last_week_result AS value\nFROM investment_results ir \nLEFT JOIN funds f ON f.fund_id = ir.fund_id\nWHERE investment_id IN (\n    SELECT DISTINCT\n        investment_id\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n    )",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Profit per week (Fund)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                },
+                {
+                    "datasource": "Investment-DB",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "custom": {
+                                "axisBorderShow": false,
+                                "axisCenteredZero": false,
+                                "axisColorMode": "text",
+                                "axisLabel": "",
+                                "axisPlacement": "auto",
+                                "barAlignment": 0,
+                                "drawStyle": "line",
+                                "fillOpacity": 0,
+                                "gradientMode": "none",
+                                "hideFrom": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": false
+                                },
+                                "insertNulls": false,
+                                "lineInterpolation": "linear",
+                                "lineWidth": 1,
+                                "pointSize": 5,
+                                "scaleDistribution": {
+                                    "type": "linear"
+                                },
+                                "showPoints": "auto",
+                                "spanNulls": false,
+                                "stacking": {
+                                    "group": "A",
+                                    "mode": "none"
+                                },
+                                "thresholdsStyle": {
+                                    "mode": "area"
+                                }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "super-light-red"
+                                    },
+                                    {
+                                        "color": "super-light-green",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "unit": "PLN"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 17,
+                        "w": 24,
+                        "x": 0,
+                        "y": 225
+                    },
+                    "id": 18,
+                    "options": {
+                        "legend": {
+                            "calcs": [
+                                "min",
+                                "max",
+                                "mean",
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                        },
+                        "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "datasource": "Investment-DB",
+                            "editorMode": "code",
+                            "format": "table",
+                            "rawQuery": true,
+                            "rawSql": "SELECT\n    result_date AS time,\n    fund_name AS metric,\n    last_month_result AS value\nFROM investment_results ir \nLEFT JOIN funds f ON f.fund_id = ir.fund_id\nWHERE investment_id IN (\n    SELECT DISTINCT\n        investment_id\n    FROM investments\n    WHERE investment_owner = ${Investment_Owner:singlequote}\n    )",
+                            "refId": "A",
+                            "sql": {
+                                "columns": [
+                                    {
+                                        "parameters": [],
+                                        "type": "function"
+                                    }
+                                ],
+                                "groupBy": [
+                                    {
+                                        "property": {
+                                            "type": "string"
+                                        },
+                                        "type": "groupBy"
+                                    }
+                                ],
+                                "limit": 50
+                            }
+                        }
+                    ],
+                    "title": "Profit per month (Fund)",
+                    "transformations": [
+                        {
+                            "id": "prepareTimeSeries",
+                            "options": {
+                                "format": "multi"
+                            }
+                        }
+                    ],
+                    "type": "timeseries"
+                }
+            ],
+            "title": "Fund profit",
+            "type": "row"
+        }
+    ],
+    "refresh": "",
+    "schemaVersion": 39,
+    "tags": [],
+    "templating": {
+        "list": [
+            {
+                "current": {
+                    "selected": false,
+                    "text": "Stan",
+                    "value": "Stan"
+                },
+                "datasource": "Investment-DB",
+                "definition": "SELECT DISTINCT INVESTMENT_OWNER from INVESTMENTS I ;",
+                "hide": 0,
+                "includeAll": false,
+                "label": "Owner",
+                "multi": false,
+                "name": "Investment_Owner",
+                "options": [],
+                "query": "SELECT DISTINCT INVESTMENT_OWNER from INVESTMENTS I ;",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "type": "query"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-30d",
+        "to": "now-1d"
+    },
+    "timepicker": {
+        "nowDelay": "1d"
+    },
+    "timezone": "browser",
+    "title": "Investment Wallet",
+    "uid": "ddh0du4z59atcfa",
+    "version": 22,
+    "weekStart": "monday"
+}

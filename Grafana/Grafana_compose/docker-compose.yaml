@@ -1,0 +1,15 @@
+version: "3"
+services:
+  grafana:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      entrypoint:
+        - /run.sh
+      restart: unless-stopped
+      volumes:
+        - ./datasources:/etc/grafana/provisioning/datasources
+        - ./dashboards_provisioning:/etc/grafana/provisioning/dashboards
+        - ./dashboards:/var/lib/grafana/dashboards
+      ports:
+        - "4000:3000"

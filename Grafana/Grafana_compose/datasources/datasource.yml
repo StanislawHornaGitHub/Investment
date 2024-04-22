@@ -1,0 +1,19 @@
+apiVersion: 1
+
+datasources:
+  - name: Investment-DB
+    type: postgres
+    url: 192.168.0.212:5532
+    user: grafana_read
+    isDefault: true
+    secureJsonData:
+      password: 'inv!w_gf_ead3'
+    jsonData:
+      database: Investments
+      sslmode: 'disable' # disable/require/verify-ca/verify-full
+      maxOpenConns: 100 # Grafana v5.4+
+      maxIdleConns: 100 # Grafana v5.4+
+      maxIdleConnsAuto: true # Grafana v9.5.1+
+      connMaxLifetime: 14400 # Grafana v5.4+
+      postgresVersion: 903 # 903=9.3, 904=9.4, 905=9.5, 906=9.6, 1000=10
+      timescaledb: false
