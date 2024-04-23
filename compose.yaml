@@ -60,7 +60,6 @@ services:
 networks:
   Internal:
     name: LAN
-    internal: true
     ipam:
       driver: default
       config:
