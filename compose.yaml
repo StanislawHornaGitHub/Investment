@@ -6,7 +6,7 @@ services:
     build:
       context: ./Grafana
       dockerfile: Grafana.Dockerfile
-    container_name: Investment_Grafana
+    container_name: ${GRAFANA_CONTAINER_NAME}
     hostname: ${GRAFANA_HOSTNAME}
     restart: no
     volumes:
@@ -25,7 +25,7 @@ services:
     build:
       context: ./Flask
       dockerfile: Flask.Dockerfile
-    container_name: Investment_Flask
+    container_name: ${FLASK_CONTAINER_NAME}
     hostname: ${FLASK_HOSTNAME}
     environment:
       DB_IP_Address: ${POSTGRESQL_INTERNAL_IP}
@@ -44,11 +44,11 @@ services:
     build:
       context: ./PostgreSQL
       dockerfile: PostgreSQL.Dockerfile
-    container_name: Investment_PostgreSQL
+    container_name: ${POSTGRESQL_CONTAINER_NAME}
     hostname: ${POSTGRESQL_HOSTNAME}
     restart: no
     volumes:
-      - ./PGDATA:/var/lib/postgresql/data
+      - ./${POSTGRESQL_PERSISTENT_STORAGE_PATH}:/var/lib/postgresql/data
     ports:
       - ${POSTGRESQL_EXTERNAL_PORT}:5432
     networks:
