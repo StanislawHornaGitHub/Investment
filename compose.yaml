@@ -1,0 +1,72 @@
+version: "3"
+
+services:
+  Grafana:
+    image: investment/grafana
+    build:
+      context: ./Grafana
+      dockerfile: Grafana.Dockerfile
+    container_name: ${GRAFANA_CONTAINER_NAME}
+    hostname: ${GRAFANA_HOSTNAME}
+    restart: no
+    volumes:
+      - ./Grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./Grafana/dashboards_provisioning:/etc/grafana/provisioning/dashboards
+      - ./Grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - ${GRAFANA_EXTERNAL_PORT}:3000
+    networks:
+      Internal:
+        ipv4_address: ${GRAFANA_INTERNAL_IP}
+      External: null
+
+  Flask:
+    image: investment/flask
+    build:
+      context: ./Flask
+      dockerfile: Flask.Dockerfile
+    container_name: ${FLASK_CONTAINER_NAME}
+    hostname: ${FLASK_HOSTNAME}
+    environment:
+      DB_IP_Address: ${POSTGRESQL_INTERNAL_IP}
+      DB_Username: ${FLASK_DB_USERNAME}
+      DB_Password: ${FLASK_DB_PASSWORD}
+    restart: unless-stopped
+    ports:
+      - ${FLASK_EXTERNAL_PORT}:5000
+    networks:
+      Internal:
+        ipv4_address: ${FLASK_INTERNAL_IP}
+      External: null
+
+  PostgreSQL:
+    image: investment/postgresql
+    build:
+      context: ./PostgreSQL
+      dockerfile: PostgreSQL.Dockerfile
+    container_name: ${POSTGRESQL_CONTAINER_NAME}
+    hostname: ${POSTGRESQL_HOSTNAME}
+    restart: no
+    volumes:
+      - ./${POSTGRESQL_PERSISTENT_STORAGE_PATH}:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRESQL_EXTERNAL_PORT}:5432
+    networks:
+      Internal:
+        ipv4_address: ${POSTGRESQL_INTERNAL_IP}
+      External: null
+
+
+networks:
+  Internal:
+    name: LAN
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.10.10.0/24"
+          gateway: 10.10.10.1
+
+  External:
+    name: WAN
+    external: true
+    driver: bridge

@@ -161,3 +161,5 @@ cython_debug/
 
 test.*
 *_Investments.json
+!.env
+PG_DATA

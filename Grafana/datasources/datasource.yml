@@ -3,7 +3,7 @@ apiVersion: 1
 datasources:
   - name: Investment-DB
     type: postgres
-    url: 192.168.0.212:5532
+    url: PGDB:5432
     user: grafana_read
     isDefault: true
     secureJsonData:

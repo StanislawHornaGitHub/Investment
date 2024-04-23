@@ -9,7 +9,7 @@
 
     .NOTES
 
-        Version:            1.0
+        Version:            1.2
         Author:             Stanisław Horna
         Mail:               stanislawhorna@outlook.com
         GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -20,6 +20,8 @@
         2024-04-22      Stanisław Horna         Add grafana_read user permissions to run system_stats functions:
                                                     - pg_sys_cpu_usage_info
                                                     - pg_sys_memory_info
+        
+        2024-04-23      Stanisław Horna         Add DELETE permissions for api_write user
 */
 
 -- create required roles
@@ -40,10 +42,10 @@ GRANT SELECT ON quotations TO "api_read";
 -- Grant privileges for API WRITE user
 GRANT CONNECT ON DATABASE "Investments" TO "api_write";
 GRANT USAGE ON SCHEMA public TO "api_write";
-GRANT SELECT, INSERT, UPDATE ON funds TO "api_write";
-GRANT SELECT, INSERT, UPDATE ON investment_results TO "api_write";
-GRANT SELECT, INSERT, UPDATE ON investments TO "api_write";
-GRANT SELECT, INSERT, UPDATE ON quotations TO "api_write";
+GRANT SELECT, INSERT, UPDATE, DELETE ON funds TO "api_write";
+GRANT SELECT, INSERT, UPDATE, DELETE ON investment_results TO "api_write";
+GRANT SELECT, INSERT, UPDATE, DELETE ON investments TO "api_write";
+GRANT SELECT, INSERT, UPDATE, DELETE ON quotations TO "api_write";
 
 -- Grant privileges for Grafana user
 GRANT CONNECT ON DATABASE "Investments" TO "grafana_read";
