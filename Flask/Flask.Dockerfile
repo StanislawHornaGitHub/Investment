@@ -40,10 +40,10 @@ RUN pip install -r requirements.txt
 # Set environmental variables
 
 # PostgreSQL variables
-ENV DB_IP_Address="192.168.0.212"
-ENV DB_Port="5532"
-ENV DB_Username="Invest_SH"
-ENV DB_Password="DefP4550RD"
+ENV DB_IP_Address="PGDB"
+ENV DB_Port="5432"
+ENV DB_Username="api_write"
+ENV DB_Password="inv!w_ap_ite2"
 ENV DB_Name="Investments"
 
 # Flask variables
