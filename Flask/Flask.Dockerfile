@@ -14,10 +14,13 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  29-Mar-2024
-# Version:  1.1
+# Version:  1.2
 
 # Date            Who                     What
 # 2024-04-03      Stanisław Horna         Timezone config added.
+#
+# 2024-04-24      Stanisław Horna         Ubuntu latest changed to static one (22.04)
+#                                         WSGI dependencies instalation added. Startup CMD changed.
 
 FROM ubuntu:22.04
 
@@ -25,7 +28,7 @@ FROM ubuntu:22.04
 RUN apt update
 RUN apt install -y python3-dev
 RUN apt install -y pip
-RUN apt install -y gcc libpcre3-dev libpcre3 libpcre3-dev
+RUN apt install -y gcc libpcre3-dev libpcre3
 
 # Set timezone
 ENV TZ="Europe/Warsaw"
