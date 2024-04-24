@@ -19,12 +19,13 @@
 # Date            Who                     What
 # 2024-04-03      Stanisław Horna         Timezone config added.
 
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 # Install Python and pip
 RUN apt update
-RUN apt install -y python3-dev 
+RUN apt install -y python3-dev
 RUN apt install -y pip
+RUN apt install -y gcc libpcre3-dev libpcre3 libpcre3-dev
 
 # Set timezone
 ENV TZ="Europe/Warsaw"
@@ -50,4 +51,4 @@ ENV DB_Name="Investments"
 ENV FLASK_DEBUG="True"
 
 # Start API program
-CMD ["python3", "./Investment_API.py"]
+CMD ["uwsgi", "--ini", "./wsgi.ini", "--thunder-lock"]
