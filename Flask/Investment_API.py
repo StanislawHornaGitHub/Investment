@@ -15,7 +15,8 @@
     Date            Who                     What
     2024-04-03      Stanisław Horna         Response body and code implemented.
     
-    2024-04-26      Stanisław Horna         Endpoint to get monitored fund urls with last quotation date implemented
+    2024-04-26      Stanisław Horna         Endpoint to get monitored fund urls with last quotation date implemented.
+                                            Unified naming and structure.
     
 """
 
