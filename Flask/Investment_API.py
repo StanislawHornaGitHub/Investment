@@ -32,25 +32,10 @@ app = Flask(__name__)
 DEBUG_MODE = os.getenv('FLASK_DEBUG', True)
 
 
-@app.route('/FundQuotation', methods=['PUT'])
-def refreshFundQuotation():
-    if (request.method == 'PUT'):
-        responseCode, responseBody = Price.updateQuotation()
-        
-        return responseBody, responseCode
-
-
-@app.route('/InvestmentRefund', methods=['PUT'])
-def refreshInvestmentRefund():
-    if (request.method == 'PUT'):
-        responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
-        
-        return responseBody, responseCode
-
-
 @app.route('/FundConfig', methods=['PUT', 'GET'])
 def fund_handler():
     match request.method:
+
         case "PUT":
             jsonFunds = request.json
             responseCode, responseBody = FundConfig.insertFundConfig(jsonFunds)
@@ -63,16 +48,39 @@ def fund_handler():
             return responseBody, responseCode
 
 
-@app.route('/InvestmentConfig', methods=['PUT'])
-def insertInvestmentConfig():
-    if (request.method == 'PUT'):
-        jsonInvestments = request.json
-        responseCode, responseBody = InvestmentConfig.insertInvestmentConfig(
-            jsonInvestments["Investments"],
-            jsonInvestments["Owner"]
-        )
+@app.route('/FundQuotation', methods=['PUT'])
+def quotation_handler():
+    match request.method:
+        
+        case "PUT":
+            responseCode, responseBody = Price.updateQuotation()
 
-        return responseBody, responseCode
+            return responseBody, responseCode
+
+
+@app.route('/InvestmentConfig', methods=['PUT'])
+def investment_handler():
+    match request.method:
+        
+        case "PUT":
+            jsonInvestments = request.json
+            responseCode, responseBody = InvestmentConfig.insertInvestmentConfig(
+                jsonInvestments["Investments"],
+                jsonInvestments["Owner"]
+            )
+
+            return responseBody, responseCode
+
+
+@app.route('/InvestmentRefund', methods=['PUT'])
+def refund_handler():
+    match request.method:
+        
+        case "PUT":
+            responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
+            
+            return responseBody, responseCode
+
 
 
 if __name__ == '__main__':
