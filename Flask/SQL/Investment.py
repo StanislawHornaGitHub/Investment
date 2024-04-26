@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.0
+    Version:            1.1
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -13,10 +13,11 @@
     ChangeLog:
 
     Date            Who                     What
+    2024-04-26      Stanisław Horna         checkInvestmentIDisValid to check if investment with provided ID exists.
 
 """
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey
+from sqlalchemy import orm, Column, String, Integer, Float, DateTime, ForeignKey, exists
 
 from SQL.base import Base
 
@@ -56,3 +57,6 @@ class Investment(Base):
         self.operation_date = operation_date
         self.operation_value = operation_value
         self.operation_currency = operation_currency
+
+    def checkInvestmentIDisValid(id: int, session: orm.session.Session) -> bool:
+        return session.query(exists().where(Investment.investment_id == id)).scalar()

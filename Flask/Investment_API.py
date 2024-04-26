@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.1
+    Version:            1.2
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -16,6 +16,7 @@
     2024-04-03      Stanisław Horna         Response body and code implemented.
     
     2024-04-26      Stanisław Horna         Endpoint to get monitored fund urls with last quotation date implemented.
+                                            Endpoint to refresh singular investment.
                                             Unified naming and structure.
     
 """
@@ -26,7 +27,7 @@ from Processing.Price import Price
 from Processing.InvestmentCalcResult import InvestmentCalcResult
 from Processing.FundConfig import FundConfig
 from Processing.InvestmentConfig import InvestmentConfig
-from Utility.ConvertToDict import ConvertToDict
+
 
 app = Flask(__name__)
 
@@ -72,15 +73,20 @@ def investment_handler():
 
             return responseBody, responseCode
 
-
 @app.route('/InvestmentRefund', methods=['PUT'])
-def refund_handler():
+@app.route('/InvestmentRefund/<int:id>', methods=['PUT'])
+def refund_handler(id: int = None):
     match request.method:
         
         case "PUT":
-            responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
-            
-            return responseBody, responseCode
+            if id == None:
+                responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
+                
+                return responseBody, responseCode
+            else:
+                responseCode, responseBody = InvestmentCalcResult.calculateResult(id)
+                
+                return responseBody, responseCode
 
 
 
