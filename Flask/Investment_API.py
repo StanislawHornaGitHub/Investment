@@ -17,6 +17,7 @@
     
     2024-04-26      Stanisław Horna         Endpoint to get monitored fund urls with last quotation date implemented.
                                             Endpoint to refresh singular investment.
+                                            Endpoint to get investment funds with last refund date implemented.
                                             Unified naming and structure.
     
 """
@@ -60,8 +61,9 @@ def quotation_handler():
             return responseBody, responseCode
 
 
-@app.route('/InvestmentConfig', methods=['PUT'])
-def investment_handler():
+@app.route('/InvestmentConfig', methods=['PUT', 'GET'])
+@app.route('/InvestmentConfig/<int:id>', methods=[ 'GET'])
+def investment_handler(id: int = None):
     match request.method:
         
         case "PUT":
@@ -72,6 +74,12 @@ def investment_handler():
             )
 
             return responseBody, responseCode
+        
+        case "GET":
+            responseCode, responseBody = InvestmentConfig.getInvestmentFunds(id)
+            
+            return responseBody, responseCode
+
 
 @app.route('/InvestmentRefund', methods=['PUT'])
 @app.route('/InvestmentRefund/<int:id>', methods=['PUT'])
