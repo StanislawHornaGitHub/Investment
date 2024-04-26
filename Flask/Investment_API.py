@@ -15,6 +15,8 @@
     Date            Who                     What
     2024-04-03      Stanisław Horna         Response body and code implemented.
     
+    2024-04-26      Stanisław Horna         Endpoint to get monitored fund urls with last quotation date implemented
+    
 """
 
 import os
@@ -23,6 +25,7 @@ from Processing.Price import Price
 from Processing.InvestmentCalcResult import InvestmentCalcResult
 from Processing.FundConfig import FundConfig
 from Processing.InvestmentConfig import InvestmentConfig
+from Utility.ConvertToDict import ConvertToDict
 
 app = Flask(__name__)
 
@@ -45,13 +48,19 @@ def refreshInvestmentRefund():
         return responseBody, responseCode
 
 
-@app.route('/FundConfig', methods=['PUT'])
-def insertFundURL():
-    if (request.method == 'PUT'):
-        jsonFunds = request.json
-        responseCode, responseBody = FundConfig.insertFundConfig(jsonFunds)
-
-        return responseBody, responseCode
+@app.route('/FundConfig', methods=['PUT', 'GET'])
+def fund_handler():
+    match request.method:
+        case "PUT":
+            jsonFunds = request.json
+            responseCode, responseBody = FundConfig.insertFundConfig(jsonFunds)
+            
+            return responseBody, responseCode
+        
+        case "GET":
+            responseCode, responseBody = FundConfig.getFundUrls()
+            
+            return responseBody, responseCode
 
 
 @app.route('/InvestmentConfig', methods=['PUT'])

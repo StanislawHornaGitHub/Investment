@@ -14,16 +14,22 @@
 
     Date            Who                     What
     2024-04-02      Stanisław Horna         Response body and code implemented.
+    
+    2024-04-26      Stanisław Horna         Method to retrieve monitored funds with last quotation date form db.
 
 """
 import json
 
 import SQL
+from sqlalchemy import func
 from SQL.Fund import Fund
+from SQL.Quotation import Quotation
 from sqlalchemy.exc import IntegrityError
 
 
 class FundConfig:
+    
+    DateToStrFormat = "%Y-%m-%d"
 
     @staticmethod
     def insertFundConfig(Funds: list[str]):
@@ -84,8 +90,8 @@ class FundConfig:
                     }
                 )
                 responseCode = 400
-        
-        # Set message if all funds were inserted successfully 
+
+        # Set message if all funds were inserted successfully
         if responseCode == 200:
             result = {
                 "Status": f"All {len(Funds)} fund URLs inserted successfully"
@@ -102,3 +108,41 @@ class FundConfig:
             investments = json.loads(str("\n".join(Invest.readlines())))
 
         return investments["FundsToCheckURLs"]
+
+    @staticmethod
+    def getFundUrls() -> list[dict[str, str]]:
+        
+        session = SQL.base.Session()
+        responseCode = 200
+        try:
+            dbOut = (
+                session.query(
+                    Quotation.fund_id,
+                    Fund.fund_url,
+                    func.max(Quotation.date)
+                ).outerjoin(
+                    Fund,
+                    Fund.fund_id == Quotation.fund_id
+                ).group_by(
+                    Quotation.fund_id,
+                    Fund.fund_url
+                )
+                .all()
+            )
+        except Exception as e:
+            responseCode = 400
+            return responseCode, {
+                "Status": "Failed to retrieve data from DB",
+                "Status_Details": str(e)
+            }
+        result = []
+        for fundID, fundURL, fundDate in dbOut:
+            result.append(
+                {
+                    "fund_id": fundID,
+                    "fund_url": fundURL,
+                    "quotation_date": fundDate.strftime(FundConfig.DateToStrFormat)
+                }
+            )
+        
+        return responseCode, result
