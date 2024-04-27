@@ -163,18 +163,21 @@ class InvestmentConfig:
 
         session = SQL.base.Session()
         responseCode = 200
-        
+
         try:
             # Check if provided ID exists in DB
-            if(Investment.checkInvestmentIDisValid(investment_id, session) != True):
+            if (
+                (Investment.checkInvestmentIDisValid(investment_id, session) != True) and
+                (investment_id is not None)
+            ):
                 resultBody = {
                     "Investment ID": investment_id,
                     "Status": f"Investment with ID: {investment_id} does not exist"
                 }
                 responseCode = 404
-                
+
                 return responseCode, resultBody
-            
+
             if investment_id != None:
                 dbOut = (
                     session.query(
