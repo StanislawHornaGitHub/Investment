@@ -58,5 +58,5 @@ class Investment(Base):
         self.operation_value = operation_value
         self.operation_currency = operation_currency
 
-    def checkInvestmentIDisValid(id: int, session: orm.session.Session) -> bool:
+    def IDisValid(id: int, session: orm.session.Session) -> bool:
         return session.query(exists().where(Investment.investment_id == id)).scalar()
