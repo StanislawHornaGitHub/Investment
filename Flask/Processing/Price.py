@@ -28,23 +28,53 @@ from Utility.Dates import Dates
 class Price:
 
     @staticmethod
-    def updateQuotation():
+    def updateQuotation(ID: str = None):
 
         # Create session and init processing variables
         session = SQL.base.Session()
         responseCode = 200
         result = []
 
-        # Get monitored Fund IDs
-        fund = ConvertToDict.fundList(session.query(Fund).all())
+        if ID is None:
 
-        # Get last quotation date for each fund
-        lastRefreshDates = (
-            session
-            .query(func.max(Quotation.date), Quotation.fund_id)
-            .group_by(Quotation.fund_id)
-            .all()
-        )
+            # Get monitored Fund IDs
+            fund = ConvertToDict.fundList(session.query(Fund).all())
+
+            # Get last quotation date for each fund
+            lastRefreshDates = (
+                session
+                .query(func.max(Quotation.date), Quotation.fund_id)
+                .group_by(Quotation.fund_id)
+                .all()
+            )
+        else:
+            # Check if provided ID exists in DB
+            if(Fund.IDisValid(ID, session) != True):
+                resultBody = {
+                    "fund_id": ID,
+                    "Status": f"Fund with ID: {ID} does not exist"
+                }
+                responseCode = 404
+                
+                return responseCode, resultBody
+            # Get monitored Fund IDs
+            fund = ConvertToDict.fundList(
+                (
+                    session
+                    .query(Fund)
+                    .filter(Fund.fund_id == ID)
+                    .all()
+                )
+            )
+
+            # Get last quotation date for each fund
+            lastRefreshDates = (
+                session
+                .query(func.max(Quotation.date), Quotation.fund_id)
+                .filter(Quotation.fund_id == ID)
+                .group_by(Quotation.fund_id)
+                .all()
+            )
 
         # Loop through each fund which already has some quotation in DB
         for date, fundID in lastRefreshDates:
@@ -148,7 +178,7 @@ class Price:
                 result[-1]["responseBody"]["Status Details"] = str(err)
 
                 continue
-            
+
             result.append({})
             # Insert quotation to DB
             result[-1]["responseCode"], result[-1]["responseBody"] = Price.insertQuotationRecords(

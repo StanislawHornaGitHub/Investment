@@ -52,13 +52,19 @@ def fund_handler():
 
 
 @app.route('/FundQuotation', methods=['PUT'])
-def quotation_handler():
+@app.route('/FundQuotation/<id>', methods=['PUT'])
+def quotation_handler(id: str = None):
     match request.method:
         
         case "PUT":
-            responseCode, responseBody = Price.updateQuotation()
+            if id is None:
+                responseCode, responseBody = Price.updateQuotation()
 
-            return responseBody, responseCode
+                return responseBody, responseCode
+            else:
+                responseCode, responseBody = Price.updateQuotation(id)
+
+                return responseBody, responseCode
 
 
 @app.route('/InvestmentConfig', methods=['PUT', 'GET'])
@@ -87,7 +93,7 @@ def refund_handler(id: int = None):
     match request.method:
         
         case "PUT":
-            if id == None:
+            if id is None:
                 responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
                 
                 return responseBody, responseCode
