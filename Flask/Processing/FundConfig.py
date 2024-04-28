@@ -14,16 +14,23 @@
 
     Date            Who                     What
     2024-04-02      Stanisław Horna         Response body and code implemented.
+    
+    2024-04-26      Stanisław Horna         Method to retrieve monitored funds with last quotation date form db.
 
 """
 import json
 
 import SQL
+from sqlalchemy import func
 from SQL.Fund import Fund
+from SQL.Quotation import Quotation
 from sqlalchemy.exc import IntegrityError
 
 
 class FundConfig:
+
+    DateToStrFormat = "%Y-%m-%d"
+    __default_date_for_none = "1900-01-01"
 
     @staticmethod
     def insertFundConfig(Funds: list[str]):
@@ -84,8 +91,8 @@ class FundConfig:
                     }
                 )
                 responseCode = 400
-        
-        # Set message if all funds were inserted successfully 
+
+        # Set message if all funds were inserted successfully
         if responseCode == 200:
             result = {
                 "Status": f"All {len(Funds)} fund URLs inserted successfully"
@@ -102,3 +109,64 @@ class FundConfig:
             investments = json.loads(str("\n".join(Invest.readlines())))
 
         return investments["FundsToCheckURLs"]
+
+    @staticmethod
+    def getFund(fund_id: str = None) -> list[dict[str, str]]:
+
+        session = SQL.base.Session()
+        responseCode = 200
+        try:
+            if fund_id is not None:
+                dbOut = (
+                    session.query(
+                        Quotation.fund_id,
+                        Fund.category_short,
+                        func.max(Quotation.date)
+                    ).outerjoin(
+                        Fund,
+                        Fund.fund_id == Quotation.fund_id
+                    ).filter(
+                        Fund.fund_id == fund_id
+                    ).group_by(
+                        Quotation.fund_id,
+                        Fund.category_short
+                    )
+                    .all()
+                )
+            else:
+                dbOut = (
+                    session.query(
+                        Quotation.fund_id,
+                        Fund.category_short,
+                        func.max(Quotation.date)
+                    ).outerjoin(
+                        Fund,
+                        Fund.fund_id == Quotation.fund_id
+                    ).group_by(
+                        Quotation.fund_id,
+                        Fund.category_short
+                    )
+                    .all()
+                )
+        except Exception as e:
+            responseCode = 400
+            return responseCode, {
+                "Status": "Failed to retrieve data from DB",
+                "Status_Details": str(e)
+            }
+        result = []
+        for fundID, fundCat, fundDate in dbOut:
+            try:
+                convertedDate = fundDate.strftime(FundConfig.DateToStrFormat)
+            except:
+                convertedDate = FundConfig.__default_date_for_none
+
+            result.append(
+                {
+                    "fund_id": fundID,
+                    "fund_category": fundCat,
+                    "quotation_date": convertedDate
+                }
+            )
+
+        return responseCode, result

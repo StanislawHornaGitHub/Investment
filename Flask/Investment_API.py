@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.1
+    Version:            1.2
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -14,6 +14,11 @@
 
     Date            Who                     What
     2024-04-03      Stanisław Horna         Response body and code implemented.
+    
+    2024-04-26      Stanisław Horna         Endpoint to get monitored fund urls with last quotation date implemented.
+                                            Endpoint to refresh singular investment.
+                                            Endpoint to get investment funds with last refund date implemented.
+                                            Unified naming and structure.
     
 """
 
@@ -24,46 +29,78 @@ from Processing.InvestmentCalcResult import InvestmentCalcResult
 from Processing.FundConfig import FundConfig
 from Processing.InvestmentConfig import InvestmentConfig
 
+
 app = Flask(__name__)
 
 DEBUG_MODE = os.getenv('FLASK_DEBUG', True)
 
 
+@app.route('/FundConfig', methods=['PUT', 'GET'])
+@app.route('/FundConfig/<id>', methods=['GET'])
+def fund_handler(id: str = None):
+    match (request.method):
+
+        case "PUT":
+            jsonFunds = request.json
+            responseCode, responseBody = (
+                FundConfig.insertFundConfig(jsonFunds)
+            )
+
+        case "GET":
+            responseCode, responseBody = (
+                FundConfig.getFund(id)
+            )
+    
+    return responseBody, responseCode
+
+
 @app.route('/FundQuotation', methods=['PUT'])
-def refreshFundQuotation():
-    if (request.method == 'PUT'):
-        responseCode, responseBody = Price.updateQuotation()
-        
-        return responseBody, responseCode
+@app.route('/FundQuotation/<id>', methods=['PUT'])
+def quotation_handler(id: str = None):
+    match (request.method):
+
+        case "PUT":
+            responseCode, responseBody = (
+                Price.updateQuotation(id)
+            )
+    
+    return responseBody, responseCode
+
+
+@app.route('/InvestmentConfig', methods=['PUT', 'GET'])
+@app.route('/InvestmentConfig/<int:id>', methods=['GET'])
+def investment_handler(id: int = None):
+    match (request.method):
+
+        case "PUT":
+            jsonInvestments = request.json
+            responseCode, responseBody = (
+                InvestmentConfig.insertInvestmentConfig(
+                    jsonInvestments["Investments"],
+                    jsonInvestments["Owner"]
+                )
+            )
+            return responseBody, responseCode
+
+        case "GET":
+            responseCode, responseBody = (
+                InvestmentConfig.getInvestmentFunds(id)
+            )
+            return responseBody, responseCode
 
 
 @app.route('/InvestmentRefund', methods=['PUT'])
-def refreshInvestmentRefund():
-    if (request.method == 'PUT'):
-        responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
-        
-        return responseBody, responseCode
+@app.route('/InvestmentRefund/<int:id>', methods=['PUT'])
+def refund_handler(id: int = None):
+    match (request.method):
 
+        case "PUT":
+            if id is None:
+                responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
+            else:
+                responseCode, responseBody = InvestmentCalcResult.calculateResult(id)
 
-@app.route('/FundConfig', methods=['PUT'])
-def insertFundURL():
-    if (request.method == 'PUT'):
-        jsonFunds = request.json
-        responseCode, responseBody = FundConfig.insertFundConfig(jsonFunds)
-
-        return responseBody, responseCode
-
-
-@app.route('/InvestmentConfig', methods=['PUT'])
-def insertInvestmentConfig():
-    if (request.method == 'PUT'):
-        jsonInvestments = request.json
-        responseCode, responseBody = InvestmentConfig.insertInvestmentConfig(
-            jsonInvestments["Investments"],
-            jsonInvestments["Owner"]
-        )
-
-        return responseBody, responseCode
+    return responseBody, responseCode
 
 
 if __name__ == '__main__':

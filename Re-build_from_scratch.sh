@@ -29,9 +29,12 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  23-Apr-2024
-# Version:  1.0
+# Version:  1.1
 
 # Date            Who                     What
+# 2024-04-28      Stanisław Horna         Remove downloading quotations and refund calculation,
+#                                         due to implementation of Checker service, 
+#                                         which will automatically perform those operations.
 #
 
 # define echo colors
@@ -50,8 +53,6 @@ Main(){
     waitForPostgreSpinUp
     showComposeStatus
     importInitData
-    downloadFundQuotation
-    calculateInvestmentResult
 }
 
 checkDockerDaemonRunning(){
@@ -151,28 +152,6 @@ importInitData(){
 
     # Go back to root directory
     SetRootDirectory
-}
-
-downloadFundQuotation(){
-
-    printYellowMessage "Downloading fund quotation"
-
-    hostMachineIP=$(getDotenvVariable "HOST_MACHINE_IP")
-    apiPort=$(getDotenvVariable "FLASK_EXTERNAL_PORT")
-
-    curl --location --request PUT "$hostMachineIP:$apiPort/FundQuotation" \
-        --header 'Content-Type: application/json'
-}
-
-calculateInvestmentResult() {
-
-    printYellowMessage "Calculating investment result"
-
-    hostMachineIP=$(getDotenvVariable "HOST_MACHINE_IP")
-    apiPort=$(getDotenvVariable "FLASK_EXTERNAL_PORT")
-
-    curl --location --request PUT "$hostMachineIP:$apiPort/InvestmentRefund" \
-        --header 'Content-Type: application/json'
 }
 
 getDotenvVariable() {

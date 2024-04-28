@@ -6,6 +6,8 @@ services:
     build:
       context: ./Grafana
       dockerfile: Grafana.Dockerfile
+    depends_on:
+      - PostgreSQL
     container_name: ${GRAFANA_CONTAINER_NAME}
     hostname: ${GRAFANA_HOSTNAME}
     restart: no
@@ -25,6 +27,8 @@ services:
     build:
       context: ./Flask
       dockerfile: Flask.Dockerfile
+    depends_on:
+      - PostgreSQL
     container_name: ${FLASK_CONTAINER_NAME}
     hostname: ${FLASK_HOSTNAME}
     environment:
@@ -55,6 +59,20 @@ services:
       Internal:
         ipv4_address: ${POSTGRESQL_INTERNAL_IP}
       External: null
+  
+  Checker:
+    image: investment/checker
+    build:
+      context: ./Checker
+      dockerfile: Checker.Dockerfile
+    depends_on:
+      - Flask
+    container_name: ${CHECKER_CONTAINER_NAME}
+    hostname: ${CHECKER_HOSTNAME}
+    restart: unless-stopped
+    networks:
+      Internal:
+        ipv4_address: ${CHECKER_INTERNAL_IP}
 
 
 networks:

@@ -16,7 +16,7 @@
 
 """
 
-from sqlalchemy import Column, String, Integer, Float, DateTime
+from sqlalchemy import orm, Column, String, Integer, Float, DateTime, exists
 
 from SQL.base import Base
 
@@ -46,3 +46,6 @@ class Fund(Base):
     
     def getFundCategoryShort(self) -> str:
         return self.category_short
+    
+    def IDisValid(id: str, session: orm.session.Session) -> bool:
+        return session.query(exists().where(Fund.fund_id == id)).scalar()

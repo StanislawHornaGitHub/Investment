@@ -26,7 +26,7 @@ from dateutil.parser import parse
 
 
 @dataclass
-class AnalizyFund:
+class AnalizyFundAPI:
     
     API_URL = "https://www.analizy.pl/api/quotation"
     
@@ -41,22 +41,22 @@ class AnalizyFund:
     def downloadQuotation(fund: Fund) -> list[Quotation]:
 
         # Create custom URL to access API to download JSON with all quotation
-        URL = f"{AnalizyFund.API_URL}/{fund.getFundCategoryShort()}/{fund.getFundID()}"
+        URL = f"{AnalizyFundAPI.API_URL}/{fund.getFundCategoryShort()}/{fund.getFundID()}"
 
         # Invoke web request and convert JSON response to dict
         fundQuotationResponse = json.loads(requests.get(URL).content)
-        fundID = fundQuotationResponse[AnalizyFund.RESPONSE_ID]
+        fundID = fundQuotationResponse[AnalizyFundAPI.RESPONSE_ID]
         
         result = {
             "Fund_ID": fundID,
             "Fund_Currency": None,
-            "FundQuotation": fundQuotationResponse[AnalizyFund.RESPONSE_DETAILS][0][AnalizyFund.RESPONSE_LIST]
+            "FundQuotation": fundQuotationResponse[AnalizyFundAPI.RESPONSE_DETAILS][0][AnalizyFundAPI.RESPONSE_LIST]
         }
         for i in range(len(result["FundQuotation"])):
-            result["FundQuotation"][i][AnalizyFund.RESPONSE_DATE_NAME] = parse(
-                result["FundQuotation"][i][AnalizyFund.RESPONSE_DATE_NAME]
+            result["FundQuotation"][i][AnalizyFundAPI.RESPONSE_DATE_NAME] = parse(
+                result["FundQuotation"][i][AnalizyFundAPI.RESPONSE_DATE_NAME]
             )
-            result["FundQuotation"][i][AnalizyFund.RESPONSE_PRICE_NAME] = float(
-                result["FundQuotation"][i][AnalizyFund.RESPONSE_PRICE_NAME]
+            result["FundQuotation"][i][AnalizyFundAPI.RESPONSE_PRICE_NAME] = float(
+                result["FundQuotation"][i][AnalizyFundAPI.RESPONSE_PRICE_NAME]
             )
         return result

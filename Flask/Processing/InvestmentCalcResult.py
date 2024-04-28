@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.3
+    Version:            1.4
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -20,13 +20,15 @@
                                             
     2024-04-03      Stanisław Horna         Bugfix in collecting already calculated results.
                                             Response body and code implemented.
+                                            
+    2024-04-26      Stanisław Horna         Error handling in calculateResult - provided ID does not exist.
 
 """
 import SQL
 from SQL.Quotation import Quotation
 from SQL.InvestmentResult import InvestmentResult
 from SQL.Investment import Investment
-from sqlalchemy import func
+from sqlalchemy import func, exc
 
 from sqlalchemy.exc import DatabaseError
 import datetime
@@ -98,25 +100,46 @@ class InvestmentCalcResult:
 
         # Create new SQL session
         session = SQL.base.Session()
+        
 
-        # Get necessary details required for calculation
-        # start date <- oldest date when some fund was bought
-        # funds <- list of involved funds
-        # ordersMap <- dict of dates and operations
-        start_date, funds, ordersMap = InvestmentCalcResult.getInvestmentOrderMap(
-            investment_id, session
-        )
+        try:
+            # Check if provided ID exists in DB
+            if(Investment.IDisValid(investment_id, session) != True):
+                resultBody = {
+                    "Investment ID": investment_id,
+                    "Status": f"Investment with ID: {investment_id} does not exist"
+                }
+                responseCode = 404
+                
+                return responseCode, resultBody
+            
+            # Get necessary details required for calculation
+            # start date <- oldest date when some fund was bought
+            # funds <- list of involved funds
+            # ordersMap <- dict of dates and operations
+            start_date, funds, ordersMap = InvestmentCalcResult.getInvestmentOrderMap(
+                investment_id, session
+            )
 
-        # Get quotations for each fund starting from start date of the oldest investment
-        quot = InvestmentCalcResult.getFundsQuotation(
-            funds, start_date, session
-        )
+            # Get quotations for each fund starting from start date of the oldest investment
+            quot = InvestmentCalcResult.getFundsQuotation(
+                funds, start_date, session
+            )
 
-        # Check the latest update, to avoid calculating everything from the beginning
-        lastUpdateDate = InvestmentCalcResult.getLastResultDate(
-            investment_id, session
-        )
-
+            # Check the latest update, to avoid calculating everything from the beginning
+            lastUpdateDate = InvestmentCalcResult.getLastResultDate(
+                investment_id, session
+            )
+        except exc.OperationalError as e:
+            resultBody = {
+                "Investment ID": investment_id,
+                "Status": "Failed to retrieve data from DB",
+                "Status_Details": str(e)
+            }
+            responseCode = 500
+            
+            return responseCode, resultBody
+        
         # Init temp dict for owned participation units
         tempOwnedFunds = {}
 
