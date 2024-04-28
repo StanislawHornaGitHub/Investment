@@ -36,72 +36,70 @@ DEBUG_MODE = os.getenv('FLASK_DEBUG', True)
 
 
 @app.route('/FundConfig', methods=['PUT', 'GET'])
-def fund_handler():
-    match request.method:
+@app.route('/FundConfig/<id>', methods=['GET'])
+def fund_handler(id: str = None):
+    match (request.method):
 
         case "PUT":
             jsonFunds = request.json
-            responseCode, responseBody = FundConfig.insertFundConfig(jsonFunds)
-            
-            return responseBody, responseCode
-        
+            responseCode, responseBody = (
+                FundConfig.insertFundConfig(jsonFunds)
+            )
+
         case "GET":
-            responseCode, responseBody = FundConfig.getFundUrls()
-            
-            return responseBody, responseCode
+            responseCode, responseBody = (
+                FundConfig.getFund(id)
+            )
+    
+    return responseBody, responseCode
 
 
 @app.route('/FundQuotation', methods=['PUT'])
 @app.route('/FundQuotation/<id>', methods=['PUT'])
 def quotation_handler(id: str = None):
-    match request.method:
-        
+    match (request.method):
+
         case "PUT":
-            if id is None:
-                responseCode, responseBody = Price.updateQuotation()
-
-                return responseBody, responseCode
-            else:
-                responseCode, responseBody = Price.updateQuotation(id)
-
-                return responseBody, responseCode
+            responseCode, responseBody = (
+                Price.updateQuotation(id)
+            )
+    
+    return responseBody, responseCode
 
 
 @app.route('/InvestmentConfig', methods=['PUT', 'GET'])
-@app.route('/InvestmentConfig/<int:id>', methods=[ 'GET'])
+@app.route('/InvestmentConfig/<int:id>', methods=['GET'])
 def investment_handler(id: int = None):
-    match request.method:
-        
+    match (request.method):
+
         case "PUT":
             jsonInvestments = request.json
-            responseCode, responseBody = InvestmentConfig.insertInvestmentConfig(
-                jsonInvestments["Investments"],
-                jsonInvestments["Owner"]
+            responseCode, responseBody = (
+                InvestmentConfig.insertInvestmentConfig(
+                    jsonInvestments["Investments"],
+                    jsonInvestments["Owner"]
+                )
             )
-
             return responseBody, responseCode
-        
+
         case "GET":
-            responseCode, responseBody = InvestmentConfig.getInvestmentFunds(id)
-            
+            responseCode, responseBody = (
+                InvestmentConfig.getInvestmentFunds(id)
+            )
             return responseBody, responseCode
 
 
 @app.route('/InvestmentRefund', methods=['PUT'])
 @app.route('/InvestmentRefund/<int:id>', methods=['PUT'])
 def refund_handler(id: int = None):
-    match request.method:
-        
-        case "PUT":
-            if id is None:
-                responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
-                
-                return responseBody, responseCode
-            else:
-                responseCode, responseBody = InvestmentCalcResult.calculateResult(id)
-                
-                return responseBody, responseCode
+    match (request.method):
 
+        case "PUT":
+            responseCode, responseBody = (
+                InvestmentCalcResult.calculateResult(id)
+            )
+
+    return responseBody, responseCode
 
 
 if __name__ == '__main__':

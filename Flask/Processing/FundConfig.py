@@ -28,7 +28,7 @@ from sqlalchemy.exc import IntegrityError
 
 
 class FundConfig:
-    
+
     DateToStrFormat = "%Y-%m-%d"
 
     @staticmethod
@@ -110,25 +110,43 @@ class FundConfig:
         return investments["FundsToCheckURLs"]
 
     @staticmethod
-    def getFundUrls() -> list[dict[str, str]]:
-        
+    def getFund(fund_id: str = None) -> list[dict[str, str]]:
+
         session = SQL.base.Session()
         responseCode = 200
         try:
-            dbOut = (
-                session.query(
-                    Quotation.fund_id,
-                    Fund.category_short,
-                    func.max(Quotation.date)
-                ).outerjoin(
-                    Fund,
-                    Fund.fund_id == Quotation.fund_id
-                ).group_by(
-                    Quotation.fund_id,
-                    Fund.category_short
+            if fund_id is not None:
+                dbOut = (
+                    session.query(
+                        Quotation.fund_id,
+                        Fund.category_short,
+                        func.max(Quotation.date)
+                    ).outerjoin(
+                        Fund,
+                        Fund.fund_id == Quotation.fund_id
+                    ).filter(
+                        Fund.fund_id == fund_id
+                    ).group_by(
+                        Quotation.fund_id,
+                        Fund.category_short
+                    )
+                    .all()
                 )
-                .all()
-            )
+            else:
+                dbOut = (
+                    session.query(
+                        Quotation.fund_id,
+                        Fund.category_short,
+                        func.max(Quotation.date)
+                    ).outerjoin(
+                        Fund,
+                        Fund.fund_id == Quotation.fund_id
+                    ).group_by(
+                        Quotation.fund_id,
+                        Fund.category_short
+                    )
+                    .all()
+                )
         except Exception as e:
             responseCode = 400
             return responseCode, {
@@ -144,5 +162,5 @@ class FundConfig:
                     "quotation_date": fundDate.strftime(FundConfig.DateToStrFormat)
                 }
             )
-        
+
         return responseCode, result

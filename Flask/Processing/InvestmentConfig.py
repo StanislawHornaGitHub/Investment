@@ -178,7 +178,7 @@ class InvestmentConfig:
 
                 return responseCode, resultBody
 
-            if investment_id != None:
+            if investment_id is not None:
                 dbOut = (
                     session.query(
                         Investment.investment_id,
