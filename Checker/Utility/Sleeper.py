@@ -24,7 +24,7 @@ import time
 @dataclass
 class Sleeper:
 
-    TimeInterval_ms: int = field(init=True, default=10000)
+    TimeInterval_ms: int = field(init=True, default=3600000)
 
     __LastCheckIn: datetime = field(init=False)
     __NextCheckIn: datetime = field(init=False)
