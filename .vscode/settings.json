@@ -8,12 +8,16 @@
         "fkeys",
         "ifun",
         "jsonify",
+        "lxml",
+        "outerjoin",
         "plpgsql",
         "plpython",
         "POSTGRE",
         "sessionmaker",
+        "signum",
         "sqlalchemy",
         "subf",
         "timedelta"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "off"
 }
