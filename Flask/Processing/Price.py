@@ -86,9 +86,9 @@ class Price:
                 responseCode = 204
                 result.append(
                     {
-                        "Fund ID": fundID,
+                        "fund_id": fundID,
                         "Status": "Failed to download quotation",
-                        "Status Details": str(err)
+                        "status_details": str(err)
                     }
                 )
                 continue
@@ -109,7 +109,7 @@ class Price:
                 allQuotations
             )
 
-            responseBody["Fund ID"] = fundID
+            responseBody["fund_id"] = fundID
 
             result.append(responseBody)
 
@@ -166,16 +166,16 @@ class Price:
                         "responseCode": 204,
                         "responseBody": {
                             "Status": "Failed to download quotation",
-                            "Status Details": str(err),
-                            "Fund ID": fundID
+                            "status_details": str(err),
+                            "fund_id": fundID
                         }
                     }
                 )
                 result[-1]["responseCode"] = 204
                 result[-1]["responseBody"] = {}
-                result[-1]["responseBody"]["Fund ID"] = fundID
+                result[-1]["responseBody"]["fund_id"] = fundID
                 result[-1]["responseBody"]["Status"] = "Failed to download quotation"
-                result[-1]["responseBody"]["Status Details"] = str(err)
+                result[-1]["responseBody"]["status_details"] = str(err)
 
                 continue
 
@@ -195,7 +195,7 @@ class Price:
                         "Last Quotation Date": Dates.convertDateToString(
                             downloadedQuot["FundQuotation"][-1][AnalizyFundAPI.RESPONSE_DATE_NAME]
                         ),
-                        "Fund ID": fundID
+                        "fund_id": fundID
                     }
                 }
             )
@@ -280,7 +280,7 @@ class Price:
             # Add error message without further analysis
             result = {
                 "Status": f"Failed to add quotation {type(err)}",
-                "Status Details": str(err)
+                "status_details": str(err)
             }
             responseCode = 206
 

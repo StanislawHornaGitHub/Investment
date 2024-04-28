@@ -118,14 +118,14 @@ class FundConfig:
             dbOut = (
                 session.query(
                     Quotation.fund_id,
-                    Fund.fund_url,
+                    Fund.category_short,
                     func.max(Quotation.date)
                 ).outerjoin(
                     Fund,
                     Fund.fund_id == Quotation.fund_id
                 ).group_by(
                     Quotation.fund_id,
-                    Fund.fund_url
+                    Fund.category_short
                 )
                 .all()
             )
@@ -136,11 +136,11 @@ class FundConfig:
                 "Status_Details": str(e)
             }
         result = []
-        for fundID, fundURL, fundDate in dbOut:
+        for fundID, fundCat, fundDate in dbOut:
             result.append(
                 {
                     "fund_id": fundID,
-                    "fund_url": fundURL,
+                    "fund_category": fundCat,
                     "quotation_date": fundDate.strftime(FundConfig.DateToStrFormat)
                 }
             )
