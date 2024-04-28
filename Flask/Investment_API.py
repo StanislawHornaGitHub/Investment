@@ -95,9 +95,10 @@ def refund_handler(id: int = None):
     match (request.method):
 
         case "PUT":
-            responseCode, responseBody = (
-                InvestmentCalcResult.calculateResult(id)
-            )
+            if id is None:
+                responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
+            else:
+                responseCode, responseBody = InvestmentCalcResult.calculateResult(id)
 
     return responseBody, responseCode
 
