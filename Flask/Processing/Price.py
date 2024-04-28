@@ -18,7 +18,7 @@
 import SQL
 from SQL.Quotation import Quotation
 from SQL.Fund import Fund
-from AnalizyPL.API import AnalizyFund
+from AnalizyPL.API import AnalizyFundAPI
 from Utility.ConvertToDict import ConvertToDict
 from sqlalchemy import func
 
@@ -81,7 +81,7 @@ class Price:
 
             try:
                 # Download newest quotation from Analizy.pl
-                downloadedQuot = AnalizyFund.downloadQuotation(fund[fundID])
+                downloadedQuot = AnalizyFundAPI.downloadQuotation(fund[fundID])
             except Exception as err:
                 responseCode = 204
                 result.append(
@@ -99,7 +99,7 @@ class Price:
             # Filter out the quotation to only those entries which will be inserted to DB
             downloadedQuot["FundQuotation"] = [
                 q for q in downloadedQuot["FundQuotation"]
-                if q[AnalizyFund.RESPONSE_DATE_NAME] > date
+                if q[AnalizyFundAPI.RESPONSE_DATE_NAME] > date
             ]
 
             # Insert quotation to DB
@@ -156,7 +156,7 @@ class Price:
         for fundID in fundsWithoutPrice:
 
             try:
-                downloadedQuot = AnalizyFund.downloadQuotation(
+                downloadedQuot = AnalizyFundAPI.downloadQuotation(
                     allFunds[fundID])
             except Exception as err:
 
@@ -193,7 +193,7 @@ class Price:
                     "responseBody": {
                         "Status": "Quotation successfully added",
                         "Last Quotation Date": Dates.convertDateToString(
-                            downloadedQuot["FundQuotation"][-1][AnalizyFund.RESPONSE_DATE_NAME]
+                            downloadedQuot["FundQuotation"][-1][AnalizyFundAPI.RESPONSE_DATE_NAME]
                         ),
                         "Fund ID": fundID
                     }
@@ -209,8 +209,8 @@ class Price:
         for entry in dataToInsert["FundQuotation"]:
 
             # Create local variables for quotation value and date
-            currentDate = entry[AnalizyFund.RESPONSE_DATE_NAME]
-            currentValue = entry[AnalizyFund.RESPONSE_PRICE_NAME]
+            currentDate = entry[AnalizyFundAPI.RESPONSE_DATE_NAME]
+            currentValue = entry[AnalizyFundAPI.RESPONSE_PRICE_NAME]
 
             # Prepare dict to calculate refund in different periods
             result = {
@@ -232,14 +232,14 @@ class Price:
                 # if the result equals to None it means that there is no quotation for desired date
                 if (prev_value := Dates.getEntryWithDesiredDate(
                     allQuotation + dataToInsert["FundQuotation"],
-                    AnalizyFund.RESPONSE_DATE_NAME,
+                    AnalizyFundAPI.RESPONSE_DATE_NAME,
                     dates[period]
                 )
                 ) != None:
 
                     # Based on filtered data calculate result
                     result[period] = (
-                        currentValue / prev_value[AnalizyFund.RESPONSE_PRICE_NAME]) - 1.0
+                        currentValue / prev_value[AnalizyFundAPI.RESPONSE_PRICE_NAME]) - 1.0
 
             # Create DB entry
             session.add(
@@ -261,7 +261,7 @@ class Price:
             result = {
                 "Status": "Quotation successfully added",
                 "Last Quotation Date": Dates.convertDateToString(
-                    dataToInsert["FundQuotation"][-1][AnalizyFund.RESPONSE_DATE_NAME]
+                    dataToInsert["FundQuotation"][-1][AnalizyFundAPI.RESPONSE_DATE_NAME]
                 )
             }
 
