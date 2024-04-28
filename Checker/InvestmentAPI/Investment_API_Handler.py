@@ -15,7 +15,7 @@
     Date            Who                     What
 
 """
-
+import os
 import requests
 from datetime import date
 from dateutil.parser import parse
@@ -23,8 +23,8 @@ from Utility.Exceptions import InvestmentAPIexception
 
 class InvestmentAPI:
     
-    __API_PORT = 5000
-    __API_IP = "192.168.0.212"
+    __API_IP = os.getenv('FLASK_IP_Address', 'localhost')
+    __API_PORT = os.getenv('FLASK_Port', '5000')
 
     __FUND_ENDPOINT = "FundConfig"
     __FUND_RESP_DATE = "quotation_date"
