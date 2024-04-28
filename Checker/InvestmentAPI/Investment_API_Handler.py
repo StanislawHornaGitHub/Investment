@@ -17,9 +17,11 @@
 """
 import os
 import requests
+import time
 from datetime import date
 from dateutil.parser import parse
 from Utility.Exceptions import InvestmentAPIexception
+from Utility.Printer import Printer
 
 class InvestmentAPI:
     
@@ -35,6 +37,18 @@ class InvestmentAPI:
     __QUOTATION_ENDPOINT = "FundQuotation"
     
     __REFUND_ENDPOINT = "InvestmentRefund"
+
+    @staticmethod
+    def waitForFullSystemInitialization():
+        # loop until request to get funds will be successful
+        while True:
+            try:
+                Printer.json(InvestmentAPI.getFunds())
+                return
+            except InvestmentAPIexception as invErr:
+                print(invErr)
+                time.sleep(1)
+                continue
 
     @staticmethod
     def getFunds(ID: str = None) -> list[dict[str, str | date]]:

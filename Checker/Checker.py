@@ -19,7 +19,6 @@
     Date            Who                     What
 
 """
-import json
 from InvestmentAPI.Investment_API_Handler import InvestmentAPI
 from InvestmentAPI.Unpacker import Unpacker
 from AnalizyPL.API import AnalizyAPI
@@ -29,6 +28,8 @@ from Utility.Printer import Printer
 
 def Main():
 
+    InvestmentAPI.waitForFullSystemInitialization()
+    
     sleeper = Sleeper()
 
     while True:
