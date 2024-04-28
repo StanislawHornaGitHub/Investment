@@ -19,12 +19,13 @@
     Date            Who                     What
 
 """
+import json
 from InvestmentAPI.Investment_API_Handler import InvestmentAPI
 from InvestmentAPI.Unpacker import Unpacker
 from AnalizyPL.API import AnalizyAPI
 from Utility.Sleeper import Sleeper
 from Utility.Exceptions import InvestmentAPIexception, AnalizyAPIexception
-
+from Utility.Printer import Printer
 
 def Main():
 
@@ -42,8 +43,24 @@ def Main():
 
 def quotationUpdate():
 
+    # Get list of funds to check
+    fundsToCheck = (InvestmentAPI.getFunds())
+    
+    # If list is empty invoke downloading all fund quotations
+    if not fundsToCheck:
+        try:
+            Printer.json(InvestmentAPI.updateFunds())
+            
+        except InvestmentAPIexception as invErr:
+            print(invErr)
+
+        except AnalizyAPIexception as anaErr:
+            print(anaErr)
+    
+        return None
+    
     # Loop through monitored funds
-    for item in (InvestmentAPI.getFunds()):
+    for item in fundsToCheck:
 
         try:
             # Unpack response items
@@ -54,22 +71,41 @@ def quotationUpdate():
             # Check if Analizy.pl api has newer quotation available,
             # if yes, then invoke update for particular fund
             if AnalizyAPI.getLastQuotationDate(fund_id, fund_cat) > quotation_date:
-                print(InvestmentAPI.updateFunds(fund_id))
+                Printer.json(InvestmentAPI.updateFunds(fund_id))
 
         except InvestmentAPIexception as invErr:
             print(invErr)
 
         except AnalizyAPIexception as anaErr:
             print(anaErr)
+    
+    return None
 
 
 def refundUpdate():
+    
+    # Get list of investments to check
+    investmentsToCheck = (InvestmentAPI.getInvestment())
+    
+    # If list is empty invoke refund calculation for all investments
+    if not investmentsToCheck:
+        try:
+            Printer.json(InvestmentAPI.updateInvestment())
+            
+        except InvestmentAPIexception as invErr:
+            print(invErr)
+
+        except AnalizyAPIexception as anaErr:
+            print(anaErr)
+    
+        return None
+    
 
     # Init local set of investment IDs to trigger update
     investmentsToUpdate = set()
 
     # Loop through configured investments
-    for item in (InvestmentAPI.getInvestment()):
+    for item in investmentsToCheck:
 
         try:
             # Unpack response items
@@ -97,7 +133,7 @@ def refundUpdate():
 
         try:
             # Trigger investment refund calculation
-            print(InvestmentAPI.updateInvestment(investment))
+            Printer.json(InvestmentAPI.updateInvestment(investment))
 
         except InvestmentAPIexception as invErr:
             print(invErr)
