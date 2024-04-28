@@ -19,7 +19,7 @@
 import requests
 from datetime import date
 from dateutil.parser import parse
-
+from Utility.Exceptions import InvestmentAPIexception
 
 class InvestmentAPI:
     
@@ -37,10 +37,13 @@ class InvestmentAPI:
     __REFUND_ENDPOINT = "InvestmentRefund"
 
     @staticmethod
-    def getFunds() -> list[dict[str, str | date]]:
+    def getFunds(ID: str = None) -> list[dict[str, str | date]]:
 
-        # Create appropriate url to call
-        url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__FUND_ENDPOINT}"
+        # Create appropriate url whether ID was provided or not
+        if ID is None:
+            url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__FUND_ENDPOINT}"
+        else:
+            url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__FUND_ENDPOINT}/{ID}"
 
         # Call API
         apiResponse = requests.get(url)
@@ -57,7 +60,7 @@ class InvestmentAPI:
 
         else:
             # Raise an exception if status code was different than 200
-            raise Exception(str(result))
+            raise InvestmentAPIexception(str(result))
         
         return result
     
@@ -76,7 +79,7 @@ class InvestmentAPI:
         
         if apiResponse.status_code != 200:
             
-            raise Exception(result)
+            raise InvestmentAPIexception(result)
         
         return result
 
@@ -103,7 +106,7 @@ class InvestmentAPI:
                 ).date()
 
         else:
-            raise Exception(str(result))
+            raise InvestmentAPIexception(str(result))
         
         return result
     
@@ -122,6 +125,6 @@ class InvestmentAPI:
         
         if apiResponse.status_code != 200:
             
-            raise Exception(result)
+            raise InvestmentAPIexception(result)
         
         return result
