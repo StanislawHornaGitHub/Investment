@@ -30,6 +30,7 @@ from sqlalchemy.exc import IntegrityError
 class FundConfig:
 
     DateToStrFormat = "%Y-%m-%d"
+    __default_date_for_none = "1900-01-01"
 
     @staticmethod
     def insertFundConfig(Funds: list[str]):
@@ -155,11 +156,16 @@ class FundConfig:
             }
         result = []
         for fundID, fundCat, fundDate in dbOut:
+            try:
+                convertedDate = fundDate.strftime(FundConfig.DateToStrFormat)
+            except:
+                convertedDate = FundConfig.__default_date_for_none
+
             result.append(
                 {
                     "fund_id": fundID,
                     "fund_category": fundCat,
-                    "quotation_date": fundDate.strftime(FundConfig.DateToStrFormat)
+                    "quotation_date": convertedDate
                 }
             )
 

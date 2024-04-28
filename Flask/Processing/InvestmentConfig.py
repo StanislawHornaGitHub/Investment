@@ -33,6 +33,7 @@ from Utility.Dates import Dates
 class InvestmentConfig:
 
     DateToStrFormat = "%Y-%m-%d"
+    __default_date_for_none = "1900-01-01"
 
     @staticmethod
     def insertInvestmentConfig(Investments: dict[str, dict[str, list[dict[str, str]]]], InvestOwner: str):
@@ -220,11 +221,18 @@ class InvestmentConfig:
 
         result = []
         for investmentID, fundID, investmentDate in dbOut:
+            try:
+                convertedDate = (
+                    investmentDate.strftime(InvestmentConfig.DateToStrFormat)
+                )
+            except:
+                convertedDate = InvestmentConfig.__default_date_for_none
+
             result.append(
                 {
                     "investment_id": investmentID,
                     "fund_id": fundID,
-                    "refund_date": investmentDate.strftime(InvestmentConfig.DateToStrFormat)
+                    "refund_date": convertedDate
                 }
             )
 
