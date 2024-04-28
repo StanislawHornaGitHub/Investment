@@ -167,7 +167,7 @@ class InvestmentConfig:
         try:
             # Check if provided ID exists in DB
             if (
-                (Investment.checkInvestmentIDisValid(investment_id, session) != True) and
+                (Investment.IDisValid(investment_id, session) != True) and
                 (investment_id is not None)
             ):
                 resultBody = {

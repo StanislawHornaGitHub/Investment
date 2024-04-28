@@ -104,7 +104,7 @@ class InvestmentCalcResult:
 
         try:
             # Check if provided ID exists in DB
-            if(Investment.checkInvestmentIDisValid(investment_id, session) != True):
+            if(Investment.IDisValid(investment_id, session) != True):
                 resultBody = {
                     "Investment ID": investment_id,
                     "Status": f"Investment with ID: {investment_id} does not exist"
