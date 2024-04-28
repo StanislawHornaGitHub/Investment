@@ -22,7 +22,7 @@ from dateutil.parser import parse
 
 
 from dataclasses import dataclass, field
-
+from Utility.Exceptions import AnalizyAPIexception
 
 
 @dataclass
@@ -41,10 +41,13 @@ class AnalizyAPI:
         # Create custom URL to access API to download JSON with all quotation
         url = f"{AnalizyAPI.__API_URL}/{fund_category}/{fund_id}"
 
+        try:
         # Invoke web request and convert JSON response to dict
-        apiResponse = requests.get(url)
-        
-        fundQuotation = apiResponse.json()
+            apiResponse = requests.get(url)
+            
+            fundQuotation = apiResponse.json()
+        except Exception as err:
+            raise AnalizyAPIexception(str(err))
         
         quotation = fundQuotation[AnalizyAPI.__RESPONSE_DETAILS][0][AnalizyAPI.__RESPONSE_LIST]
         
