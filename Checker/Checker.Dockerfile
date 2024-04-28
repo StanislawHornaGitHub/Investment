@@ -20,3 +20,17 @@ FROM ubuntu:22.04
 RUN apt update
 RUN apt install -y python3-dev
 RUN apt install -y pip
+
+# Set working directory and copy required files
+WORKDIR /App
+COPY . /App
+
+# Install Python packages
+RUN pip install -r requirements.txt
+
+# Set environmental variables
+ENV FLASK_IP_Address="API"
+ENV FLASK_Port="5000"
+
+# Start program ("-u" param is required to see print output in docker logs)
+CMD ["python3", "-u", "./Checker.py"]
