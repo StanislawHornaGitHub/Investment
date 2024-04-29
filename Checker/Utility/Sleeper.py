@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.0
+    Version:            1.1
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -13,6 +13,7 @@
     ChangeLog:
 
     Date            Who                     What
+    2024-04-29      Stanisław Horna         add check-in after completed sleep.
 
 """
 import time
@@ -69,6 +70,8 @@ class Sleeper:
                 exit(0)
 
             time.sleep(1)
+        
+        self.checkIn()
 
     def checkIn(self) -> None:
         self.__last_check_in()
