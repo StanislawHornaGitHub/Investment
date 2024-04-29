@@ -1,11 +1,11 @@
 """
 .DESCRIPTION
     Class to handle sleeping the process between operations.
-    
+
 
 .NOTES
 
-    Version:            1.1
+    Version:            1.2
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -13,11 +13,14 @@
     ChangeLog:
 
     Date            Who                     What
-    2024-04-29      Stanisław Horna         add check-in after completed sleep.
+    2024-04-29      Stanisław Horna         Add check-in after completed sleep.
+                                            Add logging capabilities.
+
 
 """
 import time
 import sys
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
@@ -28,7 +31,7 @@ from Utility.Terminator import Terminator
 class Sleeper:
 
     TimeInterval_ms: int = field(init=True, default=3600000)
-
+    
     __TERMINATOR: Terminator = field(init=False, default=Terminator())
 
     __LastCheckIn: datetime = field(init=False)
@@ -36,6 +39,8 @@ class Sleeper:
 
     def __post_init__(self):
         self.checkIn()
+        logging.info("Sleeper initialized for interval: %d",
+                     self.TimeInterval_ms)
 
     def __last_check_in(self):
         self.__LastCheckIn = datetime.now()
@@ -59,21 +64,27 @@ class Sleeper:
         return TimeToSleep
 
     def __invoke_sleep(self, sleepTime: float):
+        
+        logging.info("__invoke_sleep(%f)", sleepTime)
 
         fractionTime = sleepTime % 1
         fullSeconds = int(sleepTime)
 
+        logging.info("Sleeping for fraction time: %f", fractionTime)
         time.sleep(fractionTime)
 
+        logging.info("Starting main sleep loop. Will be executed: %d times.", fullSeconds)
         for c in range(0, fullSeconds):
             if self.__TERMINATOR.getStatus() == True:
+                logging.info("Exiting program with code 0.")
                 exit(0)
 
             time.sleep(1)
-        
+
         self.checkIn()
 
     def checkIn(self) -> None:
+        logging.info("checkIn()")
         self.__last_check_in()
         self.__next_check_in()
 
@@ -89,23 +100,21 @@ class Sleeper:
 
     def start(self) -> float:
 
+        logging.info("start()")
+
         OperationTime = self.getTimeSinceLastCheckIn()
+        logging.info("Operations took: %f", OperationTime)
         TimeToSleep = self.__calculate_time_to_sleep()
 
         if TimeToSleep <= 0:
-            print(
-                "Operations took: ",
-                OperationTime, " seconds. ",
-                "Sleep time exceeded by ",
-                (TimeToSleep * -1), " seconds."
+            logging.warning(
+                "Sleep time exceeded by %f seconds.",
+                (TimeToSleep * -1)
             )
         else:
-            print(
-                "Operations took: ",
-                OperationTime, " seconds. ",
-                "Sleep for: ",
-                TimeToSleep, " seconds"
-            )
+            logging.info("Sleep for: %f seconds", TimeToSleep)
+
             self.__invoke_sleep(TimeToSleep)
 
+        logging.info("Returning time which process was sleeping.")
         return TimeToSleep

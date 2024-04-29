@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.0
+    Version:            1.1
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -13,10 +13,13 @@
     ChangeLog:
 
     Date            Who                     What
+    2024-04-29      Stanisław Horna         Add logging capabilities.
 
 """
 import signal
+import logging
 from dataclasses import dataclass, field
+
 
 class Terminator:
     kill_now: bool = field(init=False, default=False)
@@ -30,8 +33,8 @@ class Terminator:
         signal.signal(signal.SIGTERM, self.exit_gracefully)
 
     def exit_gracefully(self, signum, frame):
-        print("\nStop signal received ({} signal)".format(self.signals[signum]))
+        logging.warning("Stop signal received.")
         self.kill_now = True
-        
+
     def getStatus(self) -> bool:
         return self.kill_now
