@@ -67,6 +67,7 @@ services:
       dockerfile: Checker.Dockerfile
     depends_on:
       - Flask
+      - PostgreSQL
     container_name: ${CHECKER_CONTAINER_NAME}
     hostname: ${CHECKER_HOSTNAME}
     restart: unless-stopped

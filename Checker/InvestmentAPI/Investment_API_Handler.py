@@ -47,7 +47,7 @@ class InvestmentAPI:
                 return
             except InvestmentAPIexception as invErr:
                 print(invErr)
-                time.sleep(1)
+                time.sleep(5)
                 continue
 
     @staticmethod

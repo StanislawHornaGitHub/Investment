@@ -9,7 +9,7 @@
 
 .NOTES
 
-    Version:            1.0
+    Version:            1.1
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -17,6 +17,7 @@
     ChangeLog:
 
     Date            Who                     What
+    2024-04-29      Stanisław Horna         Add additional messages for detection that tables are empty.
 
 """
 from InvestmentAPI.Investment_API_Handler import InvestmentAPI
@@ -49,6 +50,7 @@ def quotationUpdate():
     
     # If list is empty invoke downloading all fund quotations
     if not fundsToCheck:
+        print("Fund list is empty")
         try:
             Printer.json(InvestmentAPI.updateFunds())
             
@@ -90,6 +92,7 @@ def refundUpdate():
     
     # If list is empty invoke refund calculation for all investments
     if not investmentsToCheck:
+        print("Investment list is empty")
         try:
             Printer.json(InvestmentAPI.updateInvestment())
             
