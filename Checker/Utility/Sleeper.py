@@ -31,7 +31,7 @@ from Utility.Terminator import Terminator
 class Sleeper:
 
     TimeInterval_ms: int = field(init=True, default=3600000)
-    
+
     __TERMINATOR: Terminator = field(init=False, default=Terminator())
 
     __LastCheckIn: datetime = field(init=False)
@@ -39,8 +39,10 @@ class Sleeper:
 
     def __post_init__(self):
         self.checkIn()
-        logging.info("Sleeper initialized for interval: %d",
-                     self.TimeInterval_ms)
+        logging.debug(
+            "Sleeper initialized for interval: %d",
+            self.TimeInterval_ms
+        )
 
     def __last_check_in(self):
         self.__LastCheckIn = datetime.now()
@@ -64,16 +66,17 @@ class Sleeper:
         return TimeToSleep
 
     def __invoke_sleep(self, sleepTime: float):
-        
-        logging.info("__invoke_sleep(%f)", sleepTime)
+
+        logging.debug("__invoke_sleep(%f)", sleepTime)
 
         fractionTime = sleepTime % 1
         fullSeconds = int(sleepTime)
 
-        logging.info("Sleeping for fraction time: %f", fractionTime)
+        logging.debug("Sleeping for fraction time: %f", fractionTime)
         time.sleep(fractionTime)
 
-        logging.info("Starting main sleep loop. Will be executed: %d times.", fullSeconds)
+        logging.debug(
+            "Starting main sleep loop. Will be executed: %d times.", fullSeconds)
         for c in range(0, fullSeconds):
             if self.__TERMINATOR.getStatus() == True:
                 logging.info("Exiting program with code 0.")
@@ -84,7 +87,7 @@ class Sleeper:
         self.checkIn()
 
     def checkIn(self) -> None:
-        logging.info("checkIn()")
+        logging.debug("checkIn()")
         self.__last_check_in()
         self.__next_check_in()
 
@@ -100,7 +103,7 @@ class Sleeper:
 
     def start(self) -> float:
 
-        logging.info("start()")
+        logging.debug("start()")
 
         OperationTime = self.getTimeSinceLastCheckIn()
         logging.info("Operations took: %f", OperationTime)

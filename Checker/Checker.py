@@ -33,7 +33,7 @@ from Utility.Exceptions import InvestmentAPIexception, AnalizyAPIexception
 logging.basicConfig(
     format='%(asctime)s.%(msecs)03d - %(levelname)s - %(module)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
-    level=os.getenv('LOG_LEVEL', "INFO")
+    level=os.getenv('LOG_LEVEL', "DEBUG")
 )
 
 
@@ -48,14 +48,17 @@ def Main():
                 quotationUpdate()
                 refundUpdate()
             except InvestmentAPIexception:
-                logging.error("InvestmentAPI exception occurred", exc_info=True)
+                logging.exception(
+                    "InvestmentAPI exception occurred", exc_info=True)
 
             sleeper.start()
     except:
-        logging.critical("Exception occurred", exc_info=True)
+        logging.exception("Exception occurred", exc_info=True)
 
 
 def quotationUpdate():
+
+    logging.info("quotationUpdate()")
 
     # Get list of funds to check
     fundsToCheck = (InvestmentAPI.getFunds())
@@ -64,13 +67,14 @@ def quotationUpdate():
     if not fundsToCheck:
         logging.warning("Fund list is empty")
         try:
-            logging.info(str(InvestmentAPI.updateFunds()))
+            logging.debug(str(InvestmentAPI.updateFunds()))
 
         except InvestmentAPIexception:
-            logging.error("InvestmentAPI exception occurred", exc_info=True)
+            logging.exception(
+                "InvestmentAPI exception occurred", exc_info=True)
 
         except AnalizyAPIexception:
-            logging.error("AnalizyAPI exception occurred", exc_info=True)
+            logging.exception("AnalizyAPI exception occurred", exc_info=True)
 
         return None
 
@@ -87,7 +91,7 @@ def quotationUpdate():
             quotation_date_web = AnalizyAPI.getLastQuotationDate(
                 fund_id, fund_cat)
 
-            logging.info(
+            logging.debug(
                 "Comparing quotation dates (web | DB): %s, %s",
                 quotation_date_web, quotation_date
             )
@@ -97,15 +101,18 @@ def quotationUpdate():
                 logging.info(str(InvestmentAPI.updateFunds(fund_id)))
 
         except InvestmentAPIexception:
-            logging.error("InvestmentAPI exception occurred", exc_info=True)
+            logging.exception(
+                "InvestmentAPI exception occurred", exc_info=True)
 
         except AnalizyAPIexception:
-            logging.error("AnalizyAPI exception occurred", exc_info=True)
+            logging.exception("AnalizyAPI exception occurred", exc_info=True)
 
     return None
 
 
 def refundUpdate():
+
+    logging.info("refundUpdate()")
 
     # Get list of investments to check
     investmentsToCheck = (InvestmentAPI.getInvestment())
@@ -114,13 +121,14 @@ def refundUpdate():
     if not investmentsToCheck:
         logging.warning("Investment list is empty")
         try:
-            logging.info(str(InvestmentAPI.updateInvestment()))
+            logging.debug(str(InvestmentAPI.updateInvestment()))
 
         except InvestmentAPIexception:
-            logging.error("InvestmentAPI exception occurred", exc_info=True)
+            logging.exception(
+                "InvestmentAPI exception occurred", exc_info=True)
 
         except AnalizyAPIexception:
-            logging.error("AnalizyAPI exception occurred", exc_info=True)
+            logging.exception("AnalizyAPI exception occurred", exc_info=True)
 
         return None
 
@@ -143,7 +151,7 @@ def refundUpdate():
                 )
             )
 
-            logging.info(
+            logging.debug(
                 "Comparing dates (quotation | refund): %s, %s",
                 quotation_date, refund_date
             )
@@ -151,10 +159,12 @@ def refundUpdate():
             # if yes add investment to update set
             if quotation_date > refund_date:
                 investmentsToUpdate.add(investment_id)
-                logging.info("Investment (%s) added to update set", investment_id)
+                logging.debug(
+                    "Investment (%s) added to update set", investment_id)
 
         except InvestmentAPIexception:
-            logging.error("InvestmentAPI exception occurred", exc_info=True)
+            logging.exception(
+                "InvestmentAPI exception occurred", exc_info=True)
 
     # Loop through investments to update
     for investment in investmentsToUpdate:
@@ -164,9 +174,10 @@ def refundUpdate():
             logging.info(str(InvestmentAPI.updateInvestment(investment)))
 
         except InvestmentAPIexception as invErr:
-            logging.error("InvestmentAPI exception occurred", exc_info=True)
+            logging.exception(
+                "InvestmentAPI exception occurred", exc_info=True)
 
 
 if __name__ == '__main__':
-    logging.info("Program started")
+    logging.info("Service started")
     Main()

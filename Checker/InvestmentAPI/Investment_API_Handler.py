@@ -47,37 +47,37 @@ class InvestmentAPI:
         # loop until request to get funds will be successful
         while True:
             try:
-                logging.info("API response: %s",str(InvestmentAPI.getFunds()))
+                logging.info("Number of funds: %c",str(len(InvestmentAPI.getFunds())))
                 logging.info("System is up and running.")
                 return
-            except InvestmentAPIexception as invErr:
-                logging.warning("InvestmentAPI exception occurred", exc_info=True)
+            except InvestmentAPIexception:
+                logging.exception("InvestmentAPI exception occurred", exc_info=True)
                 time.sleep(5)
                 continue
 
     @staticmethod
     def getFunds(ID: str = None) -> list[dict[str, str | date]]:
         
-        logging.info("getFunds(%s)", ID)
+        logging.debug("getFunds(%s)", ID)
 
         # Create appropriate url whether ID was provided or not
         if ID is None:
-            logging.info("URL for fund is none created")
+            logging.debug("URL for fund is none created")
             url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__FUND_ENDPOINT}"
         else:
             url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__FUND_ENDPOINT}/{ID}"
-            logging.info("URL for fund is NOT none created")
+            logging.debug("URL for fund is NOT none created")
 
         # Call API
-        logging.info("Calling %s", url)
+        logging.debug("Calling %s", url)
         apiResponse = requests.get(url)
-        logging.info("Response status code: %d", apiResponse.status_code)
+        logging.debug("Response status code: %d", apiResponse.status_code)
         result = apiResponse.json()
 
         # Check response code
         if apiResponse.status_code == 200:
             
-            logging.info("Parsing %s to datetime type", InvestmentAPI.__FUND_RESP_DATE)
+            logging.debug("Parsing %s to datetime type", InvestmentAPI.__FUND_RESP_DATE)
             # Loop through returned list and convert date from sting to datetime
             for i in range(0, len(result)):
                 result[i][InvestmentAPI.__FUND_RESP_DATE] = parse(
@@ -86,62 +86,60 @@ class InvestmentAPI:
 
         else:
             # Raise an exception if status code was different than 200
-            logging.error("Request was NOT successful: %s", str(result))
             raise InvestmentAPIexception(str(result))
         
-        logging.info("Returning fund list")
+        logging.debug("Returning fund list")
         return result
     
     @staticmethod
     def updateFunds(ID: str = None):
         
-        logging.info("updateFunds(%s)", ID)
+        logging.debug("updateFunds(%s)", ID)
         
         # Create appropriate url whether ID was provided or not
         if ID is None:
-            logging.info("URL for fund is none created")
+            logging.debug("URL for fund is none created")
             url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__QUOTATION_ENDPOINT}"
         else:
-            logging.info("URL for fund is NOT none created")
+            logging.debug("URL for fund is NOT none created")
             url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__QUOTATION_ENDPOINT}/{ID}"
         
         # Call API
-        logging.info("Calling %s", url)
+        logging.debug("Calling %s", url)
         apiResponse = requests.put(url)
-        logging.info("Response status code: %d", apiResponse.status_code)
+        logging.debug("Response status code: %d", apiResponse.status_code)
         result = apiResponse.json()
         
         if apiResponse.status_code != 200:
             
-            logging.error("Update was NOT successful: %s", str(result))
             raise InvestmentAPIexception(result)
         
-        logging.info("Returning update status")
+        logging.debug("Returning update status")
         return result
 
     @staticmethod
     def getInvestment(ID: int = None) -> list[dict[str, str | date]]:
         
-        logging.info("getInvestment(%s)", ID)
+        logging.debug("getInvestment(%s)", ID)
         
         # Create appropriate url whether ID was provided or not
         if ID is None:
-            logging.info("URL for investment is none created")
+            logging.debug("URL for investment is none created")
             url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__INVESTMENT_ENDPOINT}"
         else:
-            logging.info("URL for investment is NOT none created")
+            logging.debug("URL for investment is NOT none created")
             url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__INVESTMENT_ENDPOINT}/{ID}"
 
         # Call API
-        logging.info("Calling %s", url)
+        logging.debug("Calling %s", url)
         apiResponse = requests.get(url)
-        logging.info("Response status code: %d", apiResponse.status_code)
+        logging.debug("Response status code: %d", apiResponse.status_code)
         result = apiResponse.json()
 
         # Check response code
         if apiResponse.status_code == 200:
             
-            logging.info("Parsing %s to datetime type", InvestmentAPI.__INVESTMENT_RESP_DATE)
+            logging.debug("Parsing %s to datetime type", InvestmentAPI.__INVESTMENT_RESP_DATE)
             # Loop through returned list and convert date from sting to datetime
             for i in range(0, len(result)):
                 result[i][InvestmentAPI.__INVESTMENT_RESP_DATE] = parse(
@@ -149,35 +147,33 @@ class InvestmentAPI:
                 ).date()
 
         else:
-            logging.error("Request was NOT successful: %s", str(result))
             raise InvestmentAPIexception(str(result))
         
-        logging.info("Returning investment list")
+        logging.debug("Returning investment list")
         return result
     
     @staticmethod
     def updateInvestment(ID: int = None):
         
-        logging.info("updateInvestment(%s)", ID)
+        logging.debug("updateInvestment(%s)", ID)
         
         # Create appropriate url whether ID was provided or not
         if ID is None:
-            logging.info("URL for investment is none created")
+            logging.debug("URL for investment is none created")
             url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__REFUND_ENDPOINT}"
         else:
-            logging.info("URL for investment is NOT none created")
+            logging.debug("URL for investment is NOT none created")
             url = f"http://{InvestmentAPI.__API_IP}:{InvestmentAPI.__API_PORT}/{InvestmentAPI.__REFUND_ENDPOINT}/{ID}"
 
         # Call API
-        logging.info("Calling %s", url)
+        logging.debug("Calling %s", url)
         apiResponse = requests.put(url)
-        logging.info("Response status code: %d", apiResponse.status_code)
+        logging.debug("Response status code: %d", apiResponse.status_code)
         result = apiResponse.json()
         
         if apiResponse.status_code != 200:
             
-            logging.error("Update was NOT successful: %s", str(result))
             raise InvestmentAPIexception(result)
         
-        logging.info("Returning update status")
+        logging.debug("Returning update status")
         return result
