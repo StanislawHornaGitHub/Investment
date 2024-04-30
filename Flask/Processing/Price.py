@@ -4,7 +4,7 @@
 
 .NOTES
 
-    Version:            1.1
+    Version:            1.2
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -13,9 +13,12 @@
 
     Date            Who                     What
     2024-04-02      Stanisław Horna         Response body and code implemented.
+    
+    2024-04-30      Stanisław Horna         Add logging capabilities.
 
 """
 import SQL
+import logging
 from SQL.Quotation import Quotation
 from SQL.Fund import Fund
 from AnalizyPL.API import AnalizyFundAPI
@@ -30,12 +33,16 @@ class Price:
     @staticmethod
     def updateQuotation(ID: str = None):
 
+        logging.debug("updateQuotation(%s)", ID)
+
         # Create session and init processing variables
         session = SQL.base.Session()
         responseCode = 200
         result = []
 
         if ID is None:
+
+            logging.debug("ID is none")
 
             # Get monitored Fund IDs
             fund = ConvertToDict.fundList(session.query(Fund).all())
@@ -48,47 +55,74 @@ class Price:
                 .all()
             )
         else:
+
+            logging.debug("ID is not none")
+
             # Check if provided ID exists in DB
-            if(Fund.IDisValid(ID, session) != True):
+            if (Fund.IDisValid(ID, session) != True):
+                logging.error("Fund with ID: %s does not exist", ID)
                 resultBody = {
                     "fund_id": ID,
                     "Status": f"Fund with ID: {ID} does not exist"
                 }
                 responseCode = 404
-                
-                return responseCode, resultBody
-            # Get monitored Fund IDs
-            fund = ConvertToDict.fundList(
-                (
-                    session
-                    .query(Fund)
-                    .filter(Fund.fund_id == ID)
-                    .all()
+
+                logging.debug(
+                    "updateQuotation(%s), returning result body and code: %d",
+                    ID,
+                    responseCode
                 )
-            )
+                return responseCode, resultBody
+
+            # Get monitored Fund IDs
+            try:
+                fund = ConvertToDict.fundList(
+                    (
+                        session
+                        .query(Fund)
+                        .filter(Fund.fund_id == ID)
+                        .all()
+                    )
+                )
+            except:
+                logging.exception(
+                    "Failed to get list of monitored funds",
+                    exc_info=True
+                )
+                return None, None
 
             # Get last quotation date for each fund
-            lastRefreshDates = (
-                session
-                .query(func.max(Quotation.date), Quotation.fund_id)
-                .filter(Quotation.fund_id == ID)
-                .group_by(Quotation.fund_id)
-                .all()
-            )
+            try:
+                lastRefreshDates = (
+                    session
+                    .query(func.max(Quotation.date), Quotation.fund_id)
+                    .filter(Quotation.fund_id == ID)
+                    .group_by(Quotation.fund_id)
+                    .all()
+                )
+            except:
+                logging.exception(
+                    "Failed to get funds' last refresh dates",
+                    exc_info=True
+                )
 
         # Loop through each fund which already has some quotation in DB
         for date, fundID in lastRefreshDates:
 
-            try:
-                # Download newest quotation from Analizy.pl
-                downloadedQuot = AnalizyFundAPI.downloadQuotation(fund[fundID])
-            except Exception as err:
+            logging.debug("Processing (date | fund ID) %s | %s", date, fundID)
+            # Download newest quotation from Analizy.pl
+            downloadedQuot = AnalizyFundAPI.downloadQuotation(fund[fundID])
+
+            if downloadedQuot is None:
                 responseCode = 204
+                logging.error(
+                    "Failed to download quotation for fund: %s",
+                    fundID
+                )
                 result.append(
                     {
                         "fund_id": fundID,
-                        "Status": "Failed to download quotation",
-                        "status_details": str(err)
+                        "Status": "Failed to download quotation"
                     }
                 )
                 continue
@@ -96,6 +130,7 @@ class Price:
             # Create temp variable to store all downloaded quotation
             allQuotations = downloadedQuot["FundQuotation"]
 
+            logging.debug("Filtering quotation to get newer then %s", date)
             # Filter out the quotation to only those entries which will be inserted to DB
             downloadedQuot["FundQuotation"] = [
                 q for q in downloadedQuot["FundQuotation"]
@@ -115,7 +150,7 @@ class Price:
 
             if code != 204:
                 responseCode = code
-
+        logging.debug("Filtering out funds without quotations saved in DB")
         # Get funds without any quotation
         fundsWithPrice = list([fr[1] for fr in lastRefreshDates])
         fundsWithoutPrice = [
@@ -149,34 +184,35 @@ class Price:
     @staticmethod
     def insertQuotation(fundsWithoutPrice: list[str], allFunds: dict[str, Fund], session):
 
+        logging.debug("insertQuotation(%s)", str(fundsWithoutPrice))
+
         # Init result list
         result = []
 
         # loop through each fund ID
         for fundID in fundsWithoutPrice:
 
-            try:
-                downloadedQuot = AnalizyFundAPI.downloadQuotation(
-                    allFunds[fundID])
-            except Exception as err:
+            logging.debug("Processing: %s", fundID)
 
+            downloadedQuot = AnalizyFundAPI.downloadQuotation(
+                allFunds[fundID]
+            )
+
+            if downloadedQuot is None:
+                logging.error(
+                    "Failed to download quotation for fund: %s",
+                    fundID
+                )
                 # Create method output details
                 result.append(
                     {
                         "responseCode": 204,
                         "responseBody": {
                             "Status": "Failed to download quotation",
-                            "status_details": str(err),
                             "fund_id": fundID
                         }
                     }
                 )
-                result[-1]["responseCode"] = 204
-                result[-1]["responseBody"] = {}
-                result[-1]["responseBody"]["fund_id"] = fundID
-                result[-1]["responseBody"]["Status"] = "Failed to download quotation"
-                result[-1]["responseBody"]["status_details"] = str(err)
-
                 continue
 
             result.append({})
@@ -199,12 +235,13 @@ class Price:
                     }
                 }
             )
-
+        logging.debug("insertQuotation(%s). Returning", str(fundsWithoutPrice))
         return result
 
     @staticmethod
     def insertQuotationRecords(dataToInsert: list[dict[str, str]], session, allQuotation=[]):
 
+        logging.debug("insertQuotationRecords()")
         # Loop through each quotation entry
         for entry in dataToInsert["FundQuotation"]:
 
@@ -266,14 +303,14 @@ class Price:
             }
 
         except IndexError as indexErr:
-
+            logging.warning("No new quotation to add", exc_info=True)
             # Add success message as index error means that there were no new entries to insert
             result = {
                 "Status": "No new quotation to add"
             }
 
         except Exception as err:
-
+            logging.exception("Failed to add quotation", exc_info=True)
             # Rollback transaction to be able to successfully proceed with the next url
             session.rollback()
 
@@ -284,16 +321,8 @@ class Price:
             }
             responseCode = 206
 
-        return responseCode, result
-
-    @staticmethod
-    def getHistoricalQuotation(desired_date, fund_id, session):
-
-        return (
-            session
-            .query(Quotation.value)
-            .filter(Quotation.date < desired_date, Quotation.fund_id == fund_id)
-            .order_by(Quotation.date.desc())
-            .limit(1)
-            .first()
+        logging.debug(
+            "insertQuotationRecords(). Returning body and code: %d",
+            responseCode
         )
+        return responseCode, result
