@@ -10,9 +10,11 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  24-Apr-2024
-# Version:  1.0
+# Version:  1.1
 
 # Date            Who                     What
+# 2024-04-29      Stanisław Horna         Add environmental variable for log level.
+#
 
 FROM ubuntu:22.04
 
@@ -31,6 +33,7 @@ RUN pip install -r requirements.txt
 # Set environmental variables
 ENV FLASK_IP_Address="API"
 ENV FLASK_Port="5000"
+ENV LOG_LEVEL="DEBUG"
 
 # Start program ("-u" param is required to see print output in docker logs)
 CMD ["python3", "-u", "./Checker.py"]

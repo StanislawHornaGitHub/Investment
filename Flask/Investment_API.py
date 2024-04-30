@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.2
+    Version:            1.3
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -20,9 +20,12 @@
                                             Endpoint to get investment funds with last refund date implemented.
                                             Unified naming and structure.
     
+    2024-04-30      Stanisław Horna         Add logging capabilities.
+    
 """
 
 import os
+import logging
 from flask import Flask, jsonify, request, Response
 from Processing.Price import Price
 from Processing.InvestmentCalcResult import InvestmentCalcResult
@@ -32,47 +35,78 @@ from Processing.InvestmentConfig import InvestmentConfig
 
 app = Flask(__name__)
 
-DEBUG_MODE = os.getenv('FLASK_DEBUG', True)
+FLASK_DEBUG_MODE = os.getenv('FLASK_DEBUG', True)
+LOG_LEVEL = os.getenv('LOG_LEVEL', "DEBUG")
+
+logging.basicConfig(
+    format='%(asctime)s.%(msecs)03d - %(levelname)s - PID: %(process)d - %(module)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    level=LOG_LEVEL
+)
 
 
 @app.route('/FundConfig', methods=['PUT', 'GET'])
 @app.route('/FundConfig/<id>', methods=['GET'])
 def fund_handler(id: str = None):
+
+    logging.info("fund_handler(%s), method: %s", id, (request.method))
+
     match (request.method):
 
         case "PUT":
+            logging.debug("Method: PUT")
             jsonFunds = request.json
             responseCode, responseBody = (
                 FundConfig.insertFundConfig(jsonFunds)
             )
 
         case "GET":
+            logging.debug("Method: GET")
             responseCode, responseBody = (
                 FundConfig.getFund(id)
             )
-    
+
+    logging.debug(
+        "fund_handler(%s). Returning body and code: %d",
+        id,
+        responseCode
+    )
     return responseBody, responseCode
 
 
 @app.route('/FundQuotation', methods=['PUT'])
 @app.route('/FundQuotation/<id>', methods=['PUT'])
 def quotation_handler(id: str = None):
+
+    logging.info("quotation_handler(%s), method: %s", id, (request.method))
+
     match (request.method):
 
         case "PUT":
+            logging.debug("Method: PUT")
             responseCode, responseBody = (
                 Price.updateQuotation(id)
             )
-    
+
+    logging.debug(
+        "quotation_handler(%s). Returning body and code: %d",
+        id,
+        responseCode
+    )
     return responseBody, responseCode
 
 
 @app.route('/InvestmentConfig', methods=['PUT', 'GET'])
 @app.route('/InvestmentConfig/<int:id>', methods=['GET'])
 def investment_handler(id: int = None):
+
+    logging.info("investment_handler(%s), method: %s", id, (request.method))
+
     match (request.method):
 
         case "PUT":
+            logging.debug("Method: PUT")
+
             jsonInvestments = request.json
             responseCode, responseBody = (
                 InvestmentConfig.insertInvestmentConfig(
@@ -80,31 +114,53 @@ def investment_handler(id: int = None):
                     jsonInvestments["Owner"]
                 )
             )
-            return responseBody, responseCode
 
         case "GET":
+            logging.debug("Method: GET")
             responseCode, responseBody = (
                 InvestmentConfig.getInvestmentFunds(id)
             )
-            return responseBody, responseCode
+
+    logging.debug(
+        "investment_handler(%s). Returning body and code: %d",
+        id,
+        responseCode
+    )
+    return responseBody, responseCode
 
 
 @app.route('/InvestmentRefund', methods=['PUT'])
 @app.route('/InvestmentRefund/<int:id>', methods=['PUT'])
 def refund_handler(id: int = None):
+
+    logging.info("refund_handler(%s), method: %s", id, (request.method))
+
     match (request.method):
 
         case "PUT":
+            logging.debug("Method: PUT")
             if id is None:
-                responseCode, responseBody =  InvestmentCalcResult.calculateAllResults()
+                logging.debug("ID is none")
+                responseCode, responseBody = (
+                    InvestmentCalcResult.calculateAllResults()
+                )
             else:
-                responseCode, responseBody = InvestmentCalcResult.calculateResult(id)
+                logging.debug("ID is NOT none")
+                responseCode, responseBody = (
+                    InvestmentCalcResult.calculateResult(id)
+                )
 
+    logging.debug(
+        "investment_handler(%s). Returning body and code: %d",
+        id,
+        responseCode
+    )
     return responseBody, responseCode
 
 
 if __name__ == '__main__':
+    logging.info("Flask startup")
     app.run(
-        debug=DEBUG_MODE,
+        debug=FLASK_DEBUG_MODE,
         host='0.0.0.0'
     )

@@ -9,7 +9,7 @@
 
 .NOTES
 
-    Version:            1.1
+    Version:            1.2
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -18,50 +18,66 @@
 
     Date            Who                     What
     2024-04-29      Stanisław Horna         Add additional messages for detection that tables are empty.
+                                            Add logging capabilities.
 
 """
+import logging
+import os
 from InvestmentAPI.Investment_API_Handler import InvestmentAPI
 from InvestmentAPI.Unpacker import Unpacker
-from AnalizyPL.API import AnalizyAPI
+from AnalizyPL.Analizy_API import AnalizyAPI
 from Utility.Sleeper import Sleeper
 from Utility.Exceptions import InvestmentAPIexception, AnalizyAPIexception
-from Utility.Printer import Printer
+
+
+logging.basicConfig(
+    format='%(asctime)s.%(msecs)03d - %(levelname)s - %(module)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    level=os.getenv('LOG_LEVEL', "DEBUG")
+)
+
 
 def Main():
 
     InvestmentAPI.waitForFullSystemInitialization()
-    
+
     sleeper = Sleeper()
+    try:
+        while True:
+            try:
+                quotationUpdate()
+                refundUpdate()
+            except InvestmentAPIexception:
+                logging.exception(
+                    "InvestmentAPI exception occurred", exc_info=True)
 
-    while True:
-        try:
-            quotationUpdate()
-            refundUpdate()
-        except InvestmentAPIexception as invErr:
-            print(invErr)
-
-        sleeper.start()
+            sleeper.start()
+    except:
+        logging.exception("Exception occurred", exc_info=True)
 
 
 def quotationUpdate():
 
+    logging.info("quotationUpdate()")
+
     # Get list of funds to check
     fundsToCheck = (InvestmentAPI.getFunds())
-    
+
     # If list is empty invoke downloading all fund quotations
     if not fundsToCheck:
-        print("Fund list is empty")
+        logging.warning("Fund list is empty")
         try:
-            Printer.json(InvestmentAPI.updateFunds())
-            
-        except InvestmentAPIexception as invErr:
-            print(invErr)
+            logging.debug(str(InvestmentAPI.updateFunds()))
 
-        except AnalizyAPIexception as anaErr:
-            print(anaErr)
-    
+        except InvestmentAPIexception:
+            logging.exception(
+                "InvestmentAPI exception occurred", exc_info=True)
+
+        except AnalizyAPIexception:
+            logging.exception("AnalizyAPI exception occurred", exc_info=True)
+
         return None
-    
+
     # Loop through monitored funds
     for item in fundsToCheck:
 
@@ -71,39 +87,50 @@ def quotationUpdate():
                 Unpacker.fundGetter(item)
             )
 
+            # Download quotation date
+            quotation_date_web = AnalizyAPI.getLastQuotationDate(
+                fund_id, fund_cat)
+
+            logging.debug(
+                "Comparing quotation dates (web | DB): %s, %s",
+                quotation_date_web, quotation_date
+            )
             # Check if Analizy.pl api has newer quotation available,
             # if yes, then invoke update for particular fund
-            if AnalizyAPI.getLastQuotationDate(fund_id, fund_cat) > quotation_date:
-                Printer.json(InvestmentAPI.updateFunds(fund_id))
+            if quotation_date_web > quotation_date:
+                logging.info(str(InvestmentAPI.updateFunds(fund_id)))
 
-        except InvestmentAPIexception as invErr:
-            print(invErr)
+        except InvestmentAPIexception:
+            logging.exception(
+                "InvestmentAPI exception occurred", exc_info=True)
 
-        except AnalizyAPIexception as anaErr:
-            print(anaErr)
-    
+        except AnalizyAPIexception:
+            logging.exception("AnalizyAPI exception occurred", exc_info=True)
+
     return None
 
 
 def refundUpdate():
-    
+
+    logging.info("refundUpdate()")
+
     # Get list of investments to check
     investmentsToCheck = (InvestmentAPI.getInvestment())
-    
+
     # If list is empty invoke refund calculation for all investments
     if not investmentsToCheck:
-        print("Investment list is empty")
+        logging.warning("Investment list is empty")
         try:
-            Printer.json(InvestmentAPI.updateInvestment())
-            
-        except InvestmentAPIexception as invErr:
-            print(invErr)
+            logging.debug(str(InvestmentAPI.updateInvestment()))
 
-        except AnalizyAPIexception as anaErr:
-            print(anaErr)
-    
+        except InvestmentAPIexception:
+            logging.exception(
+                "InvestmentAPI exception occurred", exc_info=True)
+
+        except AnalizyAPIexception:
+            logging.exception("AnalizyAPI exception occurred", exc_info=True)
+
         return None
-    
 
     # Init local set of investment IDs to trigger update
     investmentsToUpdate = set()
@@ -124,24 +151,33 @@ def refundUpdate():
                 )
             )
 
+            logging.debug(
+                "Comparing dates (quotation | refund): %s, %s",
+                quotation_date, refund_date
+            )
             # Check if quotation date is newer than the calculated refund date,
             # if yes add investment to update set
             if quotation_date > refund_date:
                 investmentsToUpdate.add(investment_id)
+                logging.debug(
+                    "Investment (%s) added to update set", investment_id)
 
-        except InvestmentAPIexception as invErr:
-            print(invErr)
+        except InvestmentAPIexception:
+            logging.exception(
+                "InvestmentAPI exception occurred", exc_info=True)
 
     # Loop through investments to update
     for investment in investmentsToUpdate:
 
         try:
             # Trigger investment refund calculation
-            Printer.json(InvestmentAPI.updateInvestment(investment))
+            logging.info(str(InvestmentAPI.updateInvestment(investment)))
 
         except InvestmentAPIexception as invErr:
-            print(invErr)
+            logging.exception(
+                "InvestmentAPI exception occurred", exc_info=True)
 
 
 if __name__ == '__main__':
+    logging.info("Service started")
     Main()

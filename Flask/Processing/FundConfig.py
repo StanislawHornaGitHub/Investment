@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.1
+    Version:            1.3
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -16,10 +16,12 @@
     2024-04-02      Stanisław Horna         Response body and code implemented.
     
     2024-04-26      Stanisław Horna         Method to retrieve monitored funds with last quotation date form db.
+    
+    2024-04-30      Stanisław Horna         Add logging capabilities.
 
 """
 import json
-
+import logging
 import SQL
 from sqlalchemy import func
 from SQL.Fund import Fund
@@ -35,6 +37,7 @@ class FundConfig:
     @staticmethod
     def insertFundConfig(Funds: list[str]):
 
+        logging.debug("insertFundConfig()")
         # Create session and init processing variables
         session = SQL.base.Session()
         responseCode = 200
@@ -42,6 +45,8 @@ class FundConfig:
 
         # Loop through provided URLs
         for url in Funds:
+
+            logging.debug("Processing: %s", url)
 
             # Try to create entry for current URL
             try:
@@ -51,6 +56,11 @@ class FundConfig:
 
             # Catch Integrity errors i.e. fund id already exists
             except IntegrityError as err:
+
+                logging.warning(
+                    "Current entry probably exists in DB",
+                    exc_info=True
+                )
 
                 # Rollback transaction to be able to successfully proceed with the next url
                 session.rollback()
@@ -67,7 +77,6 @@ class FundConfig:
                         "Status_Details": errorMessage
                     }
                 )
-                print(errorMessage)
 
                 # Change responseCode to 206 (Partial Content), when only fund can not be processed
                 # If there is set other code like 400 for some other url, avoid changing it
@@ -78,6 +87,12 @@ class FundConfig:
                 continue
 
             except Exception as e:
+                responseCode = 400
+                logging.exception(
+                    "Exception occurred, setting code to: %d",
+                    responseCode,
+                    exc_info=True
+                )
                 # Rollback transaction to be able to successfully proceed with the next url
                 session.rollback()
 
@@ -90,17 +105,20 @@ class FundConfig:
                         "Status_Details": str(e)
                     }
                 )
-                responseCode = 400
 
         # Set message if all funds were inserted successfully
         if responseCode == 200:
+            logging.info("All %d fund URLs inserted successfully", len(Funds))
             result = {
                 "Status": f"All {len(Funds)} fund URLs inserted successfully"
             }
 
         # Close SQL session
         session.close()
-
+        logging.debug(
+            "insertFundConfig(). Returning body and code: %d",
+            responseCode
+        )
         return responseCode, result
 
     @staticmethod
@@ -113,10 +131,13 @@ class FundConfig:
     @staticmethod
     def getFund(fund_id: str = None) -> list[dict[str, str]]:
 
+        logging.debug("getFund(%s)", fund_id)
+
         session = SQL.base.Session()
         responseCode = 200
         try:
             if fund_id is not None:
+                logging.debug("fund ID is NOT none")
                 dbOut = (
                     session.query(
                         Quotation.fund_id,
@@ -134,6 +155,7 @@ class FundConfig:
                     .all()
                 )
             else:
+                logging.debug("fund ID is none")
                 dbOut = (
                     session.query(
                         Quotation.fund_id,
@@ -149,11 +171,22 @@ class FundConfig:
                     .all()
                 )
         except Exception as e:
+            session.close()
             responseCode = 400
+            logging.exception(
+                "getFund(%s) failed to retrieve data from DB, setting status code to: %d",
+                fund_id,
+                responseCode,
+                exc_info=True
+            )
             return responseCode, {
                 "Status": "Failed to retrieve data from DB",
                 "Status_Details": str(e)
             }
+        session.close()
+        logging.debug(
+            "Converting DB output to list of dicts and datetime to str"
+        )
         result = []
         for fundID, fundCat, fundDate in dbOut:
             try:
@@ -168,5 +201,9 @@ class FundConfig:
                     "quotation_date": convertedDate
                 }
             )
-
+        logging.debug(
+            "getFund(%s). Returning body and code: %d",
+            fund_id,
+            responseCode
+        )
         return responseCode, result

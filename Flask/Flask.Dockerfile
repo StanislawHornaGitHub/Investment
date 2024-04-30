@@ -21,6 +21,9 @@
 #
 # 2024-04-24      Stanisław Horna         Ubuntu latest changed to static one (22.04)
 #                                         WSGI dependencies instalation added. Startup CMD changed.
+#
+# 2024-04-30      Stanisław Horna         Add environmental variable for log level.
+#
 
 FROM ubuntu:22.04
 
@@ -49,6 +52,7 @@ ENV DB_Port="5432"
 ENV DB_Username="api_write"
 ENV DB_Password="inv!w_ap_ite2"
 ENV DB_Name="Investments"
+ENV LOG_LEVEL="DEBUG"
 
 # Flask variables
 ENV FLASK_DEBUG="True"
