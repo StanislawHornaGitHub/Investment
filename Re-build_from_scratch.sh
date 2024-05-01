@@ -29,12 +29,14 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  23-Apr-2024
-# Version:  1.1
+# Version:  1.2
 
 # Date            Who                     What
 # 2024-04-28      Stanisław Horna         Remove downloading quotations and refund calculation,
-#                                         due to implementation of Checker service, 
+#                                         due to implementation of Checker service,
 #                                         which will automatically perform those operations.
+#
+# 2024-05-01      Stanisław Horna         Remove initial data import as it was moved to separate container.
 #
 
 # define echo colors
@@ -43,7 +45,7 @@ YELLOW='\033[0;33m'
 RED='\033[0;31m'
 RESET='\033[0m'
 
-Main(){
+Main() {
 
     checkDockerDaemonRunning
     stopRunningContainers
@@ -52,10 +54,9 @@ Main(){
     startCompose
     waitForPostgreSpinUp
     showComposeStatus
-    importInitData
 }
 
-checkDockerDaemonRunning(){
+checkDockerDaemonRunning() {
 
     # check if docker is running
     if docker ps -a -q -f name="Certainly Not Exist"; then
@@ -66,12 +67,12 @@ checkDockerDaemonRunning(){
     fi
 }
 
-stopRunningContainers(){
+stopRunningContainers() {
 
     docker compose down
 }
 
-removePersistantStorage(){
+removePersistantStorage() {
 
     printYellowMessage "Removing persistant storage"
 
@@ -79,27 +80,27 @@ removePersistantStorage(){
     sudo rm -fr "$dirPath"
 }
 
-buildCompose(){
-    
+buildCompose() {
+
     printYellowMessage "Building compose containers"
 
     docker compose build
 }
 
-startCompose(){
+startCompose() {
 
     printYellowMessage "Starting compose containers"
 
     docker compose up -d --force-recreate
 }
 
-waitForPostgreSpinUp(){
+waitForPostgreSpinUp() {
 
     PGcontainerName=$(getDotenvVariable "POSTGRESQL_CONTAINER_NAME")
     waitForContainerInit "$PGcontainerName" "database system is ready to accept connections$" 2 10
 }
 
-showComposeStatus(){
+showComposeStatus() {
 
     docker compose ps
 }
@@ -113,45 +114,28 @@ waitForContainerInit() {
     # init variable
     numOfDBstartups=0
 
-    # loop until SQL engine perform 2 complete startups, 
+    # loop until SQL engine perform 2 complete startups,
     # each startup is announced by log message "database system is ready to accept connections"
-    # after first one Database is initialized from scripts located in "SQL" directory, 
+    # after first one Database is initialized from scripts located in "SQL" directory,
     # once DB init is completed, another restart is performed and container is ready to work.
     while [ "$numOfDBstartups" -lt "$PhraseOccurences" ]; do
-        
+
         sleep 0.1
-        # check if container is still running, 
+        # check if container is still running,
         #   if not display container logs.
         #   if yes invoke DB tests.
 
         # if there were some error during initialization container will not be running
         if [ -z "$(docker ps -q -f name="$DockerContainerName")" ]; then
-        docker logs "$DockerContainerName"
+            docker logs "$DockerContainerName"
 
-        printRedMessage "Container is not running"
-        exit "$ExitCode"
+            printRedMessage "Container is not running"
+            exit "$ExitCode"
         fi
         numOfDBstartups=$(docker logs "$DockerContainerName" 2>&1 | grep -c "$PhraseToLookFor")
     done
 
     printGreenMessage "$DockerContainerName has started"
-}
-
-importInitData(){
-
-    printYellowMessage "Importing initial data"
-
-    dirPath=$(getDotenvVariable "INIT_DATA_IMPORT_DIR_PATH")
-    scriptToRun=$(getDotenvVariable "INIT_DATA_SCRIPT")
-    # Set InitialDataImport directory,
-    # because script is looking for particular JSON files within same directory
-    cd "$dirPath" || exit 2
-
-    # Start script which will invoke appropriate API calls
-    "$scriptToRun"
-
-    # Go back to root directory
-    SetRootDirectory
 }
 
 getDotenvVariable() {
