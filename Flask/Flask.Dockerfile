@@ -53,9 +53,11 @@ ENV DB_Username="api_write"
 ENV DB_Password="inv!w_ap_ite2"
 ENV DB_Name="Investments"
 ENV LOG_LEVEL="DEBUG"
+ENV LOKI_IP_Address="Loki"
+ENV LOKI_PORT="3100"
 
 # Flask variables
 ENV FLASK_DEBUG="True"
 
 # Start API program
-CMD ["uwsgi", "--ini", "./wsgi.ini", "--thunder-lock"]
+CMD ["uwsgi", "--ini", "./wsgi.ini"]

@@ -21,7 +21,7 @@
 
 """
 import json
-import logging
+from Utility.Logger import logger
 import SQL
 from sqlalchemy import func
 from SQL.Fund import Fund
@@ -37,7 +37,7 @@ class FundConfig:
     @staticmethod
     def insertFundConfig(Funds: list[str]):
 
-        logging.debug("insertFundConfig()")
+        logger.debug("insertFundConfig()")
         # Create session and init processing variables
         session = SQL.base.Session()
         responseCode = 200
@@ -46,7 +46,7 @@ class FundConfig:
         # Loop through provided URLs
         for url in Funds:
 
-            logging.debug("Processing: %s", url)
+            logger.debug("Processing: %s", url)
 
             # Try to create entry for current URL
             try:
@@ -57,7 +57,7 @@ class FundConfig:
             # Catch Integrity errors i.e. fund id already exists
             except IntegrityError as err:
 
-                logging.warning(
+                logger.warning(
                     "Current entry probably exists in DB",
                     exc_info=True
                 )
@@ -88,7 +88,7 @@ class FundConfig:
 
             except Exception as e:
                 responseCode = 400
-                logging.exception(
+                logger.exception(
                     "Exception occurred, setting code to: %d",
                     responseCode,
                     exc_info=True
@@ -108,14 +108,14 @@ class FundConfig:
 
         # Set message if all funds were inserted successfully
         if responseCode == 200:
-            logging.info("All %d fund URLs inserted successfully", len(Funds))
+            logger.info("All %d fund URLs inserted successfully", len(Funds))
             result = {
                 "Status": f"All {len(Funds)} fund URLs inserted successfully"
             }
 
         # Close SQL session
         session.close()
-        logging.debug(
+        logger.debug(
             "insertFundConfig(). Returning body and code: %d",
             responseCode
         )
@@ -131,13 +131,13 @@ class FundConfig:
     @staticmethod
     def getFund(fund_id: str = None) -> list[dict[str, str]]:
 
-        logging.debug("getFund(%s)", fund_id)
+        logger.debug("getFund(%s)", fund_id)
 
         session = SQL.base.Session()
         responseCode = 200
         try:
             if fund_id is not None:
-                logging.debug("fund ID is NOT none")
+                logger.debug("fund ID is NOT none")
                 dbOut = (
                     session.query(
                         Quotation.fund_id,
@@ -155,7 +155,7 @@ class FundConfig:
                     .all()
                 )
             else:
-                logging.debug("fund ID is none")
+                logger.debug("fund ID is none")
                 dbOut = (
                     session.query(
                         Quotation.fund_id,
@@ -173,7 +173,7 @@ class FundConfig:
         except Exception as e:
             session.close()
             responseCode = 400
-            logging.exception(
+            logger.exception(
                 "getFund(%s) failed to retrieve data from DB, setting status code to: %d",
                 fund_id,
                 responseCode,
@@ -184,7 +184,7 @@ class FundConfig:
                 "Status_Details": str(e)
             }
         session.close()
-        logging.debug(
+        logger.debug(
             "Converting DB output to list of dicts and datetime to str"
         )
         result = []
@@ -201,7 +201,7 @@ class FundConfig:
                     "quotation_date": convertedDate
                 }
             )
-        logging.debug(
+        logger.debug(
             "getFund(%s). Returning body and code: %d",
             fund_id,
             responseCode

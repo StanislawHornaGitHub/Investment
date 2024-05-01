@@ -22,7 +22,7 @@
 
 """
 import json
-import logging
+from Utility.Logger import logger
 import SQL
 from SQL.Investment import Investment
 from SQL.InvestmentResult import InvestmentResult
@@ -41,7 +41,7 @@ class InvestmentConfig:
     @staticmethod
     def insertInvestmentConfig(Investments: dict[str, dict[str, list[dict[str, str]]]], InvestOwner: str):
 
-        logging.debug("insertFundConfig()")
+        logger.debug("insertFundConfig()")
         # Create session and init processing variables
         session = SQL.base.Session()
         responseCode = 200
@@ -52,7 +52,7 @@ class InvestmentConfig:
 
             # Loop through each fund in investment
             for fund in Investments[invest]["Funds"]:
-                logging.debug(
+                logger.debug(
                     "Processing investment: %s, fund: %s", invest, fund
                 )
                 # Loop through each order in investment
@@ -74,7 +74,7 @@ class InvestmentConfig:
                         )
                     except Exception as err:
                         responseCode = 400
-                        logging.exception(
+                        logger.exception(
                             "Failed to create order entry, setting status code to: %d",
                             responseCode,
                             exc_info=True
@@ -91,7 +91,7 @@ class InvestmentConfig:
 
                         continue
 
-                    logging.debug("Adding entry to session")
+                    logger.debug("Adding entry to session")
                     # Add new investment record
                     session.add(
                         entry
@@ -100,7 +100,7 @@ class InvestmentConfig:
                     try:
                         session.commit()
                     except IntegrityError as err:
-                        logging.warning(
+                        logger.warning(
                             "Current entry probably exists in DB",
                             exc_info=True
                         )
@@ -131,7 +131,7 @@ class InvestmentConfig:
                         # If there is set other code like 400 for some other orders, avoid changing it
                         if responseCode == 200:
                             responseCode = 206
-                        logging.exception("Failed to add entry", exc_info=True)
+                        logger.exception("Failed to add entry", exc_info=True)
 
                         # Rollback transaction to be able to successfully proceed with order
                         session.rollback()
@@ -154,7 +154,7 @@ class InvestmentConfig:
 
         session.close()
 
-        logging.debug(
+        logger.debug(
             "insertInvestmentConfig(). Returning body and code: %d",
             responseCode
         )
@@ -177,7 +177,7 @@ class InvestmentConfig:
                 .all()
             )
         except:
-            logging.exception("Failed to get Investment IDs", exc_info=True)
+            logger.exception("Failed to get Investment IDs", exc_info=True)
             return None
 
         for id in output:
@@ -187,7 +187,7 @@ class InvestmentConfig:
     @staticmethod
     def getInvestmentFunds(investment_id: int = None):
 
-        logging.debug("getInvestmentFunds(%s)", investment_id)
+        logger.debug("getInvestmentFunds(%s)", investment_id)
         session = SQL.base.Session()
         responseCode = 200
 
@@ -198,7 +198,7 @@ class InvestmentConfig:
                 (investment_id is not None)
             ):
                 responseCode = 404
-                logging.debug(
+                logger.debug(
                     "Provided Investment ID %s does not exist, setting code to %d",
                     investment_id,
                     responseCode
@@ -208,7 +208,7 @@ class InvestmentConfig:
                     "Status": f"Investment with ID: {investment_id} does not exist"
                 }
 
-                logging.debug(
+                logger.debug(
                     "getInvestmentFunds(%s). Returning body and code: %d",
                     investment_id,
                     responseCode
@@ -216,7 +216,7 @@ class InvestmentConfig:
                 return responseCode, resultBody
 
             if investment_id is not None:
-                logging.debug("Investment ID is NOT none")
+                logger.debug("Investment ID is NOT none")
                 dbOut = (
                     session.query(
                         Investment.investment_id,
@@ -234,7 +234,7 @@ class InvestmentConfig:
                     ).all()
                 )
             else:
-                logging.debug("Investment ID is none")
+                logger.debug("Investment ID is none")
                 dbOut = (
                     session.query(
                         Investment.investment_id,
@@ -253,7 +253,7 @@ class InvestmentConfig:
         except Exception as e:
             session.close()
             responseCode = 400
-            logging.exception(
+            logger.exception(
                 "Failed to retrieve data from DB, setting status code to: %d",
                 responseCode,
                 exc_info=True
@@ -264,7 +264,7 @@ class InvestmentConfig:
             }
         session.close()
 
-        logging.debug(
+        logger.debug(
             "Converting DB output to list of dicts and datetime to str"
         )
         result = []
@@ -284,7 +284,7 @@ class InvestmentConfig:
                 }
             )
 
-        logging.debug(
+        logger.debug(
             "getInvestmentFunds(%s). Returning body and code: %d",
             investment_id,
             responseCode

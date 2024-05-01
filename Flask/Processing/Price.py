@@ -18,7 +18,7 @@
 
 """
 import SQL
-import logging
+from Utility.Logger import logger
 from SQL.Quotation import Quotation
 from SQL.Fund import Fund
 from AnalizyPL.API import AnalizyFundAPI
@@ -33,7 +33,7 @@ class Price:
     @staticmethod
     def updateQuotation(ID: str = None):
 
-        logging.debug("updateQuotation(%s)", ID)
+        logger.debug("updateQuotation(%s)", ID)
 
         # Create session and init processing variables
         session = SQL.base.Session()
@@ -42,7 +42,7 @@ class Price:
 
         if ID is None:
 
-            logging.debug("ID is none")
+            logger.debug("ID is none")
 
             # Get monitored Fund IDs
             fund = ConvertToDict.fundList(session.query(Fund).all())
@@ -56,18 +56,18 @@ class Price:
             )
         else:
 
-            logging.debug("ID is not none")
+            logger.debug("ID is not none")
 
             # Check if provided ID exists in DB
             if (Fund.IDisValid(ID, session) != True):
-                logging.error("Fund with ID: %s does not exist", ID)
+                logger.error("Fund with ID: %s does not exist", ID)
                 resultBody = {
                     "fund_id": ID,
                     "Status": f"Fund with ID: {ID} does not exist"
                 }
                 responseCode = 404
 
-                logging.debug(
+                logger.debug(
                     "updateQuotation(%s), returning result body and code: %d",
                     ID,
                     responseCode
@@ -85,7 +85,7 @@ class Price:
                     )
                 )
             except:
-                logging.exception(
+                logger.exception(
                     "Failed to get list of monitored funds",
                     exc_info=True
                 )
@@ -101,7 +101,7 @@ class Price:
                     .all()
                 )
             except:
-                logging.exception(
+                logger.exception(
                     "Failed to get funds' last refresh dates",
                     exc_info=True
                 )
@@ -109,13 +109,13 @@ class Price:
         # Loop through each fund which already has some quotation in DB
         for date, fundID in lastRefreshDates:
 
-            logging.debug("Processing (date | fund ID) %s | %s", date, fundID)
+            logger.debug("Processing (date | fund ID) %s | %s", date, fundID)
             # Download newest quotation from Analizy.pl
             downloadedQuot = AnalizyFundAPI.downloadQuotation(fund[fundID])
 
             if downloadedQuot is None:
                 responseCode = 204
-                logging.error(
+                logger.error(
                     "Failed to download quotation for fund: %s",
                     fundID
                 )
@@ -130,7 +130,7 @@ class Price:
             # Create temp variable to store all downloaded quotation
             allQuotations = downloadedQuot["FundQuotation"]
 
-            logging.debug("Filtering quotation to get newer then %s", date)
+            logger.debug("Filtering quotation to get newer then %s", date)
             # Filter out the quotation to only those entries which will be inserted to DB
             downloadedQuot["FundQuotation"] = [
                 q for q in downloadedQuot["FundQuotation"]
@@ -150,7 +150,7 @@ class Price:
 
             if code != 204:
                 responseCode = code
-        logging.debug("Filtering out funds without quotations saved in DB")
+        logger.debug("Filtering out funds without quotations saved in DB")
         # Get funds without any quotation
         fundsWithPrice = list([fr[1] for fr in lastRefreshDates])
         fundsWithoutPrice = [
@@ -184,7 +184,7 @@ class Price:
     @staticmethod
     def insertQuotation(fundsWithoutPrice: list[str], allFunds: dict[str, Fund], session):
 
-        logging.debug("insertQuotation(%s)", str(fundsWithoutPrice))
+        logger.debug("insertQuotation(%s)", str(fundsWithoutPrice))
 
         # Init result list
         result = []
@@ -192,14 +192,14 @@ class Price:
         # loop through each fund ID
         for fundID in fundsWithoutPrice:
 
-            logging.debug("Processing: %s", fundID)
+            logger.debug("Processing: %s", fundID)
 
             downloadedQuot = AnalizyFundAPI.downloadQuotation(
                 allFunds[fundID]
             )
 
             if downloadedQuot is None:
-                logging.error(
+                logger.error(
                     "Failed to download quotation for fund: %s",
                     fundID
                 )
@@ -235,13 +235,16 @@ class Price:
                     }
                 }
             )
-        logging.debug("insertQuotation(%s). Returning", str(fundsWithoutPrice))
+        logger.debug("insertQuotation(%s). Returning", str(fundsWithoutPrice))
         return result
 
     @staticmethod
     def insertQuotationRecords(dataToInsert: list[dict[str, str]], session, allQuotation=[]):
 
-        logging.debug("insertQuotationRecords()")
+        logger.debug(
+            "insertQuotationRecords(), Fund: %s",
+            dataToInsert["Fund_ID"]
+        )
         # Loop through each quotation entry
         for entry in dataToInsert["FundQuotation"]:
 
@@ -303,14 +306,14 @@ class Price:
             }
 
         except IndexError as indexErr:
-            logging.warning("No new quotation to add", exc_info=True)
+            logger.warning("No new quotation to add", exc_info=True)
             # Add success message as index error means that there were no new entries to insert
             result = {
                 "Status": "No new quotation to add"
             }
 
         except Exception as err:
-            logging.exception("Failed to add quotation", exc_info=True)
+            logger.exception("Failed to add quotation", exc_info=True)
             # Rollback transaction to be able to successfully proceed with the next url
             session.rollback()
 
@@ -321,7 +324,7 @@ class Price:
             }
             responseCode = 206
 
-        logging.debug(
+        logger.debug(
             "insertQuotationRecords(). Returning body and code: %d",
             responseCode
         )
