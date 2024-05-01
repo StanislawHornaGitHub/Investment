@@ -1,5 +1,19 @@
 version: "3"
 
+networks:
+  Internal:
+    name: LAN
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.10.10.0/24"
+          gateway: 10.10.10.1
+
+  External:
+    name: WAN
+    external: true
+    driver: bridge
+
 services:
   Grafana:
     image: investment/grafana
@@ -59,7 +73,7 @@ services:
       Internal:
         ipv4_address: ${POSTGRESQL_INTERNAL_IP}
       External: null
-  
+
   Checker:
     image: investment/checker
     build:
@@ -75,17 +89,14 @@ services:
       Internal:
         ipv4_address: ${CHECKER_INTERNAL_IP}
 
-
-networks:
-  Internal:
-    name: LAN
-    ipam:
-      driver: default
-      config:
-        - subnet: "10.10.10.0/24"
-          gateway: 10.10.10.1
-
-  External:
-    name: WAN
-    external: true
-    driver: bridge
+  loki:
+    image: grafana/loki:2.9.0
+    hostname: ${LOKI_HOSTNAME}
+    container_name: ${LOKI_CONTAINER_NAME}
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    networks:
+      Internal:
+        ipv4_address: ${LOKI_INTERNAL_IP}
+      External: null
