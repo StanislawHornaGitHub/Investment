@@ -26,16 +26,29 @@
 
 import os
 from Utility.Logger import logger
-from flask import Flask, jsonify, request, Response
+from Utility.SQL_connection_check import SQLhealthCheck
+from flask import Flask, request
 from Processing.Price import Price
 from Processing.InvestmentCalcResult import InvestmentCalcResult
 from Processing.FundConfig import FundConfig
 from Processing.InvestmentConfig import InvestmentConfig
-from loki_logger_handler.loki_logger_handler import LokiLoggerHandler
+
 
 app = Flask(__name__)
 
 FLASK_DEBUG_MODE = os.getenv('FLASK_DEBUG', True)
+
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    responseBody = {
+        "Database is available": SQLhealthCheck.checkSQLConnection()
+    }
+    responseCode = 200
+    if False in list(responseBody.values()):
+        responseCode = 503
+
+    return responseBody, responseCode
 
 
 @app.route('/FundConfig', methods=['PUT', 'GET'])

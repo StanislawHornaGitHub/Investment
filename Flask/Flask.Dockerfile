@@ -32,6 +32,7 @@ RUN apt update
 RUN apt install -y python3-dev
 RUN apt install -y pip
 RUN apt install -y gcc libpcre3-dev libpcre3
+RUN apt install -y curl
 
 # Set timezone
 ENV TZ="Europe/Warsaw"

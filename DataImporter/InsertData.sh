@@ -19,12 +19,15 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  31-Mar-2024
-# Version:  1.0
+# Version:  1.1
 
 # Date            Who                     What
+# 2024-05-01      Stanisław Horna         Set API ip and port from environment variables.
+#                                         Add silent flag to curl.
+#
 
-API_IP_ADDRESS="192.168.0.212"
-API_PORT="5000"
+API_IP_ADDRESS=$FLASK_IP_Address
+API_PORT=$FLASK_PORT
 
 FUNDS_FILE="Funds.json"
 INVESTMENT_FILES_SUFFIX="_Investments.json"
@@ -41,7 +44,7 @@ importFundsConfig() {
     jsonFunds=$(cat "./$FUNDS_FILE")
 
     # Invoke PUT /FundConfig method
-    curl --location --request PUT "$API_IP_ADDRESS:$API_PORT/FundConfig" \
+    curl --silent --location --request PUT "$API_IP_ADDRESS:$API_PORT/FundConfig" \
         --header 'Content-Type: application/json' \
         --data "$jsonFunds"
 }
@@ -53,9 +56,9 @@ importInvestmentConfig() {
         jsonInvestment=$(cat "$filename")
 
         # Invoke PUT /InvestmentConfig method
-        curl --location --request PUT "$API_IP_ADDRESS:$API_PORT/InvestmentConfig" \
+        curl --silent --location --request PUT "$API_IP_ADDRESS:$API_PORT/InvestmentConfig" \
             --header 'Content-Type: application/json' \
-            --data "$jsonInvestment" 
+            --data "$jsonInvestment"
     done
 }
 

@@ -35,6 +35,12 @@ services:
       Internal:
         ipv4_address: ${GRAFANA_INTERNAL_IP}
       External: null
+    healthcheck:
+      test: wget --quiet --tries=1 --output-document=- http://${GRAFANA_HOSTNAME}:3000/api/health
+      start_period: 2s
+      interval: 3s
+      timeout: 1s
+      retries: 5
 
   Flask:
     image: investment/flask
@@ -42,7 +48,10 @@ services:
       context: ./Flask
       dockerfile: Flask.Dockerfile
     depends_on:
-      - PostgreSQL
+      PostgreSQL:
+        condition: service_healthy
+      Loki:
+        condition: service_healthy
     container_name: ${FLASK_CONTAINER_NAME}
     hostname: ${FLASK_HOSTNAME}
     environment:
@@ -56,12 +65,21 @@ services:
       Internal:
         ipv4_address: ${FLASK_INTERNAL_IP}
       External: null
+    healthcheck:
+      test: curl --fail http://${FLASK_HOSTNAME}:5000/health
+      start_period: 2s
+      interval: 2s
+      timeout: 1s
+      retries: 10
 
   PostgreSQL:
     image: investment/postgresql
     build:
       context: ./PostgreSQL
       dockerfile: PostgreSQL.Dockerfile
+    depends_on:
+      Loki:
+        condition: service_healthy
     container_name: ${POSTGRESQL_CONTAINER_NAME}
     hostname: ${POSTGRESQL_HOSTNAME}
     restart: no
@@ -73,6 +91,12 @@ services:
       Internal:
         ipv4_address: ${POSTGRESQL_INTERNAL_IP}
       External: null
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      start_period: 2s
+      interval: 2s
+      timeout: 5s
+      retries: 10
 
   Checker:
     image: investment/checker
@@ -80,8 +104,14 @@ services:
       context: ./Checker
       dockerfile: Checker.Dockerfile
     depends_on:
-      - Flask
-      - PostgreSQL
+      PostgreSQL:
+        condition: service_healthy
+      Loki:
+        condition: service_healthy
+      Flask:
+        condition: service_healthy
+      DataImporter:
+        condition: service_completed_successfully
     container_name: ${CHECKER_CONTAINER_NAME}
     hostname: ${CHECKER_HOSTNAME}
     restart: unless-stopped
@@ -89,14 +119,39 @@ services:
       Internal:
         ipv4_address: ${CHECKER_INTERNAL_IP}
 
-  loki:
+  DataImporter:
+    image: investment/dataimporter
+    build:
+      context: ./DataImporter
+      dockerfile: DataImporter.Dockerfile
+    depends_on:
+      PostgreSQL:
+        condition: service_healthy
+      Loki:
+        condition: service_healthy
+      Flask:
+        condition: service_healthy
+    container_name: ${DATA_IMPORTER_CONTAINER_NAME}
+    hostname: ${DATA_IMPORTER_HOSTNAME}
+    restart: no
+    networks:
+      Internal:
+        ipv4_address: ${DATA_IMPORTER_INTERNAL_IP}
+
+  Loki:
     image: grafana/loki:2.9.0
     hostname: ${LOKI_HOSTNAME}
     container_name: ${LOKI_CONTAINER_NAME}
     command: -config.file=/etc/loki/local-config.yaml
     ports:
-      - "3100:3100"
+      - "${LOKI_EXTERNAL_PORT}:3100"
     networks:
       Internal:
         ipv4_address: ${LOKI_INTERNAL_IP}
       External: null
+    healthcheck:
+      test: wget --quiet --tries=1 --output-document=- http://${LOKI_HOSTNAME}:3100/ready | grep -q -w ready || exit 1
+      start_period: 2s
+      interval: 2s
+      timeout: 1s
+      retries: 10
