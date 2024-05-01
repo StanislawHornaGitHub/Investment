@@ -20,7 +20,7 @@
 """
 import time
 import sys
-import logging
+from Utility.Logger import logger
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
@@ -39,7 +39,7 @@ class Sleeper:
 
     def __post_init__(self):
         self.checkIn()
-        logging.debug(
+        logger.debug(
             "Sleeper initialized for interval: %d",
             self.TimeInterval_ms
         )
@@ -67,19 +67,19 @@ class Sleeper:
 
     def __invoke_sleep(self, sleepTime: float):
 
-        logging.debug("__invoke_sleep(%f)", sleepTime)
+        logger.debug("__invoke_sleep(%f)", sleepTime)
 
         fractionTime = sleepTime % 1
         fullSeconds = int(sleepTime)
 
-        logging.debug("Sleeping for fraction time: %f", fractionTime)
+        logger.debug("Sleeping for fraction time: %f", fractionTime)
         time.sleep(fractionTime)
 
-        logging.debug(
+        logger.debug(
             "Starting main sleep loop. Will be executed: %d times.", fullSeconds)
         for c in range(0, fullSeconds):
             if self.__TERMINATOR.getStatus() == True:
-                logging.info("Exiting program with code 0.")
+                logger.info("Exiting program with code 0.")
                 exit(0)
 
             time.sleep(1)
@@ -87,7 +87,7 @@ class Sleeper:
         self.checkIn()
 
     def checkIn(self) -> None:
-        logging.debug("checkIn()")
+        logger.debug("checkIn()")
         self.__last_check_in()
         self.__next_check_in()
 
@@ -103,21 +103,21 @@ class Sleeper:
 
     def start(self) -> float:
 
-        logging.debug("start()")
+        logger.debug("start()")
 
         OperationTime = self.getTimeSinceLastCheckIn()
-        logging.info("Operations took: %f", OperationTime)
+        logger.info("Operations took: %f", OperationTime)
         TimeToSleep = self.__calculate_time_to_sleep()
 
         if TimeToSleep <= 0:
-            logging.warning(
+            logger.warning(
                 "Sleep time exceeded by %f seconds.",
                 (TimeToSleep * -1)
             )
         else:
-            logging.info("Sleep for: %f seconds", TimeToSleep)
+            logger.info("Sleep for: %f seconds", TimeToSleep)
 
             self.__invoke_sleep(TimeToSleep)
 
-        logging.info("Returning time which process was sleeping.")
+        logger.info("Returning time which process was sleeping.")
         return TimeToSleep

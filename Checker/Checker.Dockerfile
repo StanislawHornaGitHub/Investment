@@ -34,6 +34,8 @@ RUN pip install -r requirements.txt
 ENV FLASK_IP_Address="API"
 ENV FLASK_Port="5000"
 ENV LOG_LEVEL="DEBUG"
+ENV LOKI_IP_Address="Loki"
+ENV LOKI_PORT="3100"
 
 # Start program ("-u" param is required to see print output in docker logs)
 CMD ["python3", "-u", "./Checker.py"]

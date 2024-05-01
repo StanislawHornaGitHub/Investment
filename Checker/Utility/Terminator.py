@@ -17,7 +17,7 @@
 
 """
 import signal
-import logging
+from Utility.Logger import logger
 from dataclasses import dataclass, field
 
 
@@ -33,7 +33,7 @@ class Terminator:
         signal.signal(signal.SIGTERM, self.exit_gracefully)
 
     def exit_gracefully(self, signum, frame):
-        logging.warning("Stop signal received.")
+        logger.warning("Stop signal received.")
         self.kill_now = True
 
     def getStatus(self) -> bool:
