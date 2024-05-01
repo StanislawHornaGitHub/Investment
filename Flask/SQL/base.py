@@ -22,7 +22,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 IP = os.getenv('DB_IP_Address', 'localhost')
-PORT = os.getenv('DB_Port', '5532')
+PORT = os.getenv('DB_Port', '5432')
 USERNAME = os.getenv('DB_Username', 'api_write')
 PASSWORD = os.getenv('DB_Password', 'inv!w_ap_ite2')
 DB_NAME = os.getenv('DB_Name', 'Investments')
