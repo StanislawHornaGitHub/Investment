@@ -20,12 +20,96 @@
 LOG_PREFIX_PHRASE_NEW="log_line_prefix = '%m '"
 LOG_PREFIX_PHRASE_DEFAULT="\#log_line_prefix = '%m \[%p\] '"
 
+LOG_LOGGING_COLLECTOR_NEW="logging_collector = on"
+LOG_LOGGING_COLLECTOR_DEFAULT="\#logging_collector = off"
+
+LOG_FILENAME_NEW="log_filename = 'postgresql-%Y-%m-%d_%H%M.log'"
+LOG_FILENAME_DEFAULT="\#log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'"
+
+LOG_ROTATION_AGE_NEW="log_rotation_age = 60min"
+LOG_ROTATION_AGE_DEFAULT="\#log_rotation_age = 1d"
+
+LOG_TRUNCATE_NEW="log_truncate_on_rotation = on"
+LOG_TRUNCATE_DEFAULT="\#log_truncate_on_rotation = off"
+
+LOG_MIN_LEVEL_NEW="log_min_messages = info"
+LOG_MIN_LEVEL_DEFAULT="\#log_min_messages = warning"
+
+LOG_MIN_ERROR_STATEMENT_NEW="log_min_error_statement = info"
+LOG_MIN_ERROR_STATEMENT_DEFAULT="\#log_min_error_statement = error"
+
+LOG_CHECKOINTS_NEW="log_checkpoints = on"
+LOG_CHECKOINTS_DEFAULT="\#log_checkpoints = on"
+
+LOG_CONNECTIONS_NEW="log_connections = on"
+LOG_CONNECTIONS_DEFAULT="\#log_connections = off"
+
+LOG_DISCONNECTIONS_NEW="log_disconnections = on"
+LOG_DISCONNECTIONS_DEFAULT="\#log_disconnections = off"
+
+LOG_ERROR_VERBOSITY_NEW="log_error_verbosity = verbose"
+LOG_ERROR_VERBOSITY_DEFAULT="\#log_error_verbosity = default"
+
+LOG_DESTINATION_NEW="log_destination = 'jsonlog'"
+LOG_DESTINATION_DEFAULT="\#log_destination = 'stderr'"
+
+LOG_FILE_MODE_NEW="log_file_mode = 0666"
+LOG_FILE_MODE_DEFAULT="#log_file_mode = 0600"
+
 Main() {
     setLogPrefix
+    setLogFileMode
+    #setLogDestination
+    setLogFileName
+    setLogRotationAge
+    setLogTruncate
+    setLogMinLevel
+    setLogMinStatement
+    setLogCheckpoints
+    setLogErrorVerbosity
+    setLogConnections
+    setLogColletorEnabled
 }
 
 setLogPrefix() {
     sed -i "s/$LOG_PREFIX_PHRASE_DEFAULT/$LOG_PREFIX_PHRASE_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogsDirectory() {
+    sed -i "s/$LOG_FILE_MODE_DEFAULT/$LOG_DIRECTORY_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogFileMode() {
+    sed -i "s/$LOG_DIRECTORY_DEFAULT/$LOG_FILE_MODE_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogFileName() {
+    sed -i "s/$LOG_FILENAME_DEFAULT/$LOG_FILENAME_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogDestination() {
+    sed -i "s/$LOG_DESTINATION_DEFAULT/$LOG_DESTINATION_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogRotationAge() {
+    sed -i "s/$LOG_ROTATION_AGE_DEFAULT/$LOG_ROTATION_AGE_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogTruncate() {
+    sed -i "s/$LOG_TRUNCATE_DEFAULT/$LOG_TRUNCATE_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogMinLevel() {
+    sed -i "s/$LOG_MIN_LEVEL_DEFAULT/$LOG_MIN_LEVEL_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogMinStatement() {
+    sed -i "s/$LOG_MIN_ERROR_STATEMENT_DEFAULT/$LOG_MIN_ERROR_STATEMENT_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogCheckpoints() {
+    sed -i "s/$LOG_CHECKOINTS_DEFAULT/$LOG_CHECKOINTS_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogErrorVerbosity() {
+    sed -i "s/$LOG_ERROR_VERBOSITY_DEFAULT/$LOG_ERROR_VERBOSITY_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogConnections() {
+    sed -i "s/$LOG_CONNECTIONS_DEFAULT/$LOG_CONNECTIONS_NEW/" "$PGDATA/postgresql.conf"
+    sed -i "s/$LOG_DISCONNECTIONS_DEFAULT/$LOG_DISCONNECTIONS_NEW/" "$PGDATA/postgresql.conf"
+}
+setLogColletorEnabled() {
+    sed -i "s/$LOG_LOGGING_COLLECTOR_DEFAULT/$LOG_LOGGING_COLLECTOR_NEW/" "$PGDATA/postgresql.conf"
 }
 
 Main

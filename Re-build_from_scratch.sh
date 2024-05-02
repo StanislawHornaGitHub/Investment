@@ -52,7 +52,7 @@ Main() {
     removePersistantStorage
     buildCompose
     startCompose
-    waitForPostgreSpinUp
+    #waitForPostgreSpinUp
     showComposeStatus
 }
 

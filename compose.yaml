@@ -92,7 +92,7 @@ services:
         ipv4_address: ${POSTGRESQL_INTERNAL_IP}
       External: null
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U Investments"]
       start_period: 2s
       interval: 2s
       timeout: 5s
@@ -135,14 +135,17 @@ services:
     hostname: ${DATA_IMPORTER_HOSTNAME}
     restart: no
     networks:
-      Internal:
-        ipv4_address: ${DATA_IMPORTER_INTERNAL_IP}
+      Internal: null
 
   Loki:
-    image: grafana/loki:2.9.0
+    image: investment/loki
+    build:
+      context: ./Loki
+      dockerfile: Loki.Dockerfile
     hostname: ${LOKI_HOSTNAME}
     container_name: ${LOKI_CONTAINER_NAME}
-    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./Loki:/etc/loki
     ports:
       - "${LOKI_EXTERNAL_PORT}:3100"
     networks:
@@ -154,4 +157,31 @@ services:
       start_period: 2s
       interval: 2s
       timeout: 1s
+      retries: 10
+
+  Promtail:
+    image: investment/promtail
+    build:
+      context: ./Promtail
+      dockerfile: Promtail.Dockerfile
+    depends_on:
+      Loki:
+        condition: service_healthy
+    hostname: ${PROMTAIL_HOSTNAME}
+    container_name: ${PROMTAIL_CONTAINER_NAME}
+    command: -config.file=/etc/promtail/config.yaml
+    volumes:
+      - ./Promtail:/etc/promtail
+      - ./${POSTGRESQL_PERSISTENT_STORAGE_PATH}:/PG_DATA
+    ports:
+      - ${PROMTAIL_EXTERNAL_PORT}:9080
+    networks:
+      Internal:
+        ipv4_address: "${PROMTAIL_INTERNAL_IP}"
+      External: null
+    healthcheck:
+      test: curl --fail http://${PROMTAIL_HOSTNAME}:9080
+      start_period: 2s
+      interval: 2s
+      timeout: 5s
       retries: 10
