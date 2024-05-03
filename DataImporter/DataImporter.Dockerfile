@@ -13,16 +13,21 @@
 # Date            Who                     What
 #
 
-FROM alpine:3.19
+FROM ubuntu:22.04
 
-# Install Python and pip
-RUN apk update
-RUN apk add curl
-
+RUN apt update
+RUN apt install -y curl
 
 # Set working directory and copy required files
 WORKDIR /DataImport
 COPY . /DataImport
+
+# Set timezone
+ENV TZ="Europe/Warsaw"
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
+
+RUN mkdir /log
+RUN chmod 777 /log
 
 
 # Set environmental variables
@@ -31,6 +36,9 @@ COPY . /DataImport
 ENV FLASK_IP_Address="API"
 ENV FLASK_PORT="5000"
 
+ENV LOG_PATH="/log/"
+ENV LOG_FILE_NAME="DataImporter"
 
-# Start API program
+
+# Start program
 CMD ["sh", "InsertData.sh"]

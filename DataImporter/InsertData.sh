@@ -33,33 +33,74 @@ FUNDS_FILE="Funds.json"
 INVESTMENT_FILES_SUFFIX="_Investments.json"
 
 Main() {
-
+    logMessage "Main" "Script started" "info"
     importFundsConfig
     importInvestmentConfig
+    logMessage "Main" "Script completed" "info"
 }
 
 importFundsConfig() {
+    logMessage "importFundsConfig" "Inserting funds" "info"
 
     # Read JSON file with funds
-    jsonFunds=$(cat "./$FUNDS_FILE")
+    jsonFunds=$(cat "./$FUNDS_FILE") || exit 1
+
+    logMessage "importFundsConfig" "Funds config file read" "info"
 
     # Invoke PUT /FundConfig method
-    curl --silent --location --request PUT "$API_IP_ADDRESS:$API_PORT/FundConfig" \
-        --header 'Content-Type: application/json' \
-        --data "$jsonFunds"
+    response=$(
+        curl --silent --location --request PUT "$API_IP_ADDRESS:$API_PORT/FundConfig" \
+            --header 'Content-Type: application/json' \
+            --data "$jsonFunds"
+    )
+    logMessage "importFundsConfig" "API response: $response" "debug"
+    logMessage "importFundsConfig" "Funds config import completed" "info"
 }
 
 importInvestmentConfig() {
+    logMessage "importInvestmentConfig" "Inserting investments config" "info"
+
     for filename in ./*"$INVESTMENT_FILES_SUFFIX"; do
 
         # Read JSON file with investment details
         jsonInvestment=$(cat "$filename")
+        logMessage "importInvestmentConfig" "File $filename read" "info"
 
         # Invoke PUT /InvestmentConfig method
-        curl --silent --location --request PUT "$API_IP_ADDRESS:$API_PORT/InvestmentConfig" \
-            --header 'Content-Type: application/json' \
-            --data "$jsonInvestment"
+        response=$(
+            curl --silent --location --request PUT "$API_IP_ADDRESS:$API_PORT/InvestmentConfig" \
+                --header 'Content-Type: application/json' \
+                --data "$jsonInvestment"
+        )
+        logMessage "importInvestmentConfig" "API response: $response" "debug"
     done
+
+    logMessage "importInvestmentConfig" "Investment config import completed" "info"
+}
+
+logMessage() {
+    function=$1
+    message=$2
+    level=$3
+    timestamp=$(date +"%Y-%m-%d %H:%M:%S.%6N")
+
+    # replace new lines with spaces
+    message="$(echo "$message" | tr '\n' ' ')"
+    # replace double quotes with single quotes
+    message="$(echo "$message" | tr '"' "'")"
+    # replace several spaces with just one
+    message=$(echo "$message" | tr -s ' ')
+
+    level="$(echo "$level" | tr '[:lower:]' '[:upper:]')"
+    {
+        echo -n "{"
+        echo -n "\"timestamp\" : \"$timestamp\", "
+        echo -n "\"level\" : \"$level\", "
+        echo -n "\"funcName\" : \"$function\", "
+        echo -n "\"message\" : \"$message\""
+        echo "}"
+    } >>"$LOG_PATH$LOG_FILE_NAME.json"
+
 }
 
 Main
