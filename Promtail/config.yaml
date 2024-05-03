@@ -9,11 +9,122 @@ clients:
   - url: http://Loki:3100/loki/api/v1/push
 
 scrape_configs:
-- job_name: system
+- job_name: PG_logs
+  pipeline_stages:
+    - json:
+        expressions:
+          timestamp: timestamp
+          level: error_severity
+          user: user
+          dbname: dbname
+          host: remote_host
+          message: message
+          application: application_name
+    - template:
+        source: level
+        template: '{{ regexReplaceAllLiteral "DETAIL|DEBUG|INFO|NOTICE|LOG" .level "info" }}'
+    - labels:
+        timestamp:
+        level:
+        user:
+        dbname:
+        host:
+        application:
+        message:
+    - timestamp:
+        source: timestamp
+        format: '2006-01-02 15:04:05.000 MST'
+        location: "Europe/Warsaw"
   static_configs:
   - targets:
       - localhost
     labels:
       Service: Postgres
-      __path__: /PG_DATA/log/postgresql*.log
+      __path__: /APP_DATA/PG_DATA/log/*.json
+
+- job_name: CH_logs
+  pipeline_stages:
+    - json:
+        expressions:
+          timestamp: timestamp
+          level: level
+          module: module
+          function: funcName
+          message: message
+    - template:
+        source: level
+        template: '{{ regexReplaceAllLiteral "DETAIL|DEBUG|INFO|NOTICE|LOG" .level "info" }}'
+    - labels:
+        timestamp:
+        level:
+        module:
+        function:
+        message:
+    - timestamp:
+        source: timestamp
+        format: "2006-01-02 15:04:05.000000"
+        location: "Europe/Warsaw"
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      Service: Checker
+      __path__: /APP_DATA/CH_DATA/*.json
+
+- job_name: FL_logs
+  pipeline_stages:
+    - json:
+        expressions:
+          timestamp: timestamp
+          level: level
+          module: module
+          function: funcName
+          message: message
+    - template:
+        source: level
+        template: '{{ regexReplaceAllLiteral "DETAIL|DEBUG|INFO|NOTICE|LOG" .level "info" }}'
+    - labels:
+        timestamp:
+        level:
+        module:
+        function:
+        message:
+    - timestamp:
+        source: timestamp
+        format: "2006-01-02 15:04:05.000000"
+        location: "Europe/Warsaw"
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      Service: Flask
+      __path__: /APP_DATA/FL_DATA/*.json
+
+- job_name: DI_logs
+  pipeline_stages:
+    - json:
+        expressions:
+          timestamp: timestamp
+          level: level
+          function: funcName
+          message: message
+    - template:
+        source: level
+        template: '{{ regexReplaceAllLiteral "DETAIL|DEBUG|INFO|NOTICE|LOG" .level "info" }}'
+    - labels:
+        timestamp:
+        level:
+        function:
+        message:
+    - timestamp:
+        source: timestamp
+        format: "2006-01-02 15:04:05.000000"
+        location: "Europe/Warsaw"
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      Service: DataImporter
+      __path__: /APP_DATA/DI_DATA/*.json
+
 
