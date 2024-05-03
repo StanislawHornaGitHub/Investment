@@ -23,7 +23,7 @@ LOG_PREFIX_PHRASE_DEFAULT="\#log_line_prefix = '%m \[%p\] '"
 LOG_LOGGING_COLLECTOR_NEW="logging_collector = on"
 LOG_LOGGING_COLLECTOR_DEFAULT="\#logging_collector = off"
 
-LOG_FILENAME_NEW="log_filename = 'postgresql-%Y-%m-%d_%H%M.log'"
+LOG_FILENAME_NEW="log_filename = 'postgresql.log'"
 LOG_FILENAME_DEFAULT="\#log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'"
 
 LOG_ROTATION_AGE_NEW="log_rotation_age = 60min"
@@ -59,7 +59,7 @@ LOG_FILE_MODE_DEFAULT="#log_file_mode = 0600"
 Main() {
     setLogPrefix
     setLogFileMode
-    #setLogDestination
+    setLogDestination
     setLogFileName
     setLogRotationAge
     setLogTruncate
