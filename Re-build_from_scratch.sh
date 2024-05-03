@@ -76,7 +76,7 @@ removePersistantStorage() {
 
     printYellowMessage "Removing persistant storage"
 
-    dirPath=$(getDotenvVariable "POSTGRESQL_PERSISTENT_STORAGE_PATH")
+    dirPath=$(getDotenvVariable "APP_DATA_PATH")
     sudo rm -fr "$dirPath"
 }
 

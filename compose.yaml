@@ -20,8 +20,6 @@ services:
     build:
       context: ./Grafana
       dockerfile: Grafana.Dockerfile
-    depends_on:
-      - PostgreSQL
     container_name: ${GRAFANA_CONTAINER_NAME}
     hostname: ${GRAFANA_HOSTNAME}
     restart: no
@@ -50,8 +48,6 @@ services:
     depends_on:
       PostgreSQL:
         condition: service_healthy
-      Loki:
-        condition: service_healthy
     container_name: ${FLASK_CONTAINER_NAME}
     hostname: ${FLASK_HOSTNAME}
     environment:
@@ -59,6 +55,8 @@ services:
       DB_Username: ${FLASK_DB_USERNAME}
       DB_Password: ${FLASK_DB_PASSWORD}
     restart: unless-stopped
+    volumes:
+      - ${APP_DATA_PATH}/${FLASK_PERSISTENT_STORAGE_DIR}:/log
     ports:
       - ${FLASK_EXTERNAL_PORT}:5000
     networks:
@@ -77,14 +75,11 @@ services:
     build:
       context: ./PostgreSQL
       dockerfile: PostgreSQL.Dockerfile
-    depends_on:
-      Loki:
-        condition: service_healthy
     container_name: ${POSTGRESQL_CONTAINER_NAME}
     hostname: ${POSTGRESQL_HOSTNAME}
     restart: no
     volumes:
-      - ./${POSTGRESQL_PERSISTENT_STORAGE_PATH}:/var/lib/postgresql/data
+      - ${APP_DATA_PATH}/${POSTGRESQL_PERSISTENT_STORAGE_DIR}:/var/lib/postgresql/data
     ports:
       - ${POSTGRESQL_EXTERNAL_PORT}:5432
     networks:
@@ -106,8 +101,6 @@ services:
     depends_on:
       PostgreSQL:
         condition: service_healthy
-      Loki:
-        condition: service_healthy
       Flask:
         condition: service_healthy
       DataImporter:
@@ -115,6 +108,8 @@ services:
     container_name: ${CHECKER_CONTAINER_NAME}
     hostname: ${CHECKER_HOSTNAME}
     restart: unless-stopped
+    volumes:
+      - ${APP_DATA_PATH}/${CHECKER_PERSISTENT_STORAGE_DIR}:/log
     networks:
       Internal:
         ipv4_address: ${CHECKER_INTERNAL_IP}
@@ -127,13 +122,13 @@ services:
     depends_on:
       PostgreSQL:
         condition: service_healthy
-      Loki:
-        condition: service_healthy
       Flask:
         condition: service_healthy
     container_name: ${DATA_IMPORTER_CONTAINER_NAME}
     hostname: ${DATA_IMPORTER_HOSTNAME}
     restart: no
+    volumes:
+      - ${APP_DATA_PATH}/${DATA_IMPORTER_PERSISTENT_STORAGE_DIR}:/log
     networks:
       Internal: null
 
@@ -169,10 +164,9 @@ services:
         condition: service_healthy
     hostname: ${PROMTAIL_HOSTNAME}
     container_name: ${PROMTAIL_CONTAINER_NAME}
-    command: -config.file=/etc/promtail/config.yaml
     volumes:
       - ./Promtail:/etc/promtail
-      - ./${POSTGRESQL_PERSISTENT_STORAGE_PATH}:/PG_DATA
+      - ./${APP_DATA_PATH}:/APP_DATA
     ports:
       - ${PROMTAIL_EXTERNAL_PORT}:9080
     networks:
