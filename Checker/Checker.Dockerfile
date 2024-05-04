@@ -1,6 +1,6 @@
 ### DESCRIPTION
 # Docker file to create Docker image for Checker service.
-# It will be responsivle for checking if there are new quotations available
+# It will be responsible for checking if there are new quotations available
 # and invoking the download automatically.
 
 ### INPUTS
