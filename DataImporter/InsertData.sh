@@ -19,11 +19,13 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  31-Mar-2024
-# Version:  1.1
+# Version:  1.2
 
 # Date            Who                     What
 # 2024-05-01      Stanisław Horna         Set API ip and port from environment variables.
 #                                         Add silent flag to curl.
+#
+# 2024-05-04      Stanisław Horna         Add removing backslashes from message to log.
 #
 
 API_IP_ADDRESS=$FLASK_IP_Address
@@ -86,6 +88,8 @@ logMessage() {
 
     # replace new lines with spaces
     message="$(echo "$message" | tr '\n' ' ')"
+    # replace backslashes
+    message="$(echo "$message" | tr -d '\\')"
     # replace double quotes with single quotes
     message="$(echo "$message" | tr '"' "'")"
     # replace several spaces with just one
