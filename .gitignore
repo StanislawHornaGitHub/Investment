@@ -163,4 +163,5 @@ test.*
 *_Investments.json
 !.env
 APP_DATA
+APP_LOG
 .venv*

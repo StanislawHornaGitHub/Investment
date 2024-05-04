@@ -27,6 +27,8 @@ services:
       - ./Grafana/datasources:/etc/grafana/provisioning/datasources
       - ./Grafana/dashboards_provisioning:/etc/grafana/provisioning/dashboards
       - ./Grafana/dashboards:/var/lib/grafana/dashboards
+      - ${APP_DATA_PATH}/${GRAFANA_PERSISTENT_STORAGE_DIR}:/var/lib/grafana
+      - ${APP_LOG_PATH}/${GRAFANA_PERSISTENT_STORAGE_DIR}:/var/log/grafana
     ports:
       - ${GRAFANA_EXTERNAL_PORT}:3000
     networks:
@@ -56,7 +58,7 @@ services:
       DB_Password: ${FLASK_DB_PASSWORD}
     restart: unless-stopped
     volumes:
-      - ${APP_DATA_PATH}/${FLASK_PERSISTENT_STORAGE_DIR}:/log
+      - ${APP_LOG_PATH}/${FLASK_PERSISTENT_STORAGE_DIR}:/log
     ports:
       - ${FLASK_EXTERNAL_PORT}:5000
     networks:
@@ -109,7 +111,7 @@ services:
     hostname: ${CHECKER_HOSTNAME}
     restart: unless-stopped
     volumes:
-      - ${APP_DATA_PATH}/${CHECKER_PERSISTENT_STORAGE_DIR}:/log
+      - ${APP_LOG_PATH}/${CHECKER_PERSISTENT_STORAGE_DIR}:/log
     networks:
       Internal:
         ipv4_address: ${CHECKER_INTERNAL_IP}
@@ -128,7 +130,7 @@ services:
     hostname: ${DATA_IMPORTER_HOSTNAME}
     restart: no
     volumes:
-      - ${APP_DATA_PATH}/${DATA_IMPORTER_PERSISTENT_STORAGE_DIR}:/log
+      - ${APP_LOG_PATH}/${DATA_IMPORTER_PERSISTENT_STORAGE_DIR}:/log
     networks:
       Internal: null
 
@@ -141,6 +143,7 @@ services:
     container_name: ${LOKI_CONTAINER_NAME}
     volumes:
       - ./Loki:/etc/loki
+      - ${APP_DATA_PATH}/${LOKI_PERSISTENT_STORAGE_DIR}:/loki
     ports:
       - "${LOKI_EXTERNAL_PORT}:3100"
     networks:
@@ -166,6 +169,8 @@ services:
     container_name: ${PROMTAIL_CONTAINER_NAME}
     volumes:
       - ./Promtail:/etc/promtail
+      - ./${APP_DATA_PATH}/${PROMTAIL_PERSISTENT_STORAGE_DIR}:/var/lib/promtail
+      - ./${APP_LOG_PATH}:/APP_LOG
       - ./${APP_DATA_PATH}:/APP_DATA
     ports:
       - ${PROMTAIL_EXTERNAL_PORT}:9080
