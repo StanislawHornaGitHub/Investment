@@ -1,23 +1,24 @@
 {
-    "cSpell.words": [
-        "Analizy",
-        "dateutil",
-        "ERRCODE",
-        "findall",
-        "fkey",
-        "fkeys",
-        "ifun",
-        "jsonify",
-        "lxml",
-        "outerjoin",
-        "plpgsql",
-        "plpython",
-        "POSTGRE",
-        "sessionmaker",
-        "signum",
-        "sqlalchemy",
-        "subf",
-        "timedelta"
-    ],
-    "python.analysis.typeCheckingMode": "off"
+  "cSpell.words": [
+    "Analizy",
+    "dateutil",
+    "ERRCODE",
+    "findall",
+    "fkey",
+    "fkeys",
+    "ifun",
+    "jsonify",
+    "lxml",
+    "outerjoin",
+    "plpgsql",
+    "plpython",
+    "POSTGRE",
+    "Promtail",
+    "sessionmaker",
+    "signum",
+    "sqlalchemy",
+    "subf",
+    "timedelta"
+  ],
+  "python.analysis.typeCheckingMode": "off"
 }
