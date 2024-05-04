@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.3
+    Version:            1.4
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -18,6 +18,8 @@
     2024-04-26      Stanisław Horna         Method to retrieve monitored funds with last quotation date form db.
     
     2024-04-30      Stanisław Horna         Add logging capabilities.
+    
+    2024-05-04      Stanisław Horna         Remove status details and fund url from body response in insertFundConfig()
 
 """
 import json
@@ -65,16 +67,10 @@ class FundConfig:
                 # Rollback transaction to be able to successfully proceed with the next url
                 session.rollback()
 
-                # Extract error
-                errorMessage = " - ".join([phrase for phrase in str(err).split(
-                    '\n') if ("DETAIL: " in phrase) or ("(psycopg2.errors." in phrase)])
-
                 result.append(
                     {
                         "Fund_ID": entry.fund_id,
-                        "Fund_URL": entry.fund_url,
                         "Status": "Already exists",
-                        "Status_Details": errorMessage
                     }
                 )
 
@@ -100,9 +96,7 @@ class FundConfig:
                 result.append(
                     {
                         "Fund_ID": entry.fund_id,
-                        "Fund_URL": entry.fund_url,
                         "Status": "Failed to add",
-                        "Status_Details": str(e)
                     }
                 )
 
@@ -181,7 +175,6 @@ class FundConfig:
             )
             return responseCode, {
                 "Status": "Failed to retrieve data from DB",
-                "Status_Details": str(e)
             }
         session.close()
         logger.debug(
