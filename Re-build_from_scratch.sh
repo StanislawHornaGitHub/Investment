@@ -29,7 +29,7 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  23-Apr-2024
-# Version:  1.2
+# Version:  1.3
 
 # Date            Who                     What
 # 2024-04-28      Stanisław Horna         Remove downloading quotations and refund calculation,
@@ -37,6 +37,8 @@
 #                                         which will automatically perform those operations.
 #
 # 2024-05-01      Stanisław Horna         Remove initial data import as it was moved to separate container.
+#
+# 2024-05-04      Stanisław Horna         Add prompt for user about removing persistent data.
 #
 
 # define echo colors
@@ -46,7 +48,7 @@ RED='\033[0;31m'
 RESET='\033[0m'
 
 Main() {
-
+    askUserAboutStorageRemoval
     checkDockerDaemonRunning
     stopRunningContainers
     removePersistantStorage
@@ -72,12 +74,26 @@ stopRunningContainers() {
     docker compose down
 }
 
+askUserAboutStorageRemoval() {
+
+    response=""
+    while [ "$response" != "y" ] && [ "$response" != "n" ]; do
+        echo "Remove persistent data? [y/n]: \c"
+        read -r response
+    done
+}
+
 removePersistantStorage() {
 
-    printYellowMessage "Removing persistant storage"
+    if [ "$response" = "y" ]; then
+        printYellowMessage "Removing persistant storage"
 
-    dirPath=$(getDotenvVariable "APP_DATA_PATH")
-    sudo rm -fr "$dirPath"
+        dirPath=$(getDotenvVariable "APP_DATA_PATH")
+        sudo rm -fr "$dirPath"
+
+        dirPath=$(getDotenvVariable "APP_LOG_PATH")
+        sudo rm -fr "$dirPath"
+    fi
 }
 
 buildCompose() {
