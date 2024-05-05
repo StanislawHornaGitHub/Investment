@@ -1,6 +1,6 @@
 """
 .DESCRIPTION
-    SQLAlchemy Base file to init the connection with PostgreSQL DB
+    SQLAlchemy Base file to init the ORM with declarative constructor.
     
 
 .NOTES

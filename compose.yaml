@@ -103,8 +103,10 @@ services:
     environment:
       TZ: ${SYSTEM_TIME_ZONE}
       DB_IP_Address: ${POSTGRESQL_INTERNAL_IP}
-      DB_Username: ${FLASK_DB_USERNAME}
-      DB_Password: ${FLASK_DB_PASSWORD}
+      DB_Username_rw: ${FLASK_DB_USERNAME_rw}
+      DB_Password_rw: ${FLASK_DB_PASSWORD_rw}
+      DB_Username_ro: ${FLASK_DB_USERNAME}
+      DB_Password_ro: ${FLASK_DB_PASSWORD}
     restart: unless-stopped
     volumes:
       - ${APP_LOG_PATH}/${FLASK_PERSISTENT_STORAGE_DIR}:/log
