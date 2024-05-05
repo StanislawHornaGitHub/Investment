@@ -9,17 +9,33 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  24-Mar-2024
-# Version:  1.1
+# Version:  1.2
 
 # Date            Who                     What
 # 2024-04-22      Stanisław Horna         Instance name added
+#
+# 2024-05-04      Stanisław Horna         Add log definition variables and timezone on frontend.
+#
+# 2024-05-05      Stanisław Horna         Add timezone setup for container.
+#
 
 FROM grafana/grafana-enterprise
 
+ENV GF_DATE_FORMATS_DEFAULT_TIMEZONE="Europe/Warsaw"
 
 ENV GF_DEFAULT_INSTANCE_NAME="Grafana"
 ENV GF_INSTALL_PLUGINS="grafana-clock-panel, grafana-simple-json-datasource, speakyourcode-button-panel, volkovlabs-form-panel"
-ENV GF_LOG_LEVEL="warn"
+
+ENV GF_LOG_LEVEL="info"
+ENV GF_LOG_MODE="file console"
+ENV GF_LOG_FILE_FORMAT="json"
+
+USER root
+RUN apk add curl
+
+# Set timezone
+ENV TZ="Europe/Warsaw"
+RUN apk add --no-cache tzdata
 
 EXPOSE 3000
 

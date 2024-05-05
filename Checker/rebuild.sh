@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ### DESCRIPTION
-# Script to build fresh image of Flask REST API,
+# Script to build fresh image of Checker service,
 # run docker container.
 
 ### INPUTS
@@ -20,11 +20,10 @@
 ### CHANGE LOG
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
-# Created:  24-Mar-2024
-# Version:  1.1
+# Created:  05-May-2024
+# Version:  1.0
 
 # Date            Who                     What
-# 2024-05-05      Stanisław Horna         Adjustment to work with custom dockerfile name and new configuration
 #
 
 # define echo colors
@@ -34,10 +33,9 @@ RED='\033[0;31m'
 RESET='\033[0m'
 
 # define docker variables
-DockerImageName="investment/flask"
-DockerfileName="Flask.Dockerfile"
-DockerContainerName="Investment_Flask"
-HostPortToOpen="5000"
+DockerImageName="investment/checker"
+DockerfileName="Checker.Dockerfile"
+DockerContainerName="Investment_Checker"
 
 Main() {
 
@@ -67,7 +65,7 @@ Main() {
     fi
 
     # run container based on the new docker image
-    docker run --name $DockerContainerName -p $HostPortToOpen:5000 -d $DockerImageName
+    docker run --name $DockerContainerName -d $DockerImageName
 
     # invoke sleep to wait for full initialization of the database
     waitForContainerInit
@@ -81,7 +79,10 @@ waitForContainerInit() {
     # init variable
     numOfDBstartups=0
 
-    # loop until appropriate phrase will be printed to docker logs
+    # loop until SQL engine perform 2 complete startups,
+    # each startup is announced by log message "database system is ready to accept connections"
+    # after first one Database is initialized from scripts located in "SQL" directory,
+    # once DB init is completed, another restart is performed and container is ready to work.
     while [ "$numOfDBstartups" -le 0 ]; do
 
         sleep 0.1
@@ -96,7 +97,7 @@ waitForContainerInit() {
             printRedMessage "Container is not running"
             exit 3
         fi
-        numOfDBstartups=$(docker logs $DockerContainerName 2>&1 | grep -c "spawned uWSGI master process (pid: 1)$")
+        numOfDBstartups=$(docker logs $DockerContainerName 2>&1 | grep -c " - INFO - Checker - Service started$")
     done
 }
 

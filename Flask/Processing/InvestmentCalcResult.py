@@ -26,7 +26,7 @@
     2024-04-30      Stanisław Horna         Add logging capabilities.
 
 """
-import logging
+from Utility.Logger import logger
 import SQL
 from SQL.Quotation import Quotation
 from SQL.InvestmentResult import InvestmentResult
@@ -54,7 +54,7 @@ class InvestmentCalcResult:
     @staticmethod
     def calculateAllResults() -> None:
 
-        logging.debug("calculateAllResults()")
+        logger.debug("calculateAllResults()")
 
         # Create session and init processing variables
         session = SQL.base.Session()
@@ -77,7 +77,7 @@ class InvestmentCalcResult:
 
         # Loop through each investment and invoke result calculation
         for id in investmentsToRefresh:
-            logging.debug("Processing investment ID: %s", id)
+            logger.debug("Processing investment ID: %s", id)
             # invoke investment calculation
             code, responseBody = InvestmentCalcResult.calculateResult(id)
 
@@ -98,7 +98,7 @@ class InvestmentCalcResult:
         # Close SQL session
         session.close()
 
-        logging.debug(
+        logger.debug(
             "calculateAllResults(). Returning body and code: %d",
             responseCode
         )
@@ -107,7 +107,7 @@ class InvestmentCalcResult:
     @staticmethod
     def calculateResult(investment_id: int):
 
-        logging.debug("calculateResult(%s)", investment_id)
+        logger.debug("calculateResult(%s)", investment_id)
         # Create new SQL session
         session = SQL.base.Session()
 
@@ -115,7 +115,7 @@ class InvestmentCalcResult:
             # Check if provided ID exists in DB
             if (Investment.IDisValid(investment_id, session) != True):
                 responseCode = 404
-                logging.debug(
+                logger.debug(
                     "Provided Investment ID %s does not exist, setting code to %d",
                     investment_id,
                     responseCode
@@ -124,7 +124,7 @@ class InvestmentCalcResult:
                     "Investment ID": investment_id,
                     "Status": f"Investment with ID: {investment_id} does not exist"
                 }
-                logging.debug(
+                logger.debug(
                     "calculateResult(%s). Returning body and code: %d",
                     investment_id,
                     responseCode
@@ -149,14 +149,14 @@ class InvestmentCalcResult:
                 investment_id, session
             )
         except Exception:
-            logging.exception("Exception occurred", exc_info=True)
+            logger.exception("Exception occurred", exc_info=True)
             resultBody = {
                 "Investment ID": investment_id,
                 "Status": "Failed to retrieve data from DB",
                 "Status_Details": str(e)
             }
             responseCode = 500
-            logging.debug(
+            logger.debug(
                 "calculateResult(%s). Returning body and code: %d",
                 investment_id,
                 responseCode
@@ -169,7 +169,7 @@ class InvestmentCalcResult:
         # Check if there is an lastUpdateDate if not, we have to count from the beginning
         if lastUpdateDate is None:
 
-            logging.debug("Last update is none")
+            logger.debug("Last update is none")
 
             # Set processing date to start date to begin calculation at day 0
             currentProcessingDate = start_date
@@ -184,7 +184,7 @@ class InvestmentCalcResult:
         # if there is an lastUpdateDate we can skip already calculated days
         else:
 
-            logging.debug("Last update is NOT none")
+            logger.debug("Last update is NOT none")
 
             # Get information about,
             # participation units and invested money for each fund and assign it to temp dict
@@ -210,7 +210,7 @@ class InvestmentCalcResult:
             SQLdata = InvestmentResult.getInvestmentResult(
                 investment_id, session)
 
-        logging.debug("Calculating refund")
+        logger.debug("Calculating refund")
         # Init result variable
         result = []
 
@@ -327,7 +327,7 @@ class InvestmentCalcResult:
         responseCode = 200
         resultBody = []
 
-        logging.debug("Adding calculation entries to session")
+        logger.debug("Adding calculation entries to session")
         # Loop through each entry in result var, create an DB entry, add it to session and try to commit.
         for output in result:
             record = InvestmentResult(
@@ -337,14 +337,14 @@ class InvestmentCalcResult:
 
         try:
             session.commit()
-            logging.debug("Changes successfully committed")
+            logger.debug("Changes successfully committed")
             resultBody = {
                 "Investment ID": investment_id,
                 "Status": "Results calculated and added successfully",
                 "Last Result Date": Dates.convertDateToString((result[-1]["result_date"]))
             }
         except IndexError as indexErr:
-            logging.warning("No new result to add", exc_info=True)
+            logger.warning("No new result to add", exc_info=True)
             session.rollback()
             resultBody = {
                 "Investment ID": investment_id,
@@ -352,7 +352,7 @@ class InvestmentCalcResult:
             }
         except Exception as e:
             responseCode = 206
-            logging.exception("Failed to add entry", exc_info=True)
+            logger.exception("Failed to add entry", exc_info=True)
             session.rollback()
             resultBody = {
                 "Investment ID": investment_id,
@@ -361,7 +361,7 @@ class InvestmentCalcResult:
             }
 
         session.close()
-        logging.debug(
+        logger.debug(
             "calculateResult(%s). Returning body and code: %d",
             investment_id,
             responseCode
@@ -385,7 +385,7 @@ class InvestmentCalcResult:
                 .all()
             )
         except:
-            logging.exception(
+            logger.exception(
                 "getInvestmentOrderMap(%s) failed to retrieve data from DB",
                 investment_id,
                 exc_info=True
@@ -416,7 +416,7 @@ class InvestmentCalcResult:
                 quotation[fund] = InvestmentCalcResult.getQuotation(
                     fund, start_date, session)
         except:
-            logging.exception(
+            logger.exception(
                 "getFundsQuotation(%s, %s) failed to retrieve data from DB",
                 str(fundList),
                 start_date
@@ -459,7 +459,7 @@ class InvestmentCalcResult:
                 .first()
             )
         except:
-            logging.exception(
+            logger.exception(
                 "getLastFundResult(%s, %s, %s) failed to retrieve data from DB",
                 investment_id,
                 fund_id,
@@ -471,7 +471,7 @@ class InvestmentCalcResult:
     @staticmethod
     def unifyInvestmentResults(investment_id: int, session) -> datetime.datetime:
 
-        logging.debug("unifyInvestmentResults(%s)", investment_id)
+        logger.debug("unifyInvestmentResults(%s)", investment_id)
 
         # Create subquery to calculate row number for each fund in investment
         # rank 1 will be assigned to the latest fund's result within investment
@@ -493,7 +493,7 @@ class InvestmentCalcResult:
 
         # Find the oldest date with rank 1, so it will contain latest date when each fund of the investment
         # had the same result date.
-        logging.debug("Getting the last newest entry date")
+        logger.debug("Getting the last newest entry date")
         try:
             dateToFilter = (
                 session
@@ -504,7 +504,7 @@ class InvestmentCalcResult:
                 .all()
             )[0][0]
         except:
-            logging.exception("Failed to retrieve date from DB", exc_info=True)
+            logger.exception("Failed to retrieve date from DB", exc_info=True)
             return None
 
         if dateToFilter == None:
@@ -515,7 +515,7 @@ class InvestmentCalcResult:
         # fund1 has last result from 02.01, but fund2 has result from 05.01,
         # query will delete all funds newer than 02.01,
         # which actually will be result with missing data from some funds
-        logging.debug("Deleting the entries newer than %s", dateToFilter)
+        logger.debug("Deleting the entries newer than %s", dateToFilter)
         try:
             deletedRecords = (
                 session
@@ -528,8 +528,8 @@ class InvestmentCalcResult:
             )
             session.commit()
         except:
-            logging.exception("Failed to delete DB entries", exc_info=True)
+            logger.exception("Failed to delete DB entries", exc_info=True)
 
         # Return the edge date, before which the results are complete
-        logging.debug("Returning filter date %s", dateToFilter)
+        logger.debug("Returning filter date %s", dateToFilter)
         return dateToFilter

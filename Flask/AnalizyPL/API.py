@@ -17,7 +17,7 @@
     2024-04-30      Stanisław Horna         Add logging capabilities.
 
 """
-import logging
+from Utility.Logger import logger
 from dataclasses import dataclass, field
 from SQL.Fund import Fund
 from SQL.Quotation import Quotation
@@ -41,7 +41,7 @@ class AnalizyFundAPI:
     @staticmethod
     def downloadQuotation(fund: Fund) -> list[Quotation]:
 
-        logging.debug("downloadQuotation(%s)", fund.getFundID())
+        logger.debug("downloadQuotation(%s)", fund.getFundID())
 
         # Create custom URL to access API to download JSON with all quotation
         URL = f"{AnalizyFundAPI.__API_URL}/{fund.getFundCategoryShort()}/{fund.getFundID()}"
@@ -50,7 +50,7 @@ class AnalizyFundAPI:
         try:
             fundQuotationResponse = json.loads(requests.get(URL).content)
         except:
-            logging.exception(exc_info=True)
+            logger.exception(exc_info=True)
             return None
 
         fundID = fundQuotationResponse[AnalizyFundAPI.RESPONSE_ID]
@@ -63,7 +63,7 @@ class AnalizyFundAPI:
             )
         }
 
-        logging.debug(
+        logger.debug(
             "Converting str types to proper ones (%s, %s)",
             AnalizyFundAPI.RESPONSE_DATE_NAME,
             AnalizyFundAPI.RESPONSE_PRICE_NAME
@@ -76,5 +76,5 @@ class AnalizyFundAPI:
                 result["FundQuotation"][i][AnalizyFundAPI.RESPONSE_PRICE_NAME]
             )
 
-        logging.debug("Returning quotation")
+        logger.debug("Returning quotation")
         return result

@@ -29,7 +29,7 @@ ENV TZ="Europe/Warsaw"
 # Set DB name and default user
 ENV POSTGRES_DB="Investments"
 ENV POSTGRES_PASSWORD="DefP4550RD"
-ENV POSTGRES_USER="Invest_SH"
+ENV POSTGRES_USER="Investments"
 # Set DB collate
 ENV POSTGRES_INITDB_ARGS="--encoding=UTF-8 --lc-collate=pl_PL.utf8 --lc-ctype=pl_PL.utf8"
 

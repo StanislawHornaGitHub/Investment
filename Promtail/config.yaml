@@ -1,0 +1,176 @@
+### DESCRIPTION
+# Promtail config file for scraping system's log files.
+#
+# Defined jobs:
+#   - Postgres_logs
+#   - Checker_logs
+#   - Flask_logs
+#   - DataImporter_logs
+#   - Grafana_logs
+
+### CHANGE LOG
+# Author:   Stanisław Horna
+# GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
+# Created:  02-May-2024
+# Version:  1.1
+
+# Date            Who                     What
+# 2024-05-04      Stanisław Horna         Add grafana logs to config.
+#
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /var/lib/promtail/positions.yaml
+
+clients:
+  - url: http://Loki:3100/loki/api/v1/push
+
+scrape_configs:
+- job_name: Postgres_logs
+  pipeline_stages:
+    - json:
+        expressions:
+          timestamp: timestamp
+          level: error_severity
+          user: user
+          dbname: dbname
+          host: remote_host
+          message: message
+          function: application_name
+    - template:
+        source: level
+        template: '{{ regexReplaceAllLiteral "DETAIL|DEBUG|INFO|NOTICE|LOG" .level "info" }}'
+    - labels:
+        timestamp:
+        level:
+        user:
+        dbname:
+        host:
+        function:
+        message:
+    - timestamp:
+        source: timestamp
+        format: '2006-01-02 15:04:05.000 MST'
+        location: "Europe/Warsaw"
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      Service: Postgres
+      __path__: /APP_DATA/Postgres/log/*.json
+
+- job_name: Checker_logs
+  pipeline_stages:
+    - json:
+        expressions:
+          timestamp: timestamp
+          level: level
+          module: module
+          function: funcName
+          message: message
+    - template:
+        source: level
+        template: '{{ regexReplaceAllLiteral "DETAIL|DEBUG|INFO|NOTICE|LOG" .level "info" }}'
+    - labels:
+        timestamp:
+        level:
+        module:
+        function:
+        message:
+    - timestamp:
+        source: timestamp
+        format: "2006-01-02 15:04:05.000000"
+        location: "Europe/Warsaw"
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      Service: Checker
+      __path__: /APP_LOG/Checker/*.json
+
+- job_name: Flask_logs
+  pipeline_stages:
+    - json:
+        expressions:
+          timestamp: timestamp
+          level: level
+          module: module
+          function: funcName
+          message: message
+    - template:
+        source: level
+        template: '{{ regexReplaceAllLiteral "DETAIL|DEBUG|INFO|NOTICE|LOG" .level "info" }}'
+    - labels:
+        timestamp:
+        level:
+        module:
+        function:
+        message:
+    - timestamp:
+        source: timestamp
+        format: "2006-01-02 15:04:05.000000"
+        location: "Europe/Warsaw"
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      Service: Flask
+      __path__: /APP_LOG/Flask/*.json
+
+- job_name: DataImporter_logs
+  pipeline_stages:
+    - json:
+        expressions:
+          timestamp: timestamp
+          level: level
+          function: funcName
+          message: message
+    - template:
+        source: level
+        template: '{{ regexReplaceAllLiteral "DETAIL|DEBUG|INFO|NOTICE|LOG" .level "info" }}'
+    - labels:
+        timestamp:
+        level:
+        function:
+        message:
+    - timestamp:
+        source: timestamp
+        format: "2006-01-02 15:04:05.000000"
+        location: "Europe/Warsaw"
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      Service: DataImporter
+      __path__: /APP_LOG/DataImporter/*.json
+
+- job_name: Grafana_logs
+  pipeline_stages:
+    - json:
+        expressions:
+          timestamp: t
+          level: level
+          function: logger
+          message: msg
+    - template:
+        source: level
+        template: '{{ regexReplaceAllLiteral "DETAIL|DEBUG|INFO|NOTICE|LOG" .level "info" }}'
+    - labels:
+        timestamp:
+        level:
+        function:
+        message:
+    - timestamp:
+        source: timestamp
+        format: "2006-01-02T15:04:05.999999999-07:00"
+        location: "Europe/Warsaw"
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      Service: Grafana
+      __path__: /APP_LOG/Grafana/*.log
+

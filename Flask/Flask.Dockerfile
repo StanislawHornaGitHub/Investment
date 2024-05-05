@@ -14,7 +14,7 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  29-Mar-2024
-# Version:  1.2
+# Version:  1.4
 
 # Date            Who                     What
 # 2024-04-03      Stanisław Horna         Timezone config added.
@@ -24,6 +24,9 @@
 #
 # 2024-04-30      Stanisław Horna         Add environmental variable for log level.
 #
+# 2024-05-03      Stanisław Horna         Add logs directory at root.
+#                                         Implement log related environmental variables.
+#
 
 FROM ubuntu:22.04
 
@@ -32,6 +35,7 @@ RUN apt update
 RUN apt install -y python3-dev
 RUN apt install -y pip
 RUN apt install -y gcc libpcre3-dev libpcre3
+RUN apt install -y curl
 
 # Set timezone
 ENV TZ="Europe/Warsaw"
@@ -44,6 +48,9 @@ COPY . /App
 # Install Python packages
 RUN pip install -r requirements.txt
 
+RUN mkdir /log
+RUN chmod 777 /log
+
 # Set environmental variables
 
 # PostgreSQL variables
@@ -52,10 +59,17 @@ ENV DB_Port="5432"
 ENV DB_Username="api_write"
 ENV DB_Password="inv!w_ap_ite2"
 ENV DB_Name="Investments"
+
+ENV LOKI_IP_Address="Loki"
+ENV LOKI_PORT="3100"
+
 ENV LOG_LEVEL="DEBUG"
+ENV LOG_TYPE="JSON"
+ENV LOG_PATH="/log/"
+ENV LOG_FILE_NAME="Flask"
 
 # Flask variables
 ENV FLASK_DEBUG="True"
 
 # Start API program
-CMD ["uwsgi", "--ini", "./wsgi.ini", "--thunder-lock"]
+CMD ["uwsgi", "--ini", "./wsgi.ini"]

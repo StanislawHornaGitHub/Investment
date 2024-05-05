@@ -16,7 +16,7 @@
     2024-04-29      Stanisław Horna         Add logging capabilities.
 
 """
-import logging
+from Utility.Logger import logger
 import requests
 from lxml.html import fromstring
 import datetime
@@ -29,38 +29,37 @@ from Utility.Exceptions import AnalizyAPIexception
 
 @dataclass
 class AnalizyAPI:
-    
+
     __API_URL = "https://www.analizy.pl/api/quotation"
-    
 
     __RESPONSE_DETAILS = "series"
     __RESPONSE_LIST = "price"
     __RESPONSE_DATE_NAME = "date"
-    
+
     @staticmethod
     def getLastQuotationDate(fund_id: str, fund_category: str) -> datetime.date:
 
-        logging.debug("getLastQuotationDate(%s, %s)",fund_id, fund_category)
-        
+        logger.debug("getLastQuotationDate(%s, %s)", fund_id, fund_category)
+
         # Create custom URL to access API to download JSON with all quotation
         url = f"{AnalizyAPI.__API_URL}/{fund_category}/{fund_id}"
 
         try:
             # Invoke web request and convert JSON response to dict
-            logging.debug("Calling %s", url)
+            logger.debug("Calling %s", url)
             apiResponse = requests.get(url)
-            logging.debug("Response status code: %d", apiResponse.status_code)
+            logger.debug("Response status code: %d", apiResponse.status_code)
             fundQuotation = apiResponse.json()
         except Exception as err:
-            logging.exception("Exception occurred", exc_info=True)
+            logger.exception("Exception occurred", exc_info=True)
             raise AnalizyAPIexception(str(err))
-        
-        logging.debug("Parsing %s", AnalizyAPI.__RESPONSE_DATE_NAME)
+
+        logger.debug("Parsing %s", AnalizyAPI.__RESPONSE_DATE_NAME)
         quotation = fundQuotation[AnalizyAPI.__RESPONSE_DETAILS][0][AnalizyAPI.__RESPONSE_LIST]
-        
+
         lastDate = parse(
             quotation[-1][AnalizyAPI.__RESPONSE_DATE_NAME]
         ).date()
-        
-        logging.debug("Returning date for fund: %s", fund_id)
+
+        logger.debug("Returning date for fund: %s", fund_id)
         return lastDate
