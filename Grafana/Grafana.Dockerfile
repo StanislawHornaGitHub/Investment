@@ -14,7 +14,10 @@
 # Date            Who                     What
 # 2024-04-22      Stanisław Horna         Instance name added
 #
-# 2024-05-04      Stanisław Horna         Add log definition variables and timezone.
+# 2024-05-04      Stanisław Horna         Add log definition variables and timezone on frontend.
+#
+# 2024-05-05      Stanisław Horna         Add timezone setup for container.
+#
 
 FROM grafana/grafana-enterprise
 
@@ -29,6 +32,10 @@ ENV GF_LOG_FILE_FORMAT="json"
 
 USER root
 RUN apk add curl
+
+# Set timezone
+ENV TZ="Europe/Warsaw"
+RUN apk add --no-cache tzdata
 
 EXPOSE 3000
 

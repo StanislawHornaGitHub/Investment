@@ -165,8 +165,8 @@ scrape_configs:
         message:
     - timestamp:
         source: timestamp
-        format: "2006-01-02T15:04:05.999999999Z"
-        location: "Etc/GMT"
+        format: "2006-01-02T15:04:05.999999999-07:00"
+        location: "Europe/Warsaw"
   static_configs:
   - targets:
       - localhost
