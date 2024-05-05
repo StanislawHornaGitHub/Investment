@@ -28,7 +28,7 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  23-Apr-2024
-# Version:  1.5
+# Version:  1.6
 
 # Date            Who                     What
 # 2024-04-29      Stanisław Horna         Add checker service to compose.
@@ -41,6 +41,8 @@
 # 2024-05-04      Stanisław Horna         Separate persistant storage based on type, to Logs and Data.
 #
 # 2024-05-05      Stanisław Horna         Add timezone variable in .env file and assign it across services.
+#
+# 2024-05-05      Stanisław Horna         Reflect new environment variables for DB read/write users.
 #
 
 version: "3"
