@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.1
+    Version:            1.2
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -14,6 +14,8 @@
 
     Date            Who                     What
     2024-04-26      Stanisław Horna         checkInvestmentIDisValid to check if investment with provided ID exists.
+
+    2024-05-05      Stanisław Horna         Add Foreign keys mapping.
 
 """
 
@@ -25,16 +27,28 @@ from SQL.base import Base
 class Investment(Base):
     __tablename__ = 'investments'
 
-
     investment_id = Column(Integer, primary_key=True, autoincrement=True)
     investment_name = Column(String)
     investment_owner_id = Column(Integer)
     investment_owner = Column(String)
-    investment_fund_id = Column(String, primary_key=True)
+    investment_fund_id = Column(
+        String,
+        ForeignKey('funds.fund_id'),
+        primary_key=True
+    )
     operation_quotation_date = Column(DateTime, primary_key=True)
     operation_date = Column(DateTime)
     operation_value = Column(Float)
     operation_currency = Column(String)
+
+    Fund = orm.relationship(
+        "Fund",
+        back_populates="Investment"
+    )
+    InvestmentResult = orm.relationship(
+        "InvestmentResult",
+        back_populates="Investment"
+    )
 
     def __init__(
         self,

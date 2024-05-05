@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.0
+    Version:            1.1
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -13,10 +13,11 @@
     ChangeLog:
 
     Date            Who                     What
+    2024-05-05      Stanisław Horna         Add Foreign keys mapping.
 
 """
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey
+from sqlalchemy import orm, Column, String, Integer, Float, DateTime, ForeignKey
 
 from SQL.base import Base
 
@@ -25,8 +26,16 @@ class InvestmentResult(Base):
     __tablename__ = 'investment_results'
 
     result_date = Column(DateTime, primary_key=True)
-    fund_id = Column(String, primary_key=True)
-    investment_id = Column(Integer, primary_key=True)
+    fund_id = Column(
+        String,
+        ForeignKey('funds.fund_id'),
+        primary_key=True
+    )
+    investment_id = Column(
+        Integer,
+        ForeignKey('investments.investment_id'),
+        primary_key=True
+    )
     fund_participation_units = Column(Float)
     fund_invested_money = Column(Float)
     fund_value = Column(Float)
@@ -34,7 +43,16 @@ class InvestmentResult(Base):
     last_week_result = Column(Float)
     last_month_result = Column(Float)
     last_year_result = Column(Float)
-    
+
+    Fund = orm.relationship(
+        "Fund",
+        back_populates="InvestmentResult"
+    )
+
+    Investment = orm.relationship(
+        "Investment",
+        back_populates="InvestmentResult"
+    )
 
     def __init__(
         self,
@@ -71,7 +89,7 @@ class InvestmentResult(Base):
                 InvestmentResult.fund_participation_units,
                 InvestmentResult.fund_invested_money,
                 InvestmentResult.fund_value
-                )
+            )
             .filter(InvestmentResult.investment_id == investment_id)
             .order_by(InvestmentResult.result_date.asc())
             .all()
@@ -88,5 +106,5 @@ class InvestmentResult(Base):
                     "fund_value": value
                 }
             )
-        
+
         return result

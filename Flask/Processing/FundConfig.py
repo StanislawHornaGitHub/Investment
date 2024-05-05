@@ -24,7 +24,8 @@
 """
 import json
 from Utility.Logger import logger
-import SQL
+from SQL.write import Session_rw
+from SQL.read import Session_ro
 from sqlalchemy import func
 from SQL.Fund import Fund
 from SQL.Quotation import Quotation
@@ -41,7 +42,7 @@ class FundConfig:
 
         logger.debug("insertFundConfig()")
         # Create session and init processing variables
-        session = SQL.base.Session()
+        s_rw = Session_rw()
         responseCode = 200
         result = []
 
@@ -53,8 +54,8 @@ class FundConfig:
             # Try to create entry for current URL
             try:
                 entry = Fund(url)
-                session.add(entry)
-                session.commit()
+                s_rw.add(entry)
+                s_rw.commit()
 
             # Catch Integrity errors i.e. fund id already exists
             except IntegrityError as err:
@@ -65,7 +66,7 @@ class FundConfig:
                 )
 
                 # Rollback transaction to be able to successfully proceed with the next url
-                session.rollback()
+                s_rw.rollback()
 
                 result.append(
                     {
@@ -90,7 +91,7 @@ class FundConfig:
                     exc_info=True
                 )
                 # Rollback transaction to be able to successfully proceed with the next url
-                session.rollback()
+                s_rw.rollback()
 
                 # Add error message without further analysis
                 result.append(
@@ -108,7 +109,7 @@ class FundConfig:
             }
 
         # Close SQL session
-        session.close()
+        s_rw.close()
         logger.debug(
             "insertFundConfig(). Returning body and code: %d",
             responseCode
@@ -127,13 +128,13 @@ class FundConfig:
 
         logger.debug("getFund(%s)", fund_id)
 
-        session = SQL.base.Session()
+        s_ro = Session_ro()
         responseCode = 200
         try:
             if fund_id is not None:
                 logger.debug("fund ID is NOT none")
                 dbOut = (
-                    session.query(
+                    s_ro.query(
                         Quotation.fund_id,
                         Fund.category_short,
                         func.max(Quotation.date)
@@ -151,7 +152,7 @@ class FundConfig:
             else:
                 logger.debug("fund ID is none")
                 dbOut = (
-                    session.query(
+                    s_ro.query(
                         Quotation.fund_id,
                         Fund.category_short,
                         func.max(Quotation.date)
@@ -165,7 +166,7 @@ class FundConfig:
                     .all()
                 )
         except Exception as e:
-            session.close()
+            s_ro.close()
             responseCode = 400
             logger.exception(
                 "getFund(%s) failed to retrieve data from DB, setting status code to: %d",
@@ -176,7 +177,7 @@ class FundConfig:
             return responseCode, {
                 "Status": "Failed to retrieve data from DB",
             }
-        session.close()
+        s_ro.close()
         logger.debug(
             "Converting DB output to list of dicts and datetime to str"
         )

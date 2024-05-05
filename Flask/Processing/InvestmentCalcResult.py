@@ -27,7 +27,8 @@
 
 """
 from Utility.Logger import logger
-import SQL
+from SQL.write import Session_rw
+from SQL.read import Session_ro
 from SQL.Quotation import Quotation
 from SQL.InvestmentResult import InvestmentResult
 from SQL.Investment import Investment
@@ -57,7 +58,7 @@ class InvestmentCalcResult:
         logger.debug("calculateAllResults()")
 
         # Create session and init processing variables
-        session = SQL.base.Session()
+        s_ro = Session_ro()
         responseCode = 200
         result = {
             "Codes": [],
@@ -66,9 +67,9 @@ class InvestmentCalcResult:
 
         # Get IDs for investments existing in DB
         try:
-            investmentsToRefresh = InvestmentConfig.getInvestmentIDs(session)
+            investmentsToRefresh = InvestmentConfig.getInvestmentIDs(s_ro)
         except Exception as e:
-            session.close()
+            s_ro.close()
 
             return 400, {
                 "Status": "Failed to download Investment IDs",
@@ -96,7 +97,7 @@ class InvestmentCalcResult:
                 responseCode = 400
 
         # Close SQL session
-        session.close()
+        s_ro.close()
 
         logger.debug(
             "calculateAllResults(). Returning body and code: %d",
@@ -109,11 +110,12 @@ class InvestmentCalcResult:
 
         logger.debug("calculateResult(%s)", investment_id)
         # Create new SQL session
-        session = SQL.base.Session()
+        s_rw = Session_rw()
+        s_ro = Session_ro()
 
         try:
             # Check if provided ID exists in DB
-            if (Investment.IDisValid(investment_id, session) != True):
+            if (Investment.IDisValid(investment_id, s_ro) != True):
                 responseCode = 404
                 logger.debug(
                     "Provided Investment ID %s does not exist, setting code to %d",
@@ -136,17 +138,17 @@ class InvestmentCalcResult:
             # funds <- list of involved funds
             # ordersMap <- dict of dates and operations
             start_date, funds, ordersMap = InvestmentCalcResult.getInvestmentOrderMap(
-                investment_id, session
+                investment_id, s_ro
             )
 
             # Get quotations for each fund starting from start date of the oldest investment
             quot = InvestmentCalcResult.getFundsQuotation(
-                funds, start_date, session
+                funds, start_date, s_ro
             )
 
             # Check the latest update, to avoid calculating everything from the beginning
             lastUpdateDate = InvestmentCalcResult.getLastResultDate(
-                investment_id, session
+                investment_id, s_ro
             )
         except Exception:
             logger.exception("Exception occurred", exc_info=True)
@@ -161,6 +163,8 @@ class InvestmentCalcResult:
                 investment_id,
                 responseCode
             )
+            s_ro.close()
+            s_rw.close()
             return responseCode, resultBody
 
         # Init temp dict for owned participation units
@@ -194,7 +198,7 @@ class InvestmentCalcResult:
                     investment_id,
                     fund,
                     lastUpdateDate,
-                    session
+                    s_ro
                 )
 
                 tempOwnedFunds[fund] = {
@@ -208,7 +212,7 @@ class InvestmentCalcResult:
 
             # Get historical data to be able to calculate profits compared to last week, month etc.
             SQLdata = InvestmentResult.getInvestmentResult(
-                investment_id, session)
+                investment_id, s_ro)
 
         logger.debug("Calculating refund")
         # Init result variable
@@ -333,10 +337,10 @@ class InvestmentCalcResult:
             record = InvestmentResult(
                 **output
             )
-            session.add(record)
+            s_rw.add(record)
 
         try:
-            session.commit()
+            s_rw.commit()
             logger.debug("Changes successfully committed")
             resultBody = {
                 "Investment ID": investment_id,
@@ -345,7 +349,7 @@ class InvestmentCalcResult:
             }
         except IndexError as indexErr:
             logger.warning("No new result to add", exc_info=True)
-            session.rollback()
+            s_rw.rollback()
             resultBody = {
                 "Investment ID": investment_id,
                 "Status": "No new Result to add"
@@ -353,14 +357,15 @@ class InvestmentCalcResult:
         except Exception as e:
             responseCode = 206
             logger.exception("Failed to add entry", exc_info=True)
-            session.rollback()
+            s_rw.rollback()
             resultBody = {
                 "Investment ID": investment_id,
                 "Status": "Failed to add results",
                 "Status Details": str(e)
             }
 
-        session.close()
+        s_ro.close()
+        s_rw.close()
         logger.debug(
             "calculateResult(%s). Returning body and code: %d",
             investment_id,

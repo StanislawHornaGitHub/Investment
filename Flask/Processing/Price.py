@@ -17,7 +17,8 @@
     2024-04-30      Stanisław Horna         Add logging capabilities.
 
 """
-import SQL
+from SQL.write import Session_rw
+from SQL.read import Session_ro
 from Utility.Logger import logger
 from SQL.Quotation import Quotation
 from SQL.Fund import Fund
@@ -36,7 +37,8 @@ class Price:
         logger.debug("updateQuotation(%s)", ID)
 
         # Create session and init processing variables
-        session = SQL.base.Session()
+        s_ro = Session_ro()
+        s_rw = Session_rw()
         responseCode = 200
         result = []
 
@@ -45,11 +47,11 @@ class Price:
             logger.debug("ID is none")
 
             # Get monitored Fund IDs
-            fund = ConvertToDict.fundList(session.query(Fund).all())
+            fund = ConvertToDict.fundList(s_ro.query(Fund).all())
 
             # Get last quotation date for each fund
             lastRefreshDates = (
-                session
+                s_ro
                 .query(func.max(Quotation.date), Quotation.fund_id)
                 .group_by(Quotation.fund_id)
                 .all()
@@ -59,7 +61,7 @@ class Price:
             logger.debug("ID is not none")
 
             # Check if provided ID exists in DB
-            if (Fund.IDisValid(ID, session) != True):
+            if (Fund.IDisValid(ID, s_ro) != True):
                 logger.error("Fund with ID: %s does not exist", ID)
                 resultBody = {
                     "fund_id": ID,
@@ -72,13 +74,15 @@ class Price:
                     ID,
                     responseCode
                 )
+                s_ro.close()
+                s_rw.close()
                 return responseCode, resultBody
 
             # Get monitored Fund IDs
             try:
                 fund = ConvertToDict.fundList(
                     (
-                        session
+                        s_ro
                         .query(Fund)
                         .filter(Fund.fund_id == ID)
                         .all()
@@ -89,12 +93,14 @@ class Price:
                     "Failed to get list of monitored funds",
                     exc_info=True
                 )
+                s_ro.close()
+                s_rw.close()
                 return None, None
 
             # Get last quotation date for each fund
             try:
                 lastRefreshDates = (
-                    session
+                    s_ro
                     .query(func.max(Quotation.date), Quotation.fund_id)
                     .filter(Quotation.fund_id == ID)
                     .group_by(Quotation.fund_id)
@@ -140,7 +146,7 @@ class Price:
             # Insert quotation to DB
             code, responseBody = Price.insertQuotationRecords(
                 downloadedQuot,
-                session,
+                s_rw,
                 allQuotations
             )
 
@@ -150,6 +156,7 @@ class Price:
 
             if code != 204:
                 responseCode = code
+
         logger.debug("Filtering out funds without quotations saved in DB")
         # Get funds without any quotation
         fundsWithPrice = list([fr[1] for fr in lastRefreshDates])
@@ -159,7 +166,7 @@ class Price:
         ]
 
         # Download and insert all available quotation for funds without them
-        insertStatus = Price.insertQuotation(fundsWithoutPrice, fund, session)
+        insertStatus = Price.insertQuotation(fundsWithoutPrice, fund, s_rw)
 
         # Extract error codes from .insertQuotation() method output
         errorCodes = [entry["responseCode"] for entry in insertStatus]
@@ -177,7 +184,8 @@ class Price:
             result.append(entry["responseBody"])
 
         # Close SQL session
-        session.close()
+        s_ro.close()
+        s_rw.close()
 
         return responseCode, result
 

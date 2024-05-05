@@ -14,7 +14,7 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  29-Mar-2024
-# Version:  1.4
+# Version:  1.5
 
 # Date            Who                     What
 # 2024-04-03      Stanisław Horna         Timezone config added.
@@ -26,6 +26,8 @@
 #
 # 2024-05-03      Stanisław Horna         Add logs directory at root.
 #                                         Implement log related environmental variables.
+#
+# 2024-05-05      Stanisław Horna         Separate DB read and write users.
 #
 
 FROM ubuntu:22.04
@@ -56,9 +58,11 @@ RUN chmod 777 /log
 # PostgreSQL variables
 ENV DB_IP_Address="PGDB"
 ENV DB_Port="5432"
-ENV DB_Username="api_write"
-ENV DB_Password="inv!w_ap_ite2"
 ENV DB_Name="Investments"
+ENV DB_Username_rw="api_write"
+ENV DB_Password_rw="inv!w_ap_ite2"
+ENV DB_Username_ro="api_read"
+ENV DB_Password_ro="inv!r_ap_ead1"
 
 ENV LOKI_IP_Address="Loki"
 ENV LOKI_PORT="3100"

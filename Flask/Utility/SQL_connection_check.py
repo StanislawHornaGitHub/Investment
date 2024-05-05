@@ -17,6 +17,7 @@
 """
 from Utility.Logger import logger
 import SQL
+from SQL.read import Session_ro
 from SQL.Fund import Fund
 
 
@@ -25,11 +26,11 @@ class SQLhealthCheck:
     @staticmethod
     def checkSQLConnection() -> bool:
         try:
-            session = SQL.base.Session()
-            session.query(
+            s_ro = Session_ro()
+            s_ro.query(
                 Fund
             ).all()
-            session.close()
+            s_ro.close()
             return True
         except:
             logger.exception("Failed to connect to DB", exc_info=True)

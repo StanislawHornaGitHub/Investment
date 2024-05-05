@@ -23,7 +23,8 @@
 """
 import json
 from Utility.Logger import logger
-import SQL
+from SQL.write import Session_rw
+from SQL.read import Session_ro
 from SQL.Investment import Investment
 from SQL.InvestmentResult import InvestmentResult
 
@@ -43,7 +44,7 @@ class InvestmentConfig:
 
         logger.debug("insertFundConfig()")
         # Create session and init processing variables
-        session = SQL.base.Session()
+        s_rw = Session_rw()
         responseCode = 200
         result = []
 
@@ -93,19 +94,19 @@ class InvestmentConfig:
 
                     logger.debug("Adding entry to session")
                     # Add new investment record
-                    session.add(
+                    s_rw.add(
                         entry
                     )
                     # Try to commit new entry
                     try:
-                        session.commit()
+                        s_rw.commit()
                     except IntegrityError as err:
                         logger.warning(
                             "Current entry probably exists in DB",
                             exc_info=True
                         )
                         # Rollback transaction to be able to successfully proceed with order
-                        session.rollback()
+                        s_rw.rollback()
 
                         # Extract error
                         errorMessage = (
@@ -134,7 +135,7 @@ class InvestmentConfig:
                         logger.exception("Failed to add entry", exc_info=True)
 
                         # Rollback transaction to be able to successfully proceed with order
-                        session.rollback()
+                        s_rw.rollback()
 
                         # Add error message without further analysis
                         result.append(
@@ -152,7 +153,7 @@ class InvestmentConfig:
                 "Status": f"All {InvestOwner}'s {len(Investments)} investments inserted successfully"
             }
 
-        session.close()
+        s_rw.close()
 
         logger.debug(
             "insertInvestmentConfig(). Returning body and code: %d",
@@ -188,13 +189,13 @@ class InvestmentConfig:
     def getInvestmentFunds(investment_id: int = None):
 
         logger.debug("getInvestmentFunds(%s)", investment_id)
-        session = SQL.base.Session()
+        s_ro = Session_ro()
         responseCode = 200
 
         try:
             # Check if provided ID exists in DB
             if (
-                (Investment.IDisValid(investment_id, session) != True) and
+                (Investment.IDisValid(investment_id, s_ro) != True) and
                 (investment_id is not None)
             ):
                 responseCode = 404
@@ -218,7 +219,7 @@ class InvestmentConfig:
             if investment_id is not None:
                 logger.debug("Investment ID is NOT none")
                 dbOut = (
-                    session.query(
+                    s_ro.query(
                         Investment.investment_id,
                         Investment.investment_fund_id,
                         func.max(InvestmentResult.result_date)
@@ -236,7 +237,7 @@ class InvestmentConfig:
             else:
                 logger.debug("Investment ID is none")
                 dbOut = (
-                    session.query(
+                    s_ro.query(
                         Investment.investment_id,
                         Investment.investment_fund_id,
                         func.max(InvestmentResult.result_date)
@@ -251,7 +252,7 @@ class InvestmentConfig:
                     .all()
                 )
         except Exception as e:
-            session.close()
+            s_ro.close()
             responseCode = 400
             logger.exception(
                 "Failed to retrieve data from DB, setting status code to: %d",
@@ -262,7 +263,7 @@ class InvestmentConfig:
                 "Status": "Failed to retrieve data from DB",
                 "Status_Details": str(e)
             }
-        session.close()
+        s_ro.close()
 
         logger.debug(
             "Converting DB output to list of dicts and datetime to str"
