@@ -27,7 +27,7 @@ from Utility.Exceptions import InvestmentAPIexception
 
 class InvestmentAPI:
 
-    __API_IP = os.getenv('FLASK_IP_Address', '192.168.0.212')
+    __API_IP = os.getenv('FLASK_IP_Address', 'localhost')
     __API_PORT = os.getenv('FLASK_Port', '5000')
 
     __FUND_ENDPOINT = "FundConfig"
@@ -80,8 +80,10 @@ class InvestmentAPI:
         # Check response code
         if apiResponse.status_code == 200:
 
-            logger.debug("Parsing %s to datetime type",
-                         InvestmentAPI.__FUND_RESP_DATE)
+            logger.debug(
+                "Parsing %s to datetime type",
+                InvestmentAPI.__FUND_RESP_DATE
+            )
             # Loop through returned list and convert date from sting to datetime
             for i in range(0, len(result)):
                 result[i][InvestmentAPI.__FUND_RESP_DATE] = parse(
@@ -96,7 +98,7 @@ class InvestmentAPI:
         return result
 
     @staticmethod
-    def updateFunds(ID: str = None):
+    def updateFunds(ID: str = None) -> list[dict[str, str | date]]:
 
         logger.debug("updateFunds(%s)", ID)
 
@@ -158,7 +160,7 @@ class InvestmentAPI:
         return result
 
     @staticmethod
-    def updateInvestment(ID: int = None):
+    def updateInvestment(ID: int = None) -> list[dict[str, str | date]]:
 
         logger.debug("updateInvestment(%s)", ID)
 

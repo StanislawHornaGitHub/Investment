@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.5
+    Version:            1.6
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -25,22 +25,20 @@
     
     2024-04-30      Stanisław Horna         Add logging capabilities.
 
+    2024-05-06      Stanisław Horna         Add missing I/O datatypes. Refactor variable names.
+
 """
-from Utility.Logger import logger
-from SQL.write import Session_rw
-from SQL.read import Session_ro
+
+import datetime
+from sqlalchemy import func, orm
 from SQL.Quotation import Quotation
 from SQL.InvestmentResult import InvestmentResult
 from SQL.Investment import Investment
-from sqlalchemy import func, exc
-
-from sqlalchemy.exc import DatabaseError
-import datetime
-
-from Utility import DebugOutput
+from SQL.write import Session_rw
+from SQL.read import Session_ro
 from Processing.InvestmentConfig import InvestmentConfig
-
 from Utility.Dates import Dates
+from Utility.Logger import logger
 
 
 class InvestmentCalcResult:
@@ -53,14 +51,14 @@ class InvestmentCalcResult:
     }
 
     @staticmethod
-    def calculateAllResults() -> None:
+    def calculateAllResults() -> tuple[int, list[dict[str, str]]]:
 
         logger.debug("calculateAllResults()")
 
         # Create session and init processing variables
         s_ro = Session_ro()
         responseCode = 200
-        result = {
+        responseBody = {
             "Codes": [],
             "Response": []
         }
@@ -80,20 +78,20 @@ class InvestmentCalcResult:
         for id in investmentsToRefresh:
             logger.debug("Processing investment ID: %s", id)
             # invoke investment calculation
-            code, responseBody = InvestmentCalcResult.calculateResult(id)
+            r_code, r_body = InvestmentCalcResult.calculateResult(id)
 
             # append result variable
-            result["Codes"].append(code)
-            result["Response"].append(responseBody)
+            responseBody["Codes"].append(r_code)
+            responseBody["Response"].append(r_body)
 
         if responseCode == 200:
-            if 206 in result["Codes"]:
+            if 206 in responseBody["Codes"]:
                 responseCode = 206
 
-            if 204 in result["Codes"]:
+            if 204 in responseBody["Codes"]:
                 responseCode = 204
 
-            if 400 in result["Codes"]:
+            if 400 in responseBody["Codes"]:
                 responseCode = 400
 
         # Close SQL session
@@ -103,10 +101,10 @@ class InvestmentCalcResult:
             "calculateAllResults(). Returning body and code: %d",
             responseCode
         )
-        return responseCode, result["Response"]
+        return responseCode, responseBody["Response"]
 
     @staticmethod
-    def calculateResult(investment_id: int):
+    def calculateResult(investment_id: int) -> tuple[int, dict[str, str]]:
 
         logger.debug("calculateResult(%s)", investment_id)
         # Create new SQL session
@@ -374,7 +372,20 @@ class InvestmentCalcResult:
         return responseCode, resultBody
 
     @staticmethod
-    def getInvestmentOrderMap(investment_id: int, session):
+    def getInvestmentOrderMap(
+        investment_id: int,
+        session: orm.session.Session
+    ) -> tuple[
+            datetime.datetime,
+            list[str],
+            dict[
+                datetime.datetime,
+                dict[
+                    str,
+                    dict[str, int]
+                ]
+            ]
+    ]:
         resultMap = {}
         fundList = set()
         try:
@@ -413,7 +424,14 @@ class InvestmentCalcResult:
         return orders[0][0], list(fundList), resultMap
 
     @staticmethod
-    def getFundsQuotation(fundList: list[str], start_date, session):
+    def getFundsQuotation(
+            fundList: list[str],
+            start_date: datetime.datetime,
+            session: orm.session.Session
+    ) -> dict[
+        str,
+        dict[datetime.datetime, float]
+    ]:
         quotation = {}
 
         try:
@@ -430,7 +448,11 @@ class InvestmentCalcResult:
         return quotation
 
     @staticmethod
-    def getQuotation(fund_id: str, start_date, session):
+    def getQuotation(
+        fund_id: str,
+        start_date: datetime.datetime,
+        session: orm.session.Session
+    ) -> dict[datetime.datetime, float]:
         result = {}
         quotation = (
             session
@@ -444,11 +466,16 @@ class InvestmentCalcResult:
         return result
 
     @staticmethod
-    def getLastResultDate(investment_id, session):
+    def getLastResultDate(investment_id: int, session: orm.session.Session) -> datetime.datetime:
         return InvestmentCalcResult.unifyInvestmentResults(investment_id, session)
 
     @staticmethod
-    def getLastFundResult(investment_id: int, fund_id: str, last_date, session):
+    def getLastFundResult(
+        investment_id: int,
+        fund_id: str,
+        last_date: datetime.datetime,
+        session: orm.session.Session
+    ) -> None:
         try:
             return (
                 session
@@ -474,7 +501,7 @@ class InvestmentCalcResult:
             return None
 
     @staticmethod
-    def unifyInvestmentResults(investment_id: int, session) -> datetime.datetime:
+    def unifyInvestmentResults(investment_id: int, session: orm.session.Session) -> datetime.datetime:
 
         logger.debug("unifyInvestmentResults(%s)", investment_id)
 

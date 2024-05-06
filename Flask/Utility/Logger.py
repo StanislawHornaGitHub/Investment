@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.0
+    Version:            1.1
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -13,6 +13,7 @@
     ChangeLog:
 
     Date            Who                     What
+    2024-05-06      Stanisław Horna         add missing I/O datatypes.
 
 """
 import os
@@ -25,7 +26,7 @@ from uwsgidecorators import postfork
 DEFAULT_LOG_TYPE = "JSON"
 
 
-def init_logger_basic():
+def init_logger_basic() -> logging.Logger:
     logger = logging.getLogger("Flask")
 
     logging.basicConfig(
@@ -37,7 +38,7 @@ def init_logger_basic():
 
 
 @postfork
-def init_logger_LOKI():
+def init_logger_LOKI() -> logging.Logger:
 
     # Additional if to avoid creating additional handler post fork
     if os.getenv('LOG_TYPE', DEFAULT_LOG_TYPE) == "LOKI":
@@ -53,7 +54,7 @@ def init_logger_LOKI():
         return logger
 
 
-def init_logger_JSON():
+def init_logger_JSON() -> logging.Logger:
     logger = init_logger_basic()
     LOG_PATH = os.getenv('LOG_PATH', "/log/")
     LOG_FILE_NAME = os.getenv('LOG_FILE_NAME', "Flask")
@@ -84,7 +85,7 @@ def init_logger_JSON():
     return logger
 
 
-def init_logging():
+def init_logging() -> logging.Logger:
 
     match (os.getenv('LOG_TYPE', DEFAULT_LOG_TYPE)):
 

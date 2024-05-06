@@ -4,7 +4,7 @@
 
 .NOTES
 
-    Version:            1.2
+    Version:            1.3
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -16,23 +16,25 @@
     
     2024-04-30      Stanisław Horna         Add logging capabilities.
 
+    2024-05-06      Stanisław Horna         add missing I/O datatypes. Refactor variable names.
+
 """
+
+from sqlalchemy import func, orm
+from AnalizyPL.API import AnalizyFundAPI
+from SQL.Quotation import Quotation
+from SQL.Fund import Fund
 from SQL.write import Session_rw
 from SQL.read import Session_ro
 from Utility.Logger import logger
-from SQL.Quotation import Quotation
-from SQL.Fund import Fund
-from AnalizyPL.API import AnalizyFundAPI
 from Utility.ConvertToDict import ConvertToDict
-from sqlalchemy import func
-
 from Utility.Dates import Dates
 
 
 class Price:
 
     @staticmethod
-    def updateQuotation(ID: str = None):
+    def updateQuotation(ID: str = None) -> tuple[int, list[dict[str, str]]]:
 
         logger.debug("updateQuotation(%s)", ID)
 
@@ -190,12 +192,16 @@ class Price:
         return responseCode, result
 
     @staticmethod
-    def insertQuotation(fundsWithoutPrice: list[str], allFunds: dict[str, Fund], session):
+    def insertQuotation(
+            fundsWithoutPrice: list[str],
+            allFunds: dict[str, Fund],
+            session: orm.session.Session
+    ) -> tuple[int, list[dict[str, str]]]:
 
         logger.debug("insertQuotation(%s)", str(fundsWithoutPrice))
 
         # Init result list
-        result = []
+        responseBody = []
 
         # loop through each fund ID
         for fundID in fundsWithoutPrice:
@@ -212,7 +218,7 @@ class Price:
                     fundID
                 )
                 # Create method output details
-                result.append(
+                responseBody.append(
                     {
                         "responseCode": 204,
                         "responseBody": {
@@ -223,15 +229,15 @@ class Price:
                 )
                 continue
 
-            result.append({})
+            responseBody.append({})
             # Insert quotation to DB
-            result[-1]["responseCode"], result[-1]["responseBody"] = Price.insertQuotationRecords(
+            responseBody[-1]["responseCode"], responseBody[-1]["responseBody"] = Price.insertQuotationRecords(
                 downloadedQuot,
                 session
             )
 
             # create success result entry
-            result.append(
+            responseBody.append(
                 {
                     "responseCode": 200,
                     "responseBody": {
@@ -244,10 +250,14 @@ class Price:
                 }
             )
         logger.debug("insertQuotation(%s). Returning", str(fundsWithoutPrice))
-        return result
+        return responseBody
 
     @staticmethod
-    def insertQuotationRecords(dataToInsert: list[dict[str, str]], session, allQuotation=[]):
+    def insertQuotationRecords(
+            dataToInsert: list[dict[str, str]],
+            session: orm.session.Session,
+            allQuotation: list[dict[str, str]] = []
+    ) -> tuple[int, dict[str, str]]:
 
         logger.debug(
             "insertQuotationRecords(), Fund: %s",
@@ -306,7 +316,7 @@ class Price:
         # try to commit all inserted data
         try:
             session.commit()
-            result = {
+            responseBody = {
                 "Status": "Quotation successfully added",
                 "Last Quotation Date": Dates.convertDateToString(
                     dataToInsert["FundQuotation"][-1][AnalizyFundAPI.RESPONSE_DATE_NAME]
@@ -316,7 +326,7 @@ class Price:
         except IndexError as indexErr:
             logger.warning("No new quotation to add", exc_info=True)
             # Add success message as index error means that there were no new entries to insert
-            result = {
+            responseBody = {
                 "Status": "No new quotation to add"
             }
 
@@ -326,7 +336,7 @@ class Price:
             session.rollback()
 
             # Add error message without further analysis
-            result = {
+            responseBody = {
                 "Status": f"Failed to add quotation {type(err)}",
                 "status_details": str(err)
             }
@@ -336,4 +346,4 @@ class Price:
             "insertQuotationRecords(). Returning body and code: %d",
             responseCode
         )
-        return responseCode, result
+        return responseCode, responseBody

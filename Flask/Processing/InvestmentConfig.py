@@ -6,7 +6,7 @@
 
 .NOTES
 
-    Version:            1.3
+    Version:            1.4
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -20,18 +20,20 @@
     
     2024-04-30      Stanisław Horna         Add logging capabilities.
 
-"""
-import json
-from Utility.Logger import logger
-from SQL.write import Session_rw
-from SQL.read import Session_ro
-from SQL.Investment import Investment
-from SQL.InvestmentResult import InvestmentResult
+    2024-05-06      Stanisław Horna         Add missing I/O datatypes. Refactor variable names.
 
-from sqlalchemy import func
+"""
+
+import json
+from sqlalchemy import func, orm
 from sqlalchemy.exc import IntegrityError
 from dateutil.parser import parse
+from SQL.Investment import Investment
+from SQL.InvestmentResult import InvestmentResult
+from SQL.write import Session_rw
+from SQL.read import Session_ro
 from Utility.Dates import Dates
+from Utility.Logger import logger
 
 
 class InvestmentConfig:
@@ -40,13 +42,16 @@ class InvestmentConfig:
     __default_date_for_none = "1900-01-01"
 
     @staticmethod
-    def insertInvestmentConfig(Investments: dict[str, dict[str, list[dict[str, str]]]], InvestOwner: str):
+    def insertInvestmentConfig(
+        Investments: dict[str, dict[str, list[dict[str, str]]]],
+        InvestOwner: str
+    ) -> tuple[int, list[dict[str, str]]]:
 
         logger.debug("insertFundConfig()")
         # Create session and init processing variables
         s_rw = Session_rw()
         responseCode = 200
-        result = []
+        responseBody = []
 
         # Loop through each investment
         for invest in Investments:
@@ -80,7 +85,7 @@ class InvestmentConfig:
                             responseCode,
                             exc_info=True
                         )
-                        result.append(
+                        responseBody.append(
                             {
                                 "Order Details": (
                                     f"{entry.investment_owner} - {entry.investment_fund_id} - {Dates.convertDateToString(entry.operation_quotation_date)} - {entry.operation_value}"
@@ -116,8 +121,8 @@ class InvestmentConfig:
                             )
                         )
 
-                        # Append result variable with details
-                        result.append(
+                        # Append responseBody variable with details
+                        responseBody.append(
                             {
                                 "Order Details": (
                                     f"{entry.investment_owner} - {entry.investment_fund_id} - {Dates.convertDateToString(entry.operation_quotation_date)} - {entry.operation_value}"
@@ -138,7 +143,7 @@ class InvestmentConfig:
                         s_rw.rollback()
 
                         # Add error message without further analysis
-                        result.append(
+                        responseBody.append(
                             {
                                 "Order Details": (
                                     f"{entry.investment_owner} - {entry.investment_fund_id} - {Dates.convertDateToString(entry.operation_quotation_date)} - {entry.operation_value}"
@@ -149,7 +154,7 @@ class InvestmentConfig:
                         )
 
         if responseCode == 200:
-            result = {
+            responseBody = {
                 "Status": f"All {InvestOwner}'s {len(Investments)} investments inserted successfully"
             }
 
@@ -159,7 +164,7 @@ class InvestmentConfig:
             "insertInvestmentConfig(). Returning body and code: %d",
             responseCode
         )
-        return responseCode, result
+        return responseCode, responseBody
 
     @staticmethod
     def importJSONconfig(filePath: str) -> dict[str, dict[str, any]]:
@@ -169,7 +174,7 @@ class InvestmentConfig:
         return investments
 
     @staticmethod
-    def getInvestmentIDs(session):
+    def getInvestmentIDs(session: orm.session.Session) -> list[int]:
         result = []
         try:
             output = (
@@ -186,7 +191,7 @@ class InvestmentConfig:
         return result
 
     @staticmethod
-    def getInvestmentFunds(investment_id: int = None):
+    def getInvestmentFunds(investment_id: int = None) -> tuple[int, list[dict[str, str]]]:
 
         logger.debug("getInvestmentFunds(%s)", investment_id)
         s_ro = Session_ro()
@@ -204,7 +209,7 @@ class InvestmentConfig:
                     investment_id,
                     responseCode
                 )
-                resultBody = {
+                responseBody = {
                     "Investment ID": investment_id,
                     "Status": f"Investment with ID: {investment_id} does not exist"
                 }
@@ -214,7 +219,7 @@ class InvestmentConfig:
                     investment_id,
                     responseCode
                 )
-                return responseCode, resultBody
+                return responseCode, responseBody
 
             if investment_id is not None:
                 logger.debug("Investment ID is NOT none")
@@ -268,7 +273,7 @@ class InvestmentConfig:
         logger.debug(
             "Converting DB output to list of dicts and datetime to str"
         )
-        result = []
+        responseBody = []
         for investmentID, fundID, investmentDate in dbOut:
             try:
                 convertedDate = (
@@ -277,7 +282,7 @@ class InvestmentConfig:
             except:
                 convertedDate = InvestmentConfig.__default_date_for_none
 
-            result.append(
+            responseBody.append(
                 {
                     "investment_id": investmentID,
                     "fund_id": fundID,
@@ -290,4 +295,4 @@ class InvestmentConfig:
             investment_id,
             responseCode
         )
-        return responseCode, result
+        return responseCode, responseBody
