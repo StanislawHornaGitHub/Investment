@@ -24,10 +24,13 @@ from dataclasses import dataclass, field
 @dataclass
 class Terminator:
     kill_now: bool = field(init=False, default=False)
-    signals: dict = {
-        signal.SIGINT: 'SIGINT',
-        signal.SIGTERM: 'SIGTERM'
-    }
+    signals: dict = field(
+        init=False,
+        default_factory={
+            signal.SIGINT: 'SIGINT',
+            signal.SIGTERM: 'SIGTERM'
+        }
+    )
 
     def __init__(self):
         signal.signal(signal.SIGINT, self.exit_gracefully)
