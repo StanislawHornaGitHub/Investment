@@ -34,7 +34,7 @@ class JsonFormatter(logging.Formatter):
 
         # read out time from record object
         created_time = record.created
-        print(type(record))
+
         # convert time to datetime
         dt_object = datetime.fromtimestamp(created_time)
 
