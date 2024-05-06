@@ -21,14 +21,13 @@
                                             Add logging capabilities.
 
 """
-from Utility.Logger import logger
-import logging
-import os
+
+from AnalizyPL.Analizy_API import AnalizyAPI
 from InvestmentAPI.Investment_API_Handler import InvestmentAPI
 from InvestmentAPI.Unpacker import Unpacker
-from AnalizyPL.Analizy_API import AnalizyAPI
 from Utility.Sleeper import Sleeper
 from Utility.Exceptions import InvestmentAPIexception, AnalizyAPIexception
+from Utility.Logger import logger
 
 
 def Main():

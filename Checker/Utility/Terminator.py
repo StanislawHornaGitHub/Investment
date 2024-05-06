@@ -21,6 +21,7 @@ from Utility.Logger import logger
 from dataclasses import dataclass, field
 
 
+@dataclass
 class Terminator:
     kill_now: bool = field(init=False, default=False)
     signals: dict = {

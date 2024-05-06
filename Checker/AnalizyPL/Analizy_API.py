@@ -16,15 +16,13 @@
     2024-04-29      Stanisław Horna         Add logging capabilities.
 
 """
-from Utility.Logger import logger
+
 import requests
-from lxml.html import fromstring
 import datetime
 from dateutil.parser import parse
-
-
 from dataclasses import dataclass, field
 from Utility.Exceptions import AnalizyAPIexception
+from Utility.Logger import logger
 
 
 @dataclass
