@@ -18,7 +18,6 @@
 """
 
 from sqlalchemy import orm, Column, String, Integer, Float, DateTime, ForeignKey
-
 from SQL.base import Base
 
 

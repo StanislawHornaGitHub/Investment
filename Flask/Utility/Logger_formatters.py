@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.0
+    Version:            1.1
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -13,6 +13,7 @@
     ChangeLog:
 
     Date            Who                     What
+    2024-05-06      Stanisław Horna         add missing I/O datatypes.
 
 """
 import logging
@@ -29,11 +30,11 @@ class JsonFormatter(logging.Formatter):
         self.default_time_format = "%Y-%m-%d %H:%M:%S"
         self.datefmt = time_format
 
-    def formatTime(self, record, datefmt=None):
+    def formatTime(self, record: logging.LogRecord, datefmt: str = None) -> str:
 
         # read out time from record object
         created_time = record.created
-
+        print(type(record))
         # convert time to datetime
         dt_object = datetime.fromtimestamp(created_time)
 
@@ -44,11 +45,11 @@ class JsonFormatter(logging.Formatter):
 
         return "asctime" in self.fmt_dict.values()
 
-    def formatMessage(self, record) -> dict:
+    def formatMessage(self, record: logging.LogRecord) -> dict:
 
         return {fmt_key: record.__dict__[fmt_val] for fmt_key, fmt_val in self.fmt_dict.items()}
 
-    def format(self, record) -> str:
+    def format(self, record: logging.LogRecord) -> str:
 
         # read out message from record
         record.message = record.getMessage()

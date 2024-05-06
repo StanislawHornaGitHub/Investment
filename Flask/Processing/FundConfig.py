@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.4
+    Version:            1.5
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -21,15 +21,18 @@
     
     2024-05-04      Stanisław Horna         Remove status details and fund url from body response in insertFundConfig()
 
+    2024-05-06      Stanisław Horna         Add missing I/O datatypes. Refactor variable names.
+
 """
+
 import json
-from Utility.Logger import logger
-from SQL.write import Session_rw
-from SQL.read import Session_ro
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from SQL.Fund import Fund
 from SQL.Quotation import Quotation
-from sqlalchemy.exc import IntegrityError
+from SQL.write import Session_rw
+from SQL.read import Session_ro
+from Utility.Logger import logger
 
 
 class FundConfig:
@@ -38,13 +41,13 @@ class FundConfig:
     __default_date_for_none = "1900-01-01"
 
     @staticmethod
-    def insertFundConfig(Funds: list[str]):
+    def insertFundConfig(Funds: list[str]) -> tuple[int, list[dict[str, str]]]:
 
         logger.debug("insertFundConfig()")
         # Create session and init processing variables
         s_rw = Session_rw()
         responseCode = 200
-        result = []
+        responseBody = []
 
         # Loop through provided URLs
         for url in Funds:
@@ -68,7 +71,7 @@ class FundConfig:
                 # Rollback transaction to be able to successfully proceed with the next url
                 s_rw.rollback()
 
-                result.append(
+                responseBody.append(
                     {
                         "Fund_ID": entry.fund_id,
                         "Status": "Already exists",
@@ -94,7 +97,7 @@ class FundConfig:
                 s_rw.rollback()
 
                 # Add error message without further analysis
-                result.append(
+                responseBody.append(
                     {
                         "Fund_ID": entry.fund_id,
                         "Status": "Failed to add",
@@ -104,7 +107,7 @@ class FundConfig:
         # Set message if all funds were inserted successfully
         if responseCode == 200:
             logger.info("All %d fund URLs inserted successfully", len(Funds))
-            result = {
+            responseBody = {
                 "Status": f"All {len(Funds)} fund URLs inserted successfully"
             }
 
@@ -114,7 +117,7 @@ class FundConfig:
             "insertFundConfig(). Returning body and code: %d",
             responseCode
         )
-        return responseCode, result
+        return responseCode, responseBody
 
     @staticmethod
     def importJSONconfig(filePath: str) -> list[str]:
@@ -124,13 +127,14 @@ class FundConfig:
         return investments["FundsToCheckURLs"]
 
     @staticmethod
-    def getFund(fund_id: str = None) -> list[dict[str, str]]:
+    def getFund(fund_id: str = None) -> tuple[int, list[dict[str, str]]]:
 
         logger.debug("getFund(%s)", fund_id)
 
         s_ro = Session_ro()
         responseCode = 200
         try:
+            # If fund id is not provided return latest quotation date for each fund
             if fund_id is not None:
                 logger.debug("fund ID is NOT none")
                 dbOut = (
@@ -150,6 +154,7 @@ class FundConfig:
                     .all()
                 )
             else:
+                # If fund id is provided return latest quotation date for selected fund
                 logger.debug("fund ID is none")
                 dbOut = (
                     s_ro.query(
@@ -181,14 +186,14 @@ class FundConfig:
         logger.debug(
             "Converting DB output to list of dicts and datetime to str"
         )
-        result = []
+        responseBody = []
         for fundID, fundCat, fundDate in dbOut:
             try:
                 convertedDate = fundDate.strftime(FundConfig.DateToStrFormat)
             except:
                 convertedDate = FundConfig.__default_date_for_none
 
-            result.append(
+            responseBody.append(
                 {
                     "fund_id": fundID,
                     "fund_category": fundCat,
@@ -200,4 +205,4 @@ class FundConfig:
             fund_id,
             responseCode
         )
-        return responseCode, result
+        return responseCode, responseBody

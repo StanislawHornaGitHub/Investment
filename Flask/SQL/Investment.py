@@ -20,7 +20,6 @@
 """
 
 from sqlalchemy import orm, Column, String, Integer, Float, DateTime, ForeignKey, exists
-
 from SQL.base import Base
 
 

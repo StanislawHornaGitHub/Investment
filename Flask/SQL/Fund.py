@@ -17,8 +17,7 @@
 
 """
 
-from sqlalchemy import orm, Column, String, Integer, Float, DateTime, exists
-from SQL.InvestmentResult import InvestmentResult
+from sqlalchemy import orm, Column, String, exists
 from SQL.base import Base
 
 
