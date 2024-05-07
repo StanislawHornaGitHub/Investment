@@ -146,7 +146,7 @@ class InvestmentCalcResult:
 
             # Check the latest update, to avoid calculating everything from the beginning
             lastUpdateDate = InvestmentCalcResult.getLastResultDate(
-                investment_id, s_ro
+                investment_id, s_rw
             )
         except Exception:
             logger.exception("Exception occurred", exc_info=True)
