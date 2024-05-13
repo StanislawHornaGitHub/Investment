@@ -18,7 +18,7 @@
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from Utility.Logger_formatters import JsonFormatter
+from Log.Logger_formatters import JsonFormatter
 from loki_logger_handler.loki_logger_handler import LokiLoggerHandler
 
 LOG_PATH = os.getenv('LOG_PATH', "/log/")

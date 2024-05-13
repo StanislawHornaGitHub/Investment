@@ -19,7 +19,7 @@
 import os
 import requests
 import time
-from Utility.Logger import logger
+from Log.Logger import logger
 from datetime import date
 from dateutil.parser import parse
 from Utility.Exceptions import InvestmentAPIexception

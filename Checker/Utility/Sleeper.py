@@ -20,7 +20,7 @@
 """
 import time
 import sys
-from Utility.Logger import logger
+from Log.Logger import logger
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
