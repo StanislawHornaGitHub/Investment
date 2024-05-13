@@ -28,7 +28,7 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  23-Apr-2024
-# Version:  1.6
+# Version:  1.7
 
 # Date            Who                     What
 # 2024-04-29      Stanisław Horna         Add checker service to compose.
@@ -43,6 +43,9 @@
 # 2024-05-05      Stanisław Horna         Add timezone variable in .env file and assign it across services.
 #
 # 2024-05-05      Stanisław Horna         Reflect new environment variables for DB read/write users.
+#
+# 2024-05-13      Stanisław Horna         Add config directory volume to DataImporter service.
+#                                         Set all continuously running services to restart: unless-stopped.
 #
 
 version: "3"
@@ -69,7 +72,7 @@ services:
       dockerfile: Grafana.Dockerfile
     container_name: ${GRAFANA_CONTAINER_NAME}
     hostname: ${GRAFANA_HOSTNAME}
-    restart: no
+    restart: unless-stopped
     environment:
       TZ: ${SYSTEM_TIME_ZONE}
       GF_DATE_FORMATS_DEFAULT_TIMEZONE: ${SYSTEM_TIME_ZONE}
@@ -135,7 +138,7 @@ services:
     hostname: ${POSTGRESQL_HOSTNAME}
     environment:
       TZ: ${SYSTEM_TIME_ZONE}
-    restart: no
+    restart: unless-stopped
     volumes:
       - ${APP_DATA_PATH}/${POSTGRESQL_PERSISTENT_STORAGE_DIR}:/var/lib/postgresql/data
     ports:
@@ -190,6 +193,7 @@ services:
       TZ: ${SYSTEM_TIME_ZONE}
     restart: no
     volumes:
+      - ./DataImporter/Configs:/DataImport/Configs
       - ${APP_LOG_PATH}/${DATA_IMPORTER_PERSISTENT_STORAGE_DIR}:/log
     networks:
       Internal: null
