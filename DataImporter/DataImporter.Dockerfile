@@ -20,7 +20,7 @@ RUN apt install -y curl
 
 # Set working directory and copy required files
 WORKDIR /DataImport
-COPY . /DataImport
+COPY ./InsertData.sh /DataImport/InsertData.sh
 
 # Set timezone
 ENV TZ="Europe/Warsaw"
