@@ -8,9 +8,10 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  1-May-2024
-# Version:  1.0
+# Version:  1.1
 
 # Date            Who                     What
+# 2024-05-13      Stanisław Horna         Copy InsertData.sh to container only.
 #
 
 FROM ubuntu:22.04
@@ -20,7 +21,7 @@ RUN apt install -y curl
 
 # Set working directory and copy required files
 WORKDIR /DataImport
-COPY . /DataImport
+COPY ./InsertData.sh /DataImport/InsertData.sh
 
 # Set timezone
 ENV TZ="Europe/Warsaw"

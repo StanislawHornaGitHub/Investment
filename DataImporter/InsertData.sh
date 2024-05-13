@@ -19,7 +19,7 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  31-Mar-2024
-# Version:  1.2
+# Version:  1.3
 
 # Date            Who                     What
 # 2024-05-01      Stanisław Horna         Set API ip and port from environment variables.
@@ -27,10 +27,13 @@
 #
 # 2024-05-04      Stanisław Horna         Add removing backslashes from message to log.
 #
+# 2024-05-13      Stanisław Horna         Add directory for config files to import.
+#
 
 API_IP_ADDRESS=$FLASK_IP_Address
 API_PORT=$FLASK_PORT
 
+CONFIG_DIRECTORY="./Configs"
 FUNDS_FILE="Funds.json"
 INVESTMENT_FILES_SUFFIX="_Investments.json"
 
@@ -45,7 +48,7 @@ importFundsConfig() {
     logMessage "importFundsConfig" "Inserting funds" "info"
 
     # Read JSON file with funds
-    jsonFunds=$(cat "./$FUNDS_FILE") || exit 1
+    jsonFunds=$(cat "$CONFIG_DIRECTORY/$FUNDS_FILE") || exit 1
 
     logMessage "importFundsConfig" "Funds config file read" "info"
 
@@ -62,7 +65,7 @@ importFundsConfig() {
 importInvestmentConfig() {
     logMessage "importInvestmentConfig" "Inserting investments config" "info"
 
-    for filename in ./*"$INVESTMENT_FILES_SUFFIX"; do
+    for filename in "$CONFIG_DIRECTORY"/*"$INVESTMENT_FILES_SUFFIX"; do
 
         # Read JSON file with investment details
         jsonInvestment=$(cat "$filename")
