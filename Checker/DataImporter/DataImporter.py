@@ -25,7 +25,6 @@ import datetime
 from dataclasses import dataclass, field
 from InvestmentAPI.Investment_API_Handler import InvestmentAPI
 from Status.StatusFile import StatusFile
-from Utility.Exceptions import InvestmentAPIexception
 from Log.Logger import logger
 
 
