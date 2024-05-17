@@ -79,10 +79,10 @@ class DataImporter:
         )
 
         if True in importStatus:
-            logger.debug("Some config was imported to the system")
+            logger.warning("Some config was imported to the system")
             return True
         else:
-            logger.warning("No config was imported")
+            logger.debug("No config was imported")
             return False
 
     def getLastModifyDatesFromStatusFile(self) -> None:
