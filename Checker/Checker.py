@@ -34,7 +34,8 @@ def Main():
 
     InvestmentAPI.waitForFullSystemInitialization()
 
-    sleeper = Sleeper()
+    scheduler = Sleeper()
+
     try:
         while True:
             try:
@@ -42,9 +43,11 @@ def Main():
                 refundUpdate()
             except InvestmentAPIexception:
                 logger.exception(
-                    "InvestmentAPI exception occurred", exc_info=True)
+                    "InvestmentAPI exception occurred",
+                    exc_info=True
+                )
 
-            sleeper.start()
+            scheduler.start()
     except:
         logger.exception("Exception occurred", exc_info=True)
 
