@@ -28,7 +28,7 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  23-Apr-2024
-# Version:  1.7
+# Version:  1.8
 
 # Date            Who                     What
 # 2024-04-29      Stanisław Horna         Add checker service to compose.
@@ -46,6 +46,8 @@
 #
 # 2024-05-13      Stanisław Horna         Add config directory volume to DataImporter service.
 #                                         Set all continuously running services to restart: unless-stopped.
+#
+# 2024-05-17      Stanisław Horna         DataImporter implemented as a module of Checker service.
 #
 
 version: "3"
