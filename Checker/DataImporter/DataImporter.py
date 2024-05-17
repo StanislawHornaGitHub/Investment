@@ -195,7 +195,8 @@ class DataImporter:
             )
 
         # loop through each file in fund config directory
-        for file in modifyDates:
+        # files will be ordered alphabetically
+        for file in sorted(modifyDates):
 
             if (StatusFileDate := self.files_last_modify_dates.get(file, DataImporter.__old_date)) < modifyDates[file]:
 
