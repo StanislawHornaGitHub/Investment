@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.3
+    Version:            1.4
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -19,9 +19,12 @@
     2024-05-15      Stanisław Horna         Add DataImporter implementation.
     
     2024-05-16      Stanisław Horna         Code documented.
+    
+    2024-05-18      Stanisław Horna         Read class default intervals from environment variables.
 
 """
 
+import os
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -34,8 +37,24 @@ from Log.Logger import logger
 @dataclass
 class Sleeper:
 
-    SleepTimeInterval_ms: int = field(init=True, default=3600000)
-    StatusFileCheckInterval_ms: int = field(init=True, default=60000)
+    SleepTimeInterval_ms: int = field(
+        init=True,
+        default=int(
+            os.getenv(
+                'QUOTATION_CHECK_INTERVAL_MS',
+                3600000
+            )
+        )
+    )
+    StatusFileCheckInterval_ms: int = field(
+        init=True,
+        default=int(
+            os.getenv(
+                'CONFIG_CHECK_INTERVAL_MS',
+                60000
+            )
+        )
+    )
     __IMPORTER: DataImporter = field(init=False, default=DataImporter())
     __TERMINATOR: Terminator = field(init=False, default=Terminator())
 
