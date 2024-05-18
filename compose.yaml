@@ -178,6 +178,12 @@ services:
     networks:
       Internal:
         ipv4_address: ${CHECKER_INTERNAL_IP}
+    healthcheck:
+      test: python3 ./HealthCheck.py
+      start_period: 2s
+      interval: 60s
+      timeout: 1s
+      retries: 5
 
   Loki:
     image: investment/loki
