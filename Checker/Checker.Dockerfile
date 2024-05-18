@@ -42,6 +42,9 @@ ENV CONFIG_ROOT_PATH="/etc/checker"
 ENV CONFIG_FUND_DIR="fund"
 ENV CONFIG_INVESTMENT_DIR="investment"
 
+ENV QUOTATION_CHECK_INTERVAL_MS=3600000
+ENV CONFIG_CHECK_INTERVAL_MS=60000
+
 # Install Python and pip
 RUN apt update
 RUN apt install -y python3-dev
