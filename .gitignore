@@ -160,8 +160,8 @@ cython_debug/
 #.idea/
 
 test.*
-*_Investments.json
 !.env
 APP_DATA
 APP_LOG
 .venv*
+/Checker/Configs/*/*.json

@@ -27,14 +27,15 @@ from InvestmentAPI.Investment_API_Handler import InvestmentAPI
 from InvestmentAPI.Unpacker import Unpacker
 from Utility.Sleeper import Sleeper
 from Utility.Exceptions import InvestmentAPIexception, AnalizyAPIexception
-from Utility.Logger import logger
+from Log.Logger import logger
 
 
 def Main():
 
     InvestmentAPI.waitForFullSystemInitialization()
 
-    sleeper = Sleeper()
+    scheduler = Sleeper()
+
     try:
         while True:
             try:
@@ -42,9 +43,11 @@ def Main():
                 refundUpdate()
             except InvestmentAPIexception:
                 logger.exception(
-                    "InvestmentAPI exception occurred", exc_info=True)
+                    "InvestmentAPI exception occurred",
+                    exc_info=True
+                )
 
-            sleeper.start()
+            scheduler.start()
     except:
         logger.exception("Exception occurred", exc_info=True)
 

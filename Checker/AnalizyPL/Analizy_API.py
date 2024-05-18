@@ -22,7 +22,7 @@ import datetime
 from dateutil.parser import parse
 from dataclasses import dataclass, field
 from Utility.Exceptions import AnalizyAPIexception
-from Utility.Logger import logger
+from Log.Logger import logger
 
 
 @dataclass
