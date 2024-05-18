@@ -10,7 +10,7 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  24-Apr-2024
-# Version:  1.3
+# Version:  1.4
 
 # Date            Who                     What
 # 2024-04-29      Stanisław Horna         Add environmental variable for log level.
@@ -19,6 +19,8 @@
 #                                         Implement log related environmental variables.
 #
 # 2024-05-17      Stanisław Horna         Add variables for DataImporter module.
+#
+# 2024-05-18      Stanisław Horna         Add variables for default intervals for sleeper class.
 #
 
 FROM ubuntu:22.04
