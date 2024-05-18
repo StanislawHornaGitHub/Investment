@@ -5,7 +5,7 @@
 
 .NOTES
 
-    Version:            1.1
+    Version:            1.2
     Author:             Stanisław Horna
     Mail:               stanislawhorna@outlook.com
     GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
@@ -14,6 +14,8 @@
 
     Date            Who                     What
     2024-05-17      Stanisław Horna         Documented code. Enabled logging.
+    
+    2024-05-18      Stanisław Horna         Add Heartbeat timestamp to the status file
     
 """
 
@@ -35,6 +37,7 @@ class StatusFile:
 
     NEXT_CHECK_IN_LABEL: str = "NextCheckIn"
     LAST_MODIFY_DATES_LABEL: str = "LastModified"
+    HEARTBEAT: str = "Heartbeat"
 
     @staticmethod
     def readFile() -> dict[str, datetime.datetime | list[datetime.datetime]]:
@@ -54,6 +57,9 @@ class StatusFile:
                 with open(StatusFile.__file_path, 'r') as yaml_file:
                     data = yaml.safe_load(yaml_file)
                     logger.debug("Status file loaded successfully")
+
+                    # Append current existing status file data with new date for heartbeat
+                    StatusFile.__update_heart_beat(data)
                     return data
             except:
                 logger.exception("Failed to load status file", exc_info=True)
@@ -99,6 +105,18 @@ class StatusFile:
         dataToSave = {}
         dataToSave[StatusFile.NEXT_CHECK_IN_LABEL] = NextCheckInTime
         dataToSave[StatusFile.LAST_MODIFY_DATES_LABEL] = LastModifyDates
+        dataToSave[StatusFile.HEARTBEAT] = datetime.datetime.now()
 
         logger.debug("Output dict for status file created successfully")
         return dataToSave
+
+    @staticmethod
+    def __update_heart_beat(data: dict):
+        '''
+            Method to update heartbeat timestamp in status file
+        '''
+        logger.debug("Heartbeat update")
+        StatusFile.writeFile(
+            NextCheckInTime=data[StatusFile.NEXT_CHECK_IN_LABEL],
+            LastModifyDates=data[StatusFile.LAST_MODIFY_DATES_LABEL]
+        )
