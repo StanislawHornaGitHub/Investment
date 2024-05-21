@@ -11,7 +11,7 @@ loki-logger-handler==0.1.4
 MarkupSafe==2.1.5
 psycopg2-binary==2.9.9
 python-dateutil==2.9.0.post0
-requests==2.31.0
+requests==2.32.0
 rfc3339==6.2
 six==1.16.0
 SQLAlchemy==2.0.29
