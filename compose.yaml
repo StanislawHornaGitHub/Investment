@@ -28,7 +28,7 @@
 # Author:   Stanisław Horna
 # GitHub Repository:  https://github.com/StanislawHornaGitHub/Investment
 # Created:  23-Apr-2024
-# Version:  1.9
+# Version:  1.10
 
 # Date            Who                     What
 # 2024-04-29      Stanisław Horna         Add checker service to compose.
@@ -51,22 +51,9 @@
 #
 # 2024-05-18      Stanisław Horna         Add healthcheck for Checker service.
 #
-
-version: "3"
-
-networks:
-  Internal:
-    name: LAN
-    ipam:
-      driver: default
-      config:
-        - subnet: "10.10.10.0/24"
-          gateway: 10.10.10.1
-
-  External:
-    name: WAN
-    external: true
-    driver: bridge
+# 2024-05-22      Stanisław Horna         Fix compatibility with newer docker compose versions,
+#                                         Structure unified with standards.
+#
 
 services:
   Grafana:
@@ -243,3 +230,18 @@ services:
       interval: 2s
       timeout: 5s
       retries: 10
+
+networks:
+  Internal:
+    name: LAN
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.10.10.0/24"
+          gateway: 10.10.10.1
+
+  External:
+    name: WAN
+    ipam:
+      driver: default
