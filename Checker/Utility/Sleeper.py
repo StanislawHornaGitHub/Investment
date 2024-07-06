@@ -55,8 +55,8 @@ class Sleeper:
             )
         )
     )
-    __IMPORTER: DataImporter = field(init=False, default=DataImporter())
-    __TERMINATOR: Terminator = field(init=False, default=Terminator())
+    __IMPORTER = DataImporter()
+    __TERMINATOR = Terminator()
 
     __LastCheckIn: datetime = field(init=False)
     __NextCheckIn: datetime = field(init=False)

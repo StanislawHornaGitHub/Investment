@@ -108,7 +108,7 @@ services:
     volumes:
       - ${APP_LOG_PATH}/${FLASK_PERSISTENT_STORAGE_DIR}:/log
     ports:
-      - ${FLASK_EXTERNAL_PORT}:5000
+      - 5500:5000
     networks:
       Internal:
         ipv4_address: ${FLASK_INTERNAL_IP}
@@ -167,6 +167,7 @@ services:
     networks:
       Internal:
         ipv4_address: ${CHECKER_INTERNAL_IP}
+      External: null
     healthcheck:
       test: python3 ./HealthCheck.py
       start_period: 2s
