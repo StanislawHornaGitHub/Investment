@@ -18,7 +18,6 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 14,
     "links": [],
     "panels": [
         {
@@ -62,7 +61,7 @@
                             },
                             {
                                 "id": "custom.width",
-                                "value": 100
+                                "value": 163
                             }
                         ]
                     },
@@ -75,6 +74,18 @@
                             {
                                 "id": "unit",
                                 "value": "%"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Investment name"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 173
                             }
                         ]
                     }
@@ -105,7 +116,7 @@
                     }
                 ]
             },
-            "pluginVersion": "10.4.1",
+            "pluginVersion": "11.2.0",
             "targets": [
                 {
                     "datasource": "Investment-DB",
@@ -404,7 +415,7 @@
                     }
                 ]
             },
-            "pluginVersion": "10.4.1",
+            "pluginVersion": "11.2.0",
             "targets": [
                 {
                     "datasource": "Investment-DB",
@@ -470,6 +481,7 @@
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                     "calcs": [
                         "lastNotNull"
@@ -481,7 +493,7 @@
                 "textMode": "auto",
                 "wideLayout": true
             },
-            "pluginVersion": "10.4.1",
+            "pluginVersion": "11.2.0",
             "targets": [
                 {
                     "datasource": "Investment-DB",
@@ -606,9 +618,14 @@
                     "show": false
                 },
                 "showHeader": true,
-                "sortBy": []
+                "sortBy": [
+                    {
+                        "desc": false,
+                        "displayName": "Investment name"
+                    }
+                ]
             },
-            "pluginVersion": "10.4.1",
+            "pluginVersion": "11.2.0",
             "targets": [
                 {
                     "datasource": "Investment-DB",
@@ -653,6 +670,7 @@
                         "axisLabel": "",
                         "axisPlacement": "auto",
                         "barAlignment": 0,
+                        "barWidthFactor": 0.6,
                         "drawStyle": "line",
                         "fillOpacity": 0,
                         "gradientMode": "none",
@@ -771,6 +789,7 @@
                         "axisLabel": "",
                         "axisPlacement": "auto",
                         "barAlignment": 0,
+                        "barWidthFactor": 0.6,
                         "drawStyle": "line",
                         "fillOpacity": 0,
                         "gradientMode": "none",
@@ -2470,10 +2489,13 @@
             {
                 "current": {
                     "selected": false,
-                    "text": "Stan",
-                    "value": "Stan"
+                    "text": "John_Smith",
+                    "value": "John_Smith"
                 },
-                "datasource": "Investment-DB",
+                "datasource": {
+                    "type": "grafana-postgresql-datasource",
+                    "uid": "P15873E22AD1F6020"
+                },
                 "definition": "SELECT DISTINCT INVESTMENT_OWNER from INVESTMENTS I ;",
                 "hide": 0,
                 "includeAll": false,
@@ -2500,6 +2522,6 @@
     "timezone": "browser",
     "title": "Investment Wallet",
     "uid": "ddh0du4z59atcfa",
-    "version": 22,
+    "version": 1,
     "weekStart": "monday"
 }
