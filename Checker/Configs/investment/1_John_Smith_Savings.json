@@ -1,0 +1,35 @@
+{
+    "Owner": "John_Smith",
+    "Investments": {
+        "Savings": {
+            "StartDate": "2016-01-15",
+            "EndDate": "",
+            "Funds": {
+                "PCS58": [
+                    {
+                        "BuyDate": "2016-01-15",
+                        "Money": 3000
+                    },
+                    {
+                        "BuyDate": "2017-01-24",
+                        "Money": 30000
+                    },
+                    {
+                        "BuyDate": "2018-05-24",
+                        "Money": 7000
+                    }
+                ],
+                "DWS32": [
+                    {
+                        "BuyDate": "2016-01-14",
+                        "Money": 30000
+                    },
+                    {
+                        "BuyDate": "2016-05-16",
+                        "Money": 30000
+                    }
+                ]
+            }
+        }
+    }
+}
