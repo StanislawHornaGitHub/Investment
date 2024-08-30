@@ -1,3 +1,11 @@
+<p float="left">
+  <img src="/Pictures/Logos/grafana_logo.png" height="100" />
+  <img src="/Pictures/Logos/postgresql_logo.png" height="100" />
+  <img src="/Pictures/Logos/loki_logo.png" height="100" /> 
+  <img src="/Pictures/Logos/flask_logo.png" height="100" /> 
+  <img src="/Pictures/Logos/docker_logo.png" height="100" /> 
+</p>
+
 # Investment
 Tool to track results of funds investment with visual representation in Grafana.
 Automatically calculates the profit (amount of money) and refund in following time frames:
