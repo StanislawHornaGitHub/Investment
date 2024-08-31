@@ -1,0 +1,48 @@
+{
+    "Owner": "Andrew_Brown",
+    "Investments": {
+        "Mixed_Funds": {
+            "StartDate": "2024-02-28",
+            "Funds": {
+                "AXA01": [
+                    {
+                        "BuyDate": "2024-02-28",
+                        "Money": 1500
+                    },
+                    {
+                        "BuyDate": "2024-03-04",
+                        "Money": 2000
+                    },
+                    {
+                        "BuyDate": "2024-03-15",
+                        "Money": 900
+                    },
+                    {
+                        "BuyDate": "2024-03-28",
+                        "Money": 1600
+                    }
+                ],
+                "PCS58": [
+                    {
+                        "BuyDate": "2024-02-28",
+                        "Money": 1500
+                    },
+                    {
+                        "BuyDate": "2024-03-04",
+                        "Money": 2000
+                    }
+                ],
+                "SUP59": [
+                    {
+                        "BuyDate": "2024-02-28",
+                        "Money": 1500
+                    },
+                    {
+                        "BuyDate": "2024-03-04",
+                        "Money": 2000
+                    }
+                ]
+            }
+        }
+    }
+}

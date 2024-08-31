@@ -1,0 +1,16 @@
+{
+    "Owner": "Andrew_Brown",
+    "Investments": {
+        "Blockchain": {
+            "StartDate": "2023-07-03",
+            "Funds": {
+                "SUP59": [
+                    {
+                        "BuyDate": "2023-07-03",
+                        "Money": 105000
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -164,4 +164,5 @@ test.*
 APP_DATA
 APP_LOG
 .venv*
-/Checker/Configs/*/*.json
+
+.DS_Store

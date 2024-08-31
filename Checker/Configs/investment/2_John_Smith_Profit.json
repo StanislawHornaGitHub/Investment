@@ -1,0 +1,48 @@
+{
+    "Owner": "John_Smith",
+    "Investments": {
+        "Profit": {
+            "StartDate": "2023-12-01",
+            "Funds": {
+                "SUP59": [
+                    {
+                        "BuyDate": "2023-12-01",
+                        "Money": 10000
+                    },
+                    {
+                        "BuyDate": "2024-03-01",
+                        "Money": 20000
+                    }
+                ],
+                "NOB03": [
+                    {
+                        "BuyDate": "2023-12-05",
+                        "Money": 15000
+                    },
+                    {
+                        "BuyDate": "2024-01-29",
+                        "Money": 1000
+                    },
+                    {
+                        "BuyDate": "2024-04-09",
+                        "Money": 1000
+                    }
+                ],
+                "AXA01": [
+                    {
+                        "BuyDate": "2023-12-05",
+                        "Money": 15000
+                    },
+                    {
+                        "BuyDate": "2024-01-29",
+                        "Money": 1000
+                    },
+                    {
+                        "BuyDate": "2024-04-09",
+                        "Money": 1000
+                    }
+                ]
+            }
+        }
+    }
+}
