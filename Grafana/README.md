@@ -1,18 +1,15 @@
-## Startup
-### Build docker image
-    docker build -t grafana_investment .
+# Grafana
+Basic Grafana instance with provisioned dashboards to track investment results.
 
-### Run container
-    docker run --name Grafana_Investment -p 3333:3000 -d grafana_investment
+Grafana will be available at: http://localhost:3000/login.
 
-## Grafana configuration
-1. Add new data source for PostgreSQL
-   - Name: `Investment-DB`
-   - Database name: `Investments`
-   - username: ``
-   - password: ``
-   - TLS/SSL Mode: `disable` 
-2. Install plugins:
-   - Button Panel
-   - Data Manipulation
-3. Import dashboards form `/Grafana/Dashboards` directory
+Default credentials:
+- username: `admin`
+- password: `admin`
+
+## Investment Wallet
+![image](/Pictures/Investment_Wallet_1_of_2.png)
+![image](/Pictures/Investment_Wallet_2_of_2.png)
+
+## Investment Management
+![image](/Pictures/Investment_Management.png)

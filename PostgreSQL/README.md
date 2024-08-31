@@ -1,7 +1,8 @@
-## Startup
-Perform commands below to build image and run container or run `rebuild.sh` script.
-### Build docker image
-    docker build -t postgres_investment .
+# PostgreSQL Database
+It is SQL Database with couple of plugins to monitor DB performance and extend capabilities, 
+like the opportunity to run Python code in DB Functions.
 
-### Run container
-    docker run --name postgreSQL_Investment -p 5532:5432 -d postgres_investment
+`./SQL` directory contains `.sh` scripts to configure Postgres and `.sql` scripts to set up the Database.
+
+## Database model
+![image](/Pictures/Database_model.png)
