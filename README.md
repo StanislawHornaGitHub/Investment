@@ -7,13 +7,11 @@
 </p>
 
 # Investment
-It is containerized application to track results of funds investment with visual representation in Grafana.
-Automatically calculates the profit (amount of money) and refund in following time frames:
-- last day
-- last week
-- last month
-
-Supports different investment owners and multiple investment wallets for each owner.
+The Investment project is a powerful, containerized tool designed to automate and streamline the management and analysis of investment portfolios. 
+At its core, the project provides robust functionality for handling investment configurations and updating fund quotations, 
+ensuring that financial data is consistently up-to-date and accurate. 
+Users can quickly configure investments, retrieve and update quotations, and visualize the results on Grafana dashboards.
+One application instance can handle many investment owners with multiple investment wallets for each owner.
 
 ## Sample Dashboards
 Presented dashboards are automatically provisioned in Grafana instance.

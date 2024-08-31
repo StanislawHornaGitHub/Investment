@@ -18,7 +18,8 @@
     "signum",
     "sqlalchemy",
     "subf",
-    "timedelta"
+    "timedelta",
+    "uwsgi"
   ],
   "python.analysis.typeCheckingMode": "off"
 }

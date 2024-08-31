@@ -165,3 +165,4 @@ APP_DATA
 APP_LOG
 .venv*
 
+.DS_Store
